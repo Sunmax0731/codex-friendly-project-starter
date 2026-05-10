@@ -13,6 +13,7 @@
 - エディタ decoration と FileDecorationProvider を実装する。
 - FirstPrompt テンプレート定義と生成ロジックを実装する。
 - Webview から生成とコピーを実行できるようにする。
+- Codex CLI へ FirstPrompt または現在のプロンプトを渡す command を追加する。
 
 ## Phase 3: 検証
 
@@ -20,6 +21,7 @@
 - representative suite を作成する。
 - QCDS metrics と Markdown 評価を生成する。
 - VSCodeExtension platform runtime gate を実装する。
+- Codex CLI command builder の unit test を追加する。
 - docs ZIP を生成する。
 
 ## Phase 4: 終了処理
@@ -28,4 +30,3 @@
 - 作業ブランチを `main` へ merge する。
 - `main` を `origin/main` へ push する。
 - `git status --short --branch` と ahead/behind を確認する。
-

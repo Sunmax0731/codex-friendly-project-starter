@@ -17,11 +17,13 @@ const product = {
     'src/workflows.cjs',
     'src/prompt-builder.cjs',
     'src/workspace-docs.cjs',
-    'src/webview.cjs'
+    'src/webview.cjs',
+    'src/codex-cli.cjs'
   ],
   testFiles: [
     'tests/prompt-builder.test.cjs',
     'tests/workspace-docs.test.cjs',
+    'tests/codex-cli.test.cjs',
     'samples/representative-suite.json'
   ]
 };
@@ -150,6 +152,10 @@ function commandContract() {
   const required = [
     'codex-friendly-project-starter.openStarter',
     'codex-friendly-project-starter.generateFirstPrompt',
+    'codex-friendly-project-starter.invokeCodexWithFirstPrompt',
+    'codex-friendly-project-starter.invokeCodexWithCurrentPrompt',
+    'codex-friendly-project-starter.checkCodexCli',
+    'codex-friendly-project-starter.openCodexApp',
     'codex-friendly-project-starter.refreshAgentDocs',
     'codex-friendly-project-starter.openAgentDoc'
   ];
@@ -196,7 +202,7 @@ const criteria = {
   ],
   satisfaction: [
     { id: 'user-guide', description: 'ユーザーガイドがある', kind: 'files', files: ['docs/user-guide.md'] },
-    { id: 'manual-test', description: '手動テストと厳格補足がある', kind: 'files', files: ['docs/manual-test.md', 'docs/strict-manual-test-addendum.md'] },
+    { id: 'manual-test', description: '手動テストと厳格補足がある', kind: 'files', files: ['docs/manual-test.md', 'docs/strict-manual-test-addendum.md', 'docs/vscode-verification-guide.md'] },
     { id: 'ui-ux', description: 'UI/UX方針がある', kind: 'files', files: ['docs/ui-ux-polish.md'] },
     { id: 'security-privacy', description: 'Security/Privacy checklist がある', kind: 'files', files: ['docs/security-privacy-checklist.md'] },
     { id: 'competitive', description: '競合比較と評価基準がある', kind: 'files', files: ['docs/competitive-benchmark.md', 'docs/evaluation-criteria.md'] },

@@ -8,6 +8,7 @@
 - 変更は VS Code Extension の範囲に閉じ、他の `D:\AI\VSCodeExtension` repo には混ぜません。
 - 主要ロジックは `src/` に置き、`extension.js` は VS Code API への薄い接続に保ちます。
 - FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
+- Codex CLI 呼び出しを変更する場合は、`src/codex-cli.cjs`、`tests/codex-cli.test.cjs`、`docs/vscode-verification-guide.md` を同時に更新します。
 - 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
 - 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。
 
@@ -22,4 +23,3 @@
 - 厳格評価では、ほかのリモートリポジトリで運用されている QCDS 証跡を比較基準にします。
 - 代表シナリオ、機械可読 metrics、回帰ベースライン、Security/Privacy、Traceability を満たさない場合は S 評価にしません。
 - QCDS は成果物の存在確認だけで合格にせず、代表シナリオの期待値一致を確認します。
-

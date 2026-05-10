@@ -15,6 +15,10 @@
   "activationEvents": [
     "onCommand:codex-friendly-project-starter.openStarter",
     "onCommand:codex-friendly-project-starter.generateFirstPrompt",
+    "onCommand:codex-friendly-project-starter.invokeCodexWithFirstPrompt",
+    "onCommand:codex-friendly-project-starter.invokeCodexWithCurrentPrompt",
+    "onCommand:codex-friendly-project-starter.checkCodexCli",
+    "onCommand:codex-friendly-project-starter.openCodexApp",
     "onCommand:codex-friendly-project-starter.refreshAgentDocs",
     "onView:codexFriendlyAgentDocs"
   ],
@@ -27,6 +31,22 @@
       {
         "command": "codex-friendly-project-starter.generateFirstPrompt",
         "title": "Codex Starter: Generate FirstPrompt"
+      },
+      {
+        "command": "codex-friendly-project-starter.invokeCodexWithFirstPrompt",
+        "title": "Codex Starter: Invoke AI Agent with FirstPrompt"
+      },
+      {
+        "command": "codex-friendly-project-starter.invokeCodexWithCurrentPrompt",
+        "title": "Codex Starter: Invoke AI Agent with Current Prompt"
+      },
+      {
+        "command": "codex-friendly-project-starter.checkCodexCli",
+        "title": "Codex Starter: Check Codex CLI"
+      },
+      {
+        "command": "codex-friendly-project-starter.openCodexApp",
+        "title": "Codex Starter: Open Codex App"
       },
       {
         "command": "codex-friendly-project-starter.refreshAgentDocs",
@@ -66,6 +86,36 @@
           "type": "boolean",
           "default": true,
           "description": "Include D:\\AI QCDS and release-readiness checkpoints in generated prompts."
+        },
+        "codexFriendlyProjectStarter.codexCliPath": {
+          "type": "string",
+          "default": "codex",
+          "description": "Codex CLI command or absolute path used when invoking AI Agents from VS Code."
+        },
+        "codexFriendlyProjectStarter.codexSandboxMode": {
+          "type": "string",
+          "enum": [
+            "read-only",
+            "workspace-write",
+            "danger-full-access"
+          ],
+          "default": "workspace-write",
+          "description": "Sandbox mode passed to `codex exec`."
+        },
+        "codexFriendlyProjectStarter.codexModel": {
+          "type": "string",
+          "default": "",
+          "description": "Optional model name passed to `codex exec -m`. Leave blank to use Codex CLI defaults."
+        },
+        "codexFriendlyProjectStarter.codexProfile": {
+          "type": "string",
+          "default": "",
+          "description": "Optional Codex CLI profile passed to `codex exec -p`."
+        },
+        "codexFriendlyProjectStarter.confirmBeforeCodexRun": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for confirmation before starting `codex exec` from VS Code."
         }
       }
     }
@@ -87,4 +137,3 @@
     "qcds"
   ]
 }
-

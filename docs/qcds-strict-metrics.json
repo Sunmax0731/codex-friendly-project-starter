@@ -60,6 +60,7 @@
           "files": [
             "tests/prompt-builder.test.cjs",
             "tests/workspace-docs.test.cjs",
+            "tests/codex-cli.test.cjs",
             "samples/representative-suite.json"
           ],
           "pass": true,
@@ -89,7 +90,8 @@
             "src/workflows.cjs",
             "src/prompt-builder.cjs",
             "src/workspace-docs.cjs",
-            "src/webview.cjs"
+            "src/webview.cjs",
+            "src/codex-cli.cjs"
           ],
           "pass": true,
           "detail": "ok"
@@ -271,7 +273,8 @@
           "kind": "files",
           "files": [
             "docs/manual-test.md",
-            "docs/strict-manual-test-addendum.md"
+            "docs/strict-manual-test-addendum.md",
+            "docs/vscode-verification-guide.md"
           ],
           "pass": true,
           "detail": "ok"

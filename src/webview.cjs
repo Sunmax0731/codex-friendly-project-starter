@@ -43,6 +43,7 @@ function renderStarterWebview(nonce) {
   <label style="margin-top:12px;">目的<textarea id="goal" placeholder="何を作り、どこまで進めるか"></textarea></label>
   <div class="actions">
     <button id="generate">FirstPrompt を開く</button>
+    <button id="runCodex">Codex CLI で実行</button>
     <button id="copy" class="secondary">クリップボードへコピー</button>
   </div>
   <div id="summary" class="summary"></div>
@@ -70,6 +71,7 @@ function renderStarterWebview(nonce) {
   document.getElementById('projectName').addEventListener('input', renderSummary);
   document.getElementById('goal').addEventListener('input', renderSummary);
   document.getElementById('generate').addEventListener('click', () => vscode.postMessage({ type: 'generate', input: currentInput() }));
+  document.getElementById('runCodex').addEventListener('click', () => vscode.postMessage({ type: 'runCodex', input: currentInput() }));
   document.getElementById('copy').addEventListener('click', () => vscode.postMessage({ type: 'copy', input: currentInput() }));
   function currentInput() {
     return {

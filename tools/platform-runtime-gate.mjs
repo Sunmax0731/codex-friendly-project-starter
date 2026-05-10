@@ -19,11 +19,15 @@ function runVsCodeExtensionGate() {
     check('activation-events', Array.isArray(pkg.activationEvents) && pkg.activationEvents.length >= 3, 'activation events exist'),
     check('open-starter-command', commands.has('codex-friendly-project-starter.openStarter'), 'openStarter command exists'),
     check('generate-command', commands.has('codex-friendly-project-starter.generateFirstPrompt'), 'generateFirstPrompt command exists'),
+    check('invoke-command', commands.has('codex-friendly-project-starter.invokeCodexWithFirstPrompt') && commands.has('codex-friendly-project-starter.invokeCodexWithCurrentPrompt'), 'Codex invoke commands exist'),
+    check('codex-utility-commands', commands.has('codex-friendly-project-starter.checkCodexCli') && commands.has('codex-friendly-project-starter.openCodexApp'), 'Codex CLI utility commands exist'),
     check('tree-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyAgentDocs'), 'Tree View contribution exists'),
     check('webview-panel', extension.includes('createWebviewPanel') && webview.includes('acquireVsCodeApi'), 'webview contract exists'),
+    check('webview-run-codex', webview.includes('runCodex') && extension.includes('invokeCodexAgent'), 'webview can invoke Codex agent'),
     check('file-decoration', extension.includes('registerFileDecorationProvider'), 'file decoration provider exists'),
     check('editor-decoration', extension.includes('createTextEditorDecorationType'), 'editor decoration exists'),
-    check('agent-doc-scan', extension.includes('scanAgentDocs'), 'agent docs scan wired')
+    check('agent-doc-scan', extension.includes('scanAgentDocs'), 'agent docs scan wired'),
+    check('codex-exec-terminal', extension.includes('buildCodexExecTerminalCommand') && readText('src/codex-cli.cjs').includes('codex') && readText('src/codex-cli.cjs').includes('exec'), 'Codex exec terminal command exists')
   ];
   return {
     product: config.product,
@@ -53,4 +57,3 @@ function writeJson(relativePath, value) {
   if (!fs.existsSync(path.dirname(target))) fs.mkdirSync(path.dirname(target), { recursive: true });
   if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== text) fs.writeFileSync(target, text, 'utf8');
 }
-

@@ -8,5 +8,5 @@
 | Prompt generation | `src/prompt-builder.cjs` | FirstPrompt 生成 |
 | Workspace scan | `src/workspace-docs.cjs` | Agent docs 検出と分類 |
 | Webview | `src/webview.cjs` | HTML と message UI |
+| Codex CLI | `src/codex-cli.cjs` | `codex exec` / `codex app` の terminal command 生成 |
 | Validation | `tools/` | QCDS、runtime gate、docs ZIP、guard |
-

@@ -5,12 +5,14 @@
 - FirstPrompt が選択した分野と進め方を正しく反映する。
 - Agent docs スキャンが必要文書を拾い、不要ディレクトリを除外する。
 - VSCodeExtension の activation、commands、Tree View、webview、decoration 契約がそろっている。
+- Codex CLI command が prompt file、workspace root、sandbox mode を正しく組み立てる。
 - 文字化けがない。
 
 ## Cost
 
 - runtime dependencies を追加しない。
 - 開発モードで簡単に起動できる。
+- Codex CLI path は設定で差し替えられる。
 - docs ZIP と代表シナリオがあり、再検証しやすい。
 
 ## Delivery
@@ -22,6 +24,6 @@
 ## Satisfaction
 
 - 開発者が最初の Codex 指示を迷わず作れる。
+- 生成後すぐ AI Agent を起動できる。
 - Agent docs の見落としを減らせる。
 - 進め方を Issue駆動、TODO駆動、仕様駆動、TDD から選べる。
-

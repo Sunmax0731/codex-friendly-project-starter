@@ -14,7 +14,7 @@
     "automatedValidation": "npm test",
     "platformGate": "dist/platform-runtime-gate-result.json",
     "docsZip": "dist/codex-friendly-project-starter-docs.zip",
-    "manualTest": "docs/manual-test.md"
+    "manualTest": "docs/manual-test.md",
+    "vscodeVerificationGuide": "docs/vscode-verification-guide.md"
   }
 }
-

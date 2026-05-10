@@ -31,6 +31,16 @@
       "detail": "generateFirstPrompt command exists"
     },
     {
+      "id": "invoke-command",
+      "pass": true,
+      "detail": "Codex invoke commands exist"
+    },
+    {
+      "id": "codex-utility-commands",
+      "pass": true,
+      "detail": "Codex CLI utility commands exist"
+    },
+    {
       "id": "tree-view",
       "pass": true,
       "detail": "Tree View contribution exists"
@@ -39,6 +49,11 @@
       "id": "webview-panel",
       "pass": true,
       "detail": "webview contract exists"
+    },
+    {
+      "id": "webview-run-codex",
+      "pass": true,
+      "detail": "webview can invoke Codex agent"
     },
     {
       "id": "file-decoration",
@@ -54,6 +69,11 @@
       "id": "agent-doc-scan",
       "pass": true,
       "detail": "agent docs scan wired"
+    },
+    {
+      "id": "codex-exec-terminal",
+      "pass": true,
+      "detail": "Codex exec terminal command exists"
     }
   ]
 }

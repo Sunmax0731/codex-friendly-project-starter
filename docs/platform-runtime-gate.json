@@ -7,8 +7,8 @@
     "Tree View",
     "webview",
     "file decoration",
-    "editor decoration"
+    "editor decoration",
+    "Codex CLI terminal invocation"
   ],
   "manualVsCodeHostTest": "not-run-by-codex"
 }
-

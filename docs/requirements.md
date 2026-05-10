@@ -16,12 +16,14 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、工程、進行速度を選択して FirstPrompt を生成する。
 - 生成結果を untitled Markdown で開き、Webview からはクリップボードにもコピーできる。
+- Codex CLI が利用できる環境では、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡せる。
+- Codex CLI の存在確認と Codex App 起動導線を Command Palette から呼べる。
 - AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension を最低限サポートする。
 - QCDS、platform runtime gate、docs ZIP、代表シナリオを検証できる。
 
 ## 対象外
 
-- Codex CLI や OpenAI API の直接実行。
+- OpenAI API の直接実行。
 - GitHub Issue の自動作成や自動更新。
 - VSIX Marketplace 公開。
 - ユーザー固有テンプレートの永続化。
@@ -31,4 +33,3 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `npm test` が通る。
 - `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
-
