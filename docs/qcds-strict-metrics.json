@@ -1,0 +1,327 @@
+{
+  "repository": "codex-friendly-project-starter",
+  "benchmarkRepos": [
+    "Sunmax0731/movie-telop-transcriber",
+    "Sunmax0731/codex-remote-android"
+  ],
+  "scenarioResults": [
+    {
+      "id": "webapp-release-run",
+      "purpose": "WebApp のリリース一括進行プロンプトが QCDS と runtime gate を含む",
+      "expectedContains": [
+        "Web アプリ",
+        "Issue駆動",
+        "リリースまで一気に進める",
+        "headless browser",
+        "docs/qcds-strict-metrics.json"
+      ],
+      "missing": [],
+      "pass": true
+    },
+    {
+      "id": "vscode-tdd-guided",
+      "purpose": "VS Code 拡張の TDD と逐次判断プロンプトを生成できる",
+      "expectedContains": [
+        "VS Code 拡張",
+        "TDD",
+        "技術判断を逐次確認する",
+        "activation",
+        "代表シナリオ"
+      ],
+      "missing": [],
+      "pass": true
+    },
+    {
+      "id": "chrome-todo-minimal",
+      "purpose": "Chrome 拡張の TODO 駆動と最短MVPプロンプトを生成できる",
+      "expectedContains": [
+        "Chrome 拡張",
+        "TODO駆動",
+        "最短MVP",
+        "MV3 manifest",
+        "調査優先"
+      ],
+      "missing": [],
+      "pass": true
+    }
+  ],
+  "dimensions": {
+    "quality": {
+      "label": "Quality",
+      "score": 100,
+      "grade": "S+",
+      "passed": 6,
+      "expected": 6,
+      "checks": [
+        {
+          "id": "tests",
+          "description": "自動テストがある",
+          "kind": "files",
+          "files": [
+            "tests/prompt-builder.test.cjs",
+            "tests/workspace-docs.test.cjs",
+            "samples/representative-suite.json"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "catalog-coverage",
+          "description": "分野と進め方のカタログが要求範囲を覆う",
+          "kind": "catalog",
+          "pass": true,
+          "detail": "catalog coverage ok"
+        },
+        {
+          "id": "representative-scenarios",
+          "description": "代表シナリオの期待文言が生成結果に含まれる",
+          "kind": "scenarios",
+          "pass": true,
+          "detail": "all scenarios passed"
+        },
+        {
+          "id": "implementation-responsibility",
+          "description": "実装責務が分割されている",
+          "kind": "files",
+          "files": [
+            "extension.js",
+            "src/domains.cjs",
+            "src/workflows.cjs",
+            "src/prompt-builder.cjs",
+            "src/workspace-docs.cjs",
+            "src/webview.cjs"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "baseline",
+          "description": "回帰ベースラインが代表シナリオと一致する",
+          "kind": "baseline",
+          "pass": true,
+          "detail": "baseline matches suite"
+        },
+        {
+          "id": "text-clean",
+          "description": "追跡対象テキストに文字化けがない",
+          "kind": "mojibake",
+          "pass": true,
+          "detail": "ok"
+        }
+      ]
+    },
+    "cost": {
+      "label": "Cost",
+      "score": 100,
+      "grade": "S+",
+      "passed": 6,
+      "expected": 6,
+      "checks": [
+        {
+          "id": "lean-package",
+          "description": "追加 runtime dependencies がない",
+          "kind": "lean",
+          "pass": true,
+          "detail": "no runtime dependencies"
+        },
+        {
+          "id": "install-guide",
+          "description": "導入手順がある",
+          "kind": "files",
+          "files": [
+            "docs/installation-guide.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "local-run",
+          "description": "ローカル実行手順が README にある",
+          "kind": "contains",
+          "file": "README.md",
+          "values": [
+            "npm test",
+            "code --extensionDevelopmentPath"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "sample-suite",
+          "description": "代表シナリオがある",
+          "kind": "files",
+          "files": [
+            "samples/representative-suite.json"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "docs-zip",
+          "description": "docs ZIP が生成済みである",
+          "kind": "zip",
+          "pass": true,
+          "detail": "docs zip size 45393"
+        },
+        {
+          "id": "no-global-tool",
+          "description": "グローバル tool なしで検証できる",
+          "kind": "contains",
+          "file": "package.json",
+          "values": [
+            "node --test",
+            "powershell"
+          ],
+          "pass": true,
+          "detail": "ok"
+        }
+      ]
+    },
+    "delivery": {
+      "label": "Delivery",
+      "score": 100,
+      "grade": "S+",
+      "passed": 6,
+      "expected": 6,
+      "checks": [
+        {
+          "id": "readme-doc-links",
+          "description": "README が厳格QCDS docsへ誘導する",
+          "kind": "contains",
+          "file": "README.md",
+          "values": [
+            "docs/qcds-remote-benchmark.md",
+            "docs/qcds-strict-metrics.json",
+            "docs/traceability-matrix.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "release-checklist",
+          "description": "release checklist に QCDS と security がある",
+          "kind": "contains",
+          "file": "docs/release-checklist.md",
+          "values": [
+            "docs/qcds-strict-metrics.json",
+            "docs/security-privacy-checklist.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "platform-gate-config",
+          "description": "platform runtime gate config がある",
+          "kind": "files",
+          "files": [
+            "docs/platform-runtime-gate.json"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "traceability",
+          "description": "要件から証跡まで追跡できる",
+          "kind": "files",
+          "files": [
+            "docs/traceability-matrix.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "remote-benchmark",
+          "description": "remote benchmark がある",
+          "kind": "files",
+          "files": [
+            "docs/qcds-remote-benchmark.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "commands",
+          "description": "VS Code command contract がある",
+          "kind": "commands",
+          "pass": true,
+          "detail": "commands ok"
+        }
+      ]
+    },
+    "satisfaction": {
+      "label": "Satisfaction",
+      "score": 100,
+      "grade": "S+",
+      "passed": 6,
+      "expected": 6,
+      "checks": [
+        {
+          "id": "user-guide",
+          "description": "ユーザーガイドがある",
+          "kind": "files",
+          "files": [
+            "docs/user-guide.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "manual-test",
+          "description": "手動テストと厳格補足がある",
+          "kind": "files",
+          "files": [
+            "docs/manual-test.md",
+            "docs/strict-manual-test-addendum.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "ui-ux",
+          "description": "UI/UX方針がある",
+          "kind": "files",
+          "files": [
+            "docs/ui-ux-polish.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "security-privacy",
+          "description": "Security/Privacy checklist がある",
+          "kind": "files",
+          "files": [
+            "docs/security-privacy-checklist.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "competitive",
+          "description": "競合比較と評価基準がある",
+          "kind": "files",
+          "files": [
+            "docs/competitive-benchmark.md",
+            "docs/evaluation-criteria.md"
+          ],
+          "pass": true,
+          "detail": "ok"
+        },
+        {
+          "id": "agent-skill-lessons",
+          "description": "AGENTS/SKILLに運用学習がある",
+          "kind": "contains",
+          "file": "AGENTS.md",
+          "values": [
+            "Remote QCDS Benchmark Rules",
+            "QCDS"
+          ],
+          "pass": true,
+          "detail": "ok"
+        }
+      ]
+    }
+  },
+  "overallScore": 100,
+  "overallGrade": "S+"
+}

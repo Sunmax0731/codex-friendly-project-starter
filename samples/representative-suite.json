@@ -1,0 +1,63 @@
+{
+  "product": "codex-friendly-project-starter",
+  "scenarios": [
+    {
+      "id": "webapp-release-run",
+      "purpose": "WebApp のリリース一括進行プロンプトが QCDS と runtime gate を含む",
+      "input": {
+        "domainId": "WebApp",
+        "governanceId": "issue-driven",
+        "workflowId": "release-run",
+        "paceId": "autonomous",
+        "projectName": "sample-webapp",
+        "goal": "WebApp を公開前品質まで仕上げる"
+      },
+      "expectedContains": [
+        "Web アプリ",
+        "Issue駆動",
+        "リリースまで一気に進める",
+        "headless browser",
+        "docs/qcds-strict-metrics.json"
+      ]
+    },
+    {
+      "id": "vscode-tdd-guided",
+      "purpose": "VS Code 拡張の TDD と逐次判断プロンプトを生成できる",
+      "input": {
+        "domainId": "VSCodeExtension",
+        "governanceId": "tdd",
+        "workflowId": "guided-decisions",
+        "paceId": "checkpoint",
+        "projectName": "sample-extension",
+        "goal": "Extension Host の機能をテスト先行で作る"
+      },
+      "expectedContains": [
+        "VS Code 拡張",
+        "TDD",
+        "技術判断を逐次確認する",
+        "activation",
+        "代表シナリオ"
+      ]
+    },
+    {
+      "id": "chrome-todo-minimal",
+      "purpose": "Chrome 拡張の TODO 駆動と最短MVPプロンプトを生成できる",
+      "input": {
+        "domainId": "ChromeExtension",
+        "governanceId": "todo-driven",
+        "workflowId": "minimal-mvp",
+        "paceId": "research-first",
+        "projectName": "sample-chrome-extension",
+        "goal": "MV3 拡張の最小機能を作る"
+      },
+      "expectedContains": [
+        "Chrome 拡張",
+        "TODO駆動",
+        "最短MVP",
+        "MV3 manifest",
+        "調査優先"
+      ]
+    }
+  ]
+}
+

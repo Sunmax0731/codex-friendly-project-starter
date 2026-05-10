@@ -1,0 +1,59 @@
+{
+  "product": "codex-friendly-project-starter",
+  "platformType": "vscode-extension",
+  "pass": true,
+  "method": "static-vscode-extension-contract",
+  "manualTest": "not-run-by-codex",
+  "checks": [
+    {
+      "id": "engine",
+      "pass": true,
+      "detail": "engines.vscode exists"
+    },
+    {
+      "id": "main",
+      "pass": true,
+      "detail": "main file exists"
+    },
+    {
+      "id": "activation-events",
+      "pass": true,
+      "detail": "activation events exist"
+    },
+    {
+      "id": "open-starter-command",
+      "pass": true,
+      "detail": "openStarter command exists"
+    },
+    {
+      "id": "generate-command",
+      "pass": true,
+      "detail": "generateFirstPrompt command exists"
+    },
+    {
+      "id": "tree-view",
+      "pass": true,
+      "detail": "Tree View contribution exists"
+    },
+    {
+      "id": "webview-panel",
+      "pass": true,
+      "detail": "webview contract exists"
+    },
+    {
+      "id": "file-decoration",
+      "pass": true,
+      "detail": "file decoration provider exists"
+    },
+    {
+      "id": "editor-decoration",
+      "pass": true,
+      "detail": "editor decoration exists"
+    },
+    {
+      "id": "agent-doc-scan",
+      "pass": true,
+      "detail": "agent docs scan wired"
+    }
+  ]
+}

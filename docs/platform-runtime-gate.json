@@ -1,0 +1,14 @@
+{
+  "product": "codex-friendly-project-starter",
+  "platformType": "vscode-extension",
+  "requiredContracts": [
+    "activationEvents",
+    "commands",
+    "Tree View",
+    "webview",
+    "file decoration",
+    "editor decoration"
+  ],
+  "manualVsCodeHostTest": "not-run-by-codex"
+}
+

@@ -1,0 +1,36 @@
+{
+  "repository": "codex-friendly-project-starter",
+  "scenarioExpectations": [
+    {
+      "id": "webapp-release-run",
+      "expectedContains": [
+        "Web アプリ",
+        "Issue駆動",
+        "リリースまで一気に進める",
+        "headless browser",
+        "docs/qcds-strict-metrics.json"
+      ]
+    },
+    {
+      "id": "vscode-tdd-guided",
+      "expectedContains": [
+        "VS Code 拡張",
+        "TDD",
+        "技術判断を逐次確認する",
+        "activation",
+        "代表シナリオ"
+      ]
+    },
+    {
+      "id": "chrome-todo-minimal",
+      "expectedContains": [
+        "Chrome 拡張",
+        "TODO駆動",
+        "最短MVP",
+        "MV3 manifest",
+        "調査優先"
+      ]
+    }
+  ]
+}
+

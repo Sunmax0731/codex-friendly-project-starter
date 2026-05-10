@@ -1,0 +1,90 @@
+{
+  "name": "codex-friendly-project-starter",
+  "displayName": "Codex Friendly Project Starter",
+  "version": "0.1.0",
+  "publisher": "sunmax0731",
+  "private": false,
+  "description": "VS Code extension for highlighting AI agent documents and generating Codex-friendly first prompts.",
+  "main": "./extension.js",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:codex-friendly-project-starter.openStarter",
+    "onCommand:codex-friendly-project-starter.generateFirstPrompt",
+    "onCommand:codex-friendly-project-starter.refreshAgentDocs",
+    "onView:codexFriendlyAgentDocs"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "codex-friendly-project-starter.openStarter",
+        "title": "Codex Starter: Open Project Starter"
+      },
+      {
+        "command": "codex-friendly-project-starter.generateFirstPrompt",
+        "title": "Codex Starter: Generate FirstPrompt"
+      },
+      {
+        "command": "codex-friendly-project-starter.refreshAgentDocs",
+        "title": "Codex Starter: Refresh Agent Docs"
+      },
+      {
+        "command": "codex-friendly-project-starter.openAgentDoc",
+        "title": "Codex Starter: Open Agent Doc"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codex-friendly-project-starter",
+          "title": "Codex Starter",
+          "icon": "resources/codex-starter.svg"
+        }
+      ]
+    },
+    "views": {
+      "codex-friendly-project-starter": [
+        {
+          "id": "codexFriendlyAgentDocs",
+          "name": "Agent Docs"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Codex Friendly Project Starter",
+      "properties": {
+        "codexFriendlyProjectStarter.defaultDomain": {
+          "type": "string",
+          "default": "WebApp",
+          "description": "Default domain used when generating a first prompt."
+        },
+        "codexFriendlyProjectStarter.includeQcdsChecklist": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include D:\\AI QCDS and release-readiness checkpoints in generated prompts."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1 && node tools/qcds-evaluate.cjs && node tools/platform-runtime-gate.mjs && node tools/closed-alpha-guard.mjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1",
+    "validate": "npm test",
+    "docs:zip": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1",
+    "platform:gate": "node tools/platform-runtime-gate.mjs",
+    "closed-alpha:guard": "node tools/closed-alpha-guard.mjs"
+  },
+  "devDependencies": {},
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "ai-agent",
+    "first-prompt",
+    "vscodeextension",
+    "qcds"
+  ]
+}
+

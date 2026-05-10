@@ -1,0 +1,34 @@
+# 要件
+
+## 目的
+
+VS Code で新規または既存プロジェクトを開始する際に、Codex や AI Agent が読むべき文書を見落とさず、分野と進め方に応じた FirstPrompt を短時間で作れるようにする。
+
+## 対象ユーザー
+
+- `D:\AI` 配下で複数分野の開発を進める開発者
+- Codex に実装、検証、docs、GitHub 反映まで任せたい開発者
+- Issue駆動、TODO駆動、仕様駆動、TDD などを案件ごとに切り替えたい開発者
+
+## MVP 要件
+
+- ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を Tree View に表示する。
+- `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
+- 分野、ガバナンス、工程、進行速度を選択して FirstPrompt を生成する。
+- 生成結果を untitled Markdown で開き、Webview からはクリップボードにもコピーできる。
+- AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension を最低限サポートする。
+- QCDS、platform runtime gate、docs ZIP、代表シナリオを検証できる。
+
+## 対象外
+
+- Codex CLI や OpenAI API の直接実行。
+- GitHub Issue の自動作成や自動更新。
+- VSIX Marketplace 公開。
+- ユーザー固有テンプレートの永続化。
+
+## 成功条件
+
+- `npm test` が通る。
+- `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
+- VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
+

@@ -1,0 +1,25 @@
+# AGENTS
+
+このリポジトリは VS Code 内で Codex フレンドリーなプロジェクト開始を支援する拡張です。作業前に README.md、SKILL.md、docs/requirements.md、docs/specification.md、docs/design.md、docs/manual-test.md を確認してください。
+
+## 作業ルール
+
+- 作業ブランチは `codex/<task-summary>` を1本だけ使い、工程完了後に `main` へ merge して `main` を push します。
+- 変更は VS Code Extension の範囲に閉じ、他の `D:\AI\VSCodeExtension` repo には混ぜません。
+- 主要ロジックは `src/` に置き、`extension.js` は VS Code API への薄い接続に保ちます。
+- FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
+- 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
+- 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。
+
+## 現在の評価ゲート
+
+- `npm test` は unit tests、docs ZIP、QCDS、VSCodeExtension platform runtime gate、closed alpha guard を実行します。
+- QCDS は Quality、Cost、Delivery、Satisfaction の全観点 A- 以上を最低条件にします。
+- VSCodeExtension gate は activation、commands、Tree View、webview、Agent Doc decoration の静的契約を確認します。
+
+## Remote QCDS Benchmark Rules
+
+- 厳格評価では、ほかのリモートリポジトリで運用されている QCDS 証跡を比較基準にします。
+- 代表シナリオ、機械可読 metrics、回帰ベースライン、Security/Privacy、Traceability を満たさない場合は S 評価にしません。
+- QCDS は成果物の存在確認だけで合格にせず、代表シナリオの期待値一致を確認します。
+

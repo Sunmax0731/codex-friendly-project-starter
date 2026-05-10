@@ -1,0 +1,31 @@
+# 実装計画
+
+## Phase 1: Repo と public remote
+
+- `D:\AI\VSCodeExtension\codex-friendly-project-starter` を作成する。
+- Git repo を `main` で初期化する。
+- GitHub public remote を作成し `origin` に設定する。
+
+## Phase 2: MVP 実装
+
+- VS Code manifest、commands、Activity Bar、Tree View を定義する。
+- Agent docs スキャンと分類を実装する。
+- エディタ decoration と FileDecorationProvider を実装する。
+- FirstPrompt テンプレート定義と生成ロジックを実装する。
+- Webview から生成とコピーを実行できるようにする。
+
+## Phase 3: 検証
+
+- Node.js unit tests を追加する。
+- representative suite を作成する。
+- QCDS metrics と Markdown 評価を生成する。
+- VSCodeExtension platform runtime gate を実装する。
+- docs ZIP を生成する。
+
+## Phase 4: 終了処理
+
+- `npm test` を通す。
+- 作業ブランチを `main` へ merge する。
+- `main` を `origin/main` へ push する。
+- `git status --short --branch` と ahead/behind を確認する。
+
