@@ -7,6 +7,7 @@ const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('./src/workflows.cjs');
 const { buildFirstPrompt } = require('./src/prompt-builder.cjs');
 const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const { renderStarterWebview } = require('./src/webview.cjs');
+const { resolveInvocationTarget } = require('./src/invocation-target.cjs');
 const {
   buildCodexExecScript,
   buildPowerShellFileTerminalCommand,
@@ -99,7 +100,7 @@ async function invokeCodexWithFirstPromptCommand(context) {
     ...input,
     includeQcdsChecklist: config.get('includeQcdsChecklist', true)
   });
-  await invokeCodexAgent(context, prompt, 'Generated FirstPrompt');
+  await invokeCodexAgent(context, prompt, 'Generated FirstPrompt', { input });
 }
 
 async function invokeCodexWithCurrentPromptCommand(context) {
@@ -117,14 +118,19 @@ async function invokeCodexWithCurrentPromptCommand(context) {
   await invokeCodexAgent(context, prompt, 'Current Prompt');
 }
 
-async function invokeCodexAgent(context, prompt, sourceLabel) {
+async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const cwd = pickWorkspaceRoot();
+  const workspaceRoot = pickWorkspaceRoot();
+  const target = resolveInvocationTarget({ workspaceRoot, prompt, input: options.input });
+  const cwd = target.cwd;
   const sandboxMode = config.get('codexSandboxMode', 'workspace-write');
   if (config.get('confirmBeforeCodexRun', true)) {
+    const targetText = target.targetRepositoryPath && target.targetRepositoryPath !== cwd
+      ? `\nTarget repo: ${target.targetRepositoryPath}`
+      : '';
     const warning = sandboxMode === 'danger-full-access'
-      ? `Codex CLI を ${cwd} で danger-full-access 実行します。続行しますか?`
-      : `Codex CLI を ${cwd} で実行します。続行しますか?`;
+      ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}\n続行しますか?`
+      : `Codex CLI を ${cwd} で実行します。${targetText}\n続行しますか?`;
     const answer = await vscode.window.showWarningMessage(warning, { modal: false }, 'Run Codex', 'Cancel');
     if (answer !== 'Run Codex') return;
   }
@@ -204,7 +210,7 @@ function openStarterWebview(context) {
     if (message.type === 'generate') await openPromptDocument(input);
     if (message.type === 'runCodex') {
       const prompt = buildFirstPrompt(input);
-      await invokeCodexAgent(context, prompt, 'Webview FirstPrompt');
+      await invokeCodexAgent(context, prompt, 'Webview FirstPrompt', { input });
     }
     if (message.type === 'copy') {
       await vscode.env.clipboard.writeText(buildFirstPrompt(input));

@@ -66,3 +66,5 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.codexModel`: 任意の `-m` 値。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の `-p` 値。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を行う。
+
+FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。

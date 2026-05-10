@@ -74,6 +74,11 @@
       "id": "codex-exec-terminal",
       "pass": true,
       "detail": "Codex exec UTF-8 launcher command exists"
+    },
+    {
+      "id": "codex-target-root",
+      "pass": true,
+      "detail": "Codex target root resolver exists"
     }
   ]
 }

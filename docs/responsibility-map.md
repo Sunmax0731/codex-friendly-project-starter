@@ -9,4 +9,5 @@
 | Workspace scan | `src/workspace-docs.cjs` | Agent docs 検出と分類 |
 | Webview | `src/webview.cjs` | HTML と message UI |
 | Codex CLI | `src/codex-cli.cjs` | `codex exec` / `codex app` の terminal command 生成 |
+| Invocation target | `src/invocation-target.cjs` | FirstPrompt の対象 repo path から実行 root を解決 |
 | Validation | `tools/` | QCDS、runtime gate、docs ZIP、guard |

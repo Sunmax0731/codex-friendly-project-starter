@@ -100,6 +100,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - `workspace-write` では Codex が workspace 内のファイルを変更できる。
 - まず挙動確認だけをしたい場合は Settings で `codexFriendlyProjectStarter.codexSandboxMode` を `read-only` にする。
+- FirstPrompt が `D:\AI\ChromeExtension\movie-loop-tool` など現在の starter repo 外を対象にする場合、確認ダイアログの workspace root が `D:\AI\ChromeExtension` など対象 repo の親ディレクトリになっていることを確認する。
 
 ## 6. 現在のプロンプトで AI Agent を起動
 
@@ -114,6 +115,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - 選択範囲があれば選択範囲、なければ文書全体が `codex exec` に渡る。
 - 統合ターミナルで Codex Agent が起動する。
+- 文書全体の FirstPrompt を渡した場合、target repo path が抽出され、対象 domain の既存親ディレクトリが `-C` root になる。
 
 ## 7. Codex App 起動
 

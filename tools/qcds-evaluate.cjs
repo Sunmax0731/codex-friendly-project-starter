@@ -18,12 +18,14 @@ const product = {
     'src/prompt-builder.cjs',
     'src/workspace-docs.cjs',
     'src/webview.cjs',
-    'src/codex-cli.cjs'
+    'src/codex-cli.cjs',
+    'src/invocation-target.cjs'
   ],
   testFiles: [
     'tests/prompt-builder.test.cjs',
     'tests/workspace-docs.test.cjs',
     'tests/codex-cli.test.cjs',
+    'tests/invocation-target.test.cjs',
     'samples/representative-suite.json'
   ]
 };
