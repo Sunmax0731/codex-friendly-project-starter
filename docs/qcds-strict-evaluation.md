@@ -34,7 +34,7 @@ Overall: S+ (100)
 - [x] 導入手順がある - ok
 - [x] ローカル実行手順が README にある - ok
 - [x] 代表シナリオがある - ok
-- [x] docs ZIP が生成済みである - docs zip size 45393
+- [x] docs ZIP が生成済みである - docs zip exists and exceeds minimum size
 - [x] グローバル tool なしで検証できる - ok
 
 ### Delivery

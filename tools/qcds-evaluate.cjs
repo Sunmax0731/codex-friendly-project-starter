@@ -141,7 +141,7 @@ function docsZip() {
   const zip = file('dist/codex-friendly-project-starter-docs.zip');
   if (!fs.existsSync(zip)) return { pass: false, detail: 'zip missing' };
   const size = fs.statSync(zip).size;
-  return { pass: size > 10000, detail: 'docs zip size ' + size };
+  return { pass: size > 10000, detail: 'docs zip exists and exceeds minimum size' };
 }
 
 function commandContract() {
@@ -266,4 +266,3 @@ function main() {
 if (require.main === module) main();
 
 module.exports = { evaluateRepository, gradeFromScore };
-

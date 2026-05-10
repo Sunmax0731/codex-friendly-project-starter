@@ -161,7 +161,7 @@
           "description": "docs ZIP が生成済みである",
           "kind": "zip",
           "pass": true,
-          "detail": "docs zip size 45393"
+          "detail": "docs zip exists and exceeds minimum size"
         },
         {
           "id": "no-global-tool",
