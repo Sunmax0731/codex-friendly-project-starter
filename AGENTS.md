@@ -9,6 +9,7 @@
 - 主要ロジックは `src/` に置き、`extension.js` は VS Code API への薄い接続に保ちます。
 - FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
 - Codex CLI 呼び出しを変更する場合は、`src/codex-cli.cjs`、`tests/codex-cli.test.cjs`、`docs/vscode-verification-guide.md` を同時に更新します。
+- TODO / Issue 可視化を変更する場合は、`src/work-items.cjs`、`src/webview.cjs`、`tests/work-items.test.cjs`、`docs/vscode-verification-guide.md`、`Issues/README.md` を同時に確認します。
 - 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
 - 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。
 

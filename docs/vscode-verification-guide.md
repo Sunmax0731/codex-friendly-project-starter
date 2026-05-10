@@ -31,7 +31,27 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Explorer 上で AI Agent 文書に `AI` badge が見える。
 - Markdown 見出しと `QCDS`、`AGENTS`、`SKILL` などがハイライトされる。
 
-## 2. FirstPrompt 生成
+## 2. Work Items と Local Issues
+
+手順:
+
+1. Activity Bar の `Codex Starter` を開く。
+2. `Work Items` を開く。
+3. `TODO`、`Issues`、`Release readiness` の group を確認する。
+4. `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
+5. `Ctrl+Shift+P` から `Codex Starter: Initialize Issues Directory` を実行する。
+6. `Ctrl+Shift+P` から `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
+7. `Codex Starter: Refresh Work Items` を実行する。
+
+期待結果:
+
+- `TODO.md` の未完了 task が `Work Items` に表示される。
+- `Issues/*.md` の open / in-progress / blocked Issue が表示される。
+- Dashboard に TODO と Issue の progress bar が表示される。
+- `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
+- 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
+
+## 3. FirstPrompt 生成
 
 手順:
 
@@ -46,7 +66,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 選んだ分野と進め方が本文に入る。
 - `README.md`、`AGENTS.md`、`SKILL.md` の確認順、QCDS、runtime gate、完了条件が入る。
 
-## 3. Webview 生成
+## 4. Webview 生成
 
 手順:
 
@@ -62,7 +82,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - FirstPrompt が Markdown として開く。
 - クリップボードへ同じ内容をコピーできる。
 
-## 4. Codex CLI 確認
+## 5. Codex CLI 確認
 
 手順:
 
@@ -78,7 +98,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - Settings で `codexFriendlyProjectStarter.codexCliPath` に `codex` または `C:\Users\<user>\AppData\Roaming\npm\codex.ps1` などの実パスを設定する。
 
-## 5. 生成プロンプトで AI Agent を起動
+## 6. 生成プロンプトで AI Agent を起動
 
 手順:
 
@@ -102,7 +122,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - まず挙動確認だけをしたい場合は Settings で `codexFriendlyProjectStarter.codexSandboxMode` を `read-only` にする。
 - FirstPrompt が `D:\AI\ChromeExtension\movie-loop-tool` など現在の starter repo 外を対象にする場合、確認ダイアログの workspace root が `D:\AI\ChromeExtension` など対象 repo の親ディレクトリになっていることを確認する。
 
-## 6. 現在のプロンプトで AI Agent を起動
+## 7. 現在のプロンプトで AI Agent を起動
 
 手順:
 
@@ -117,7 +137,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 統合ターミナルで Codex Agent が起動する。
 - 文書全体の FirstPrompt を渡した場合、target repo path が抽出され、対象 domain の既存親ディレクトリが `-C` root になる。
 
-## 7. Codex App 起動
+## 8. Codex App 起動
 
 手順:
 
@@ -129,7 +149,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 統合ターミナルで `codex app` が実行される。
 - Codex desktop app が起動、または CLI が案内を表示する。
 
-## 8. 確認後の記録
+## 9. 確認後の記録
 
 確認が終わったら次を記録する。
 

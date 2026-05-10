@@ -104,4 +104,91 @@ function renderStarterWebview(nonce) {
 </html>`;
 }
 
-module.exports = { renderStarterWebview };
+function renderWorkDashboardWebview(nonce, dashboard) {
+  const safe = JSON.stringify(dashboard).replace(/</g, '\\u003c');
+  const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
+  const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
+  return `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex Work Dashboard</title>
+  <style>
+    body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 18px; }
+    main { max-width: 960px; }
+    h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
+    h2 { font-size: 14px; margin: 20px 0 8px; font-weight: 600; }
+    .root { color: var(--vscode-descriptionForeground); margin-bottom: 14px; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .metric, .row, .readiness { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; background: var(--vscode-sideBar-background); }
+    .metric-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .metric strong { font-size: 18px; }
+    .bar { height: 10px; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-panel-border); margin-top: 8px; overflow: hidden; }
+    .fill { display: block; height: 100%; background: var(--vscode-charts-green); }
+    .list { display: grid; gap: 8px; }
+    .row { display: grid; grid-template-columns: 72px 1fr auto; gap: 10px; align-items: center; }
+    .path { color: var(--vscode-descriptionForeground); font-size: 12px; }
+    .pill { border: 1px solid var(--vscode-panel-border); padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
+    .status-open { color: var(--vscode-charts-yellow); }
+    .status-blocked { color: var(--vscode-errorForeground); }
+    .status-pass { color: var(--vscode-charts-green); }
+    .readiness { display: grid; grid-template-columns: 110px 1fr; gap: 10px; margin-bottom: 8px; }
+    .empty { color: var(--vscode-descriptionForeground); border: 1px dashed var(--vscode-panel-border); padding: 12px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Codex Work Dashboard</h1>
+  <div class="root">${escapeHtml(dashboard.rootPath)}</div>
+  <section class="metrics" aria-label="Work item summary">
+    ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
+    ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
+  </section>
+  <h2>Release Readiness</h2>
+  ${dashboard.releaseReadiness.map(readinessHtml).join('')}
+  <h2>Open TODO</h2>
+  <div class="list">${todoItems.length ? todoItems.map(todoHtml).join('') : '<div class="empty">Open TODO はありません。</div>'}</div>
+  <h2>Open Issues</h2>
+  <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
+</main>
+<script nonce="${nonce}">
+  window.__codexWorkDashboard = ${safe};
+</script>
+</body>
+</html>`;
+}
+
+function metricHtml(label, value, percent, subtext) {
+  return `<div class="metric">
+    <div class="metric-head"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>
+    <div class="bar" aria-label="${escapeHtml(label)} ${percent}%"><span class="fill" style="width:${Math.max(0, Math.min(100, percent))}%"></span></div>
+    <div class="path">${escapeHtml(subtext)}</div>
+  </div>`;
+}
+
+function readinessHtml(item) {
+  const cls = item.status === 'pass' ? 'status-pass' : 'status-blocked';
+  return `<div class="readiness"><span class="${cls}">${escapeHtml(item.status)}</span><span>${escapeHtml(item.label)} - <span class="path">${escapeHtml(item.detail)}</span></span></div>`;
+}
+
+function todoHtml(item) {
+  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span></span><span class="status-open">${escapeHtml(item.status)}</span></div>`;
+}
+
+function issueHtml(item) {
+  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.type)} / ${item.progress.done}/${item.progress.total}</span></span><span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status)}</span></div>`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+module.exports = { renderStarterWebview, renderWorkDashboardWebview };

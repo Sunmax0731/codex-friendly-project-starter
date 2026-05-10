@@ -10,6 +10,11 @@
 - `codex-friendly-project-starter.openCodexApp`: 統合ターミナルから `codex app` を実行する。
 - `codex-friendly-project-starter.refreshAgentDocs`: Agent Docs Tree を再スキャンする。
 - `codex-friendly-project-starter.openAgentDoc`: Tree View の文書を開く。
+- `codex-friendly-project-starter.refreshWorkItems`: Work Items Tree を再スキャンする。
+- `codex-friendly-project-starter.openWorkDashboard`: TODO / Issue / release readiness の dashboard Webview を開く。
+- `codex-friendly-project-starter.initializeIssuesDirectory`: workspace root に `Issues/README.md` を作成または開く。
+- `codex-friendly-project-starter.createLocalIssue`: `Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
+- `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO または Issue を該当行で開く。
 
 ## Tree View
 
@@ -21,6 +26,37 @@
 - 運用 docs: `docs/installation-guide.md`、`docs/user-guide.md`、`docs/security-privacy-checklist.md`
 
 `node_modules`、`.git`、`dist`、`out` はスキャン対象外にする。
+
+## Work Items
+
+`codexFriendlyWorkItems` は現在のワークスペースから次を収集する。
+
+- `TODO.md`、`ToDo.md`、`Todo.md` の checkbox task。
+- `Issues/*.md` の Issue Markdown。ただし `Issues/README.md` は説明文として除外する。
+- release readiness の補助チェック。`README.md`、`AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/README.md`、QCDS docs、manual/user guide の存在を表示する。
+
+TODO の task は Markdown 見出しを section として保持し、`[P1]` または `P1` 形式の priority を読み取る。Issue は次の metadata を読み取る。
+
+```markdown
+- Status: open
+- Priority: P2
+- Type: feature
+- Source: local
+- Created: YYYY-MM-DD
+```
+
+`Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。
+
+## Work Dashboard
+
+Dashboard Webview は次を表示する。
+
+- TODO 完了数 / 総数の progress bar。
+- Issue closed 数 / 総数の progress bar。
+- release readiness の pass / missing。
+- 未完了 TODO と未完了 Issue の上位一覧。
+
+Dashboard は読み取り専用とし、編集は Tree View から Markdown を開いて行う。
 
 ## ハイライト
 

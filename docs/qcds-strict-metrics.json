@@ -60,6 +60,7 @@
           "files": [
             "tests/prompt-builder.test.cjs",
             "tests/workspace-docs.test.cjs",
+            "tests/work-items.test.cjs",
             "tests/codex-cli.test.cjs",
             "tests/invocation-target.test.cjs",
             "samples/representative-suite.json"
@@ -91,6 +92,7 @@
             "src/workflows.cjs",
             "src/prompt-builder.cjs",
             "src/workspace-docs.cjs",
+            "src/work-items.cjs",
             "src/webview.cjs",
             "src/codex-cli.cjs",
             "src/invocation-target.cjs"

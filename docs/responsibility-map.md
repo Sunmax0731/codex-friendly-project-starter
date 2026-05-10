@@ -7,7 +7,8 @@
 | Workflow catalog | `src/workflows.cjs` | Issue/TODO/spec/TDD と工程選択 |
 | Prompt generation | `src/prompt-builder.cjs` | FirstPrompt 生成 |
 | Workspace scan | `src/workspace-docs.cjs` | Agent docs 検出と分類 |
-| Webview | `src/webview.cjs` | HTML と message UI |
+| Work item scan | `src/work-items.cjs` | TODO / Issue Markdown 解析、Issues 初期化、dashboard data |
+| Webview | `src/webview.cjs` | Starter UI と Work Dashboard HTML |
 | Codex CLI | `src/codex-cli.cjs` | `codex exec` / `codex app` の terminal command 生成 |
 | Invocation target | `src/invocation-target.cjs` | FirstPrompt の対象 repo path から実行 root を解決 |
 | Validation | `tools/` | QCDS、runtime gate、docs ZIP、guard |

@@ -6,6 +6,22 @@
 2. Activity Bar の `Codex Starter` を開く。
 3. `Agent Docs` から `AGENTS.md`、`SKILL.md`、`README.md`、主要 docs を確認する。
 
+## TODO と Issue を可視化する
+
+1. 対象 workspace を VS Code で開く。
+2. Activity Bar の `Codex Starter` を開く。
+3. `Work Items` で `TODO`、`Issues`、`Release readiness` を確認する。
+4. 未完了 TODO または Issue を選択すると、該当 Markdown が対象行で開く。
+5. Command Palette から `Codex Starter: Open Work Dashboard` を実行すると、TODO と Issue の進捗を progress bar で確認できる。
+
+## Local Issue を管理する
+
+1. Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。
+2. `Issues/README.md` が作成または表示される。
+3. `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
+4. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
+5. `Codex Starter: Refresh Work Items` で Tree View を更新する。
+
 ## FirstPrompt を生成する
 
 Command Palette から `Codex Starter: Generate FirstPrompt` を実行し、次を選ぶ。

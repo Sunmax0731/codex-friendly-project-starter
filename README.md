@@ -6,6 +6,9 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 
 - Agent Docs Tree: ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を一覧化します。
 - Agent Doc Highlight: Agent 向け文書を開いたとき、重要見出しと制約語をエディタ上でハイライトします。
+- Work Items Tree: `TODO.md` と `Issues/*.md` を読み取り、未完了 TODO、local Issue、release readiness を常設 Tree View で確認できます。
+- Work Dashboard: TODO と Issue の進捗を progress bar と未完了一覧でグラフィカルに表示します。
+- Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行などの進め方から開始プロンプトを生成します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示またはクリップボードへコピーできます。
 - AI Agent Invocation: Codex CLI がある環境では、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡し、VS Code 統合ターミナルから AI Agent を起動できます。
@@ -21,12 +24,16 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 VS Code 起動後、Command Palette から次を実行します。
 
 - `Codex Starter: Open Project Starter`
+- `Codex Starter: Open Work Dashboard`
+- `Codex Starter: Initialize Issues Directory`
+- `Codex Starter: Create Local Issue`
 - `Codex Starter: Generate FirstPrompt`
 - `Codex Starter: Invoke AI Agent with FirstPrompt`
 - `Codex Starter: Invoke AI Agent with Current Prompt`
 - `Codex Starter: Check Codex CLI`
 - `Codex Starter: Open Codex App`
 - `Codex Starter: Refresh Agent Docs`
+- `Codex Starter: Refresh Work Items`
 
 ## ドキュメント
 
@@ -43,6 +50,7 @@ VS Code 起動後、Command Palette から次を実行します。
 - docs/evaluation-criteria.md
 - docs/release-checklist.md
 - docs/qcds-evaluation.md
+- Issues/README.md
 
 ## 厳格QCDS評価
 

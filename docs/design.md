@@ -12,6 +12,21 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 文書名、分類、相対パスを表示する。
 - 選択すると該当 Markdown を開く。
 
+### Work Items Tree
+
+- Activity Bar の `Codex Starter` に `Agent Docs` と並べて配置する。
+- `TODO done/total`、`Issues closed/total`、`Release readiness` を group として表示する。
+- 未完了 TODO は priority、相対パス、line number を description に出す。
+- 未完了 Issue は priority と status を description に出す。
+- 選択すると該当 Markdown の対象行を開く。
+
+### Work Dashboard
+
+- `Codex Starter: Open Work Dashboard` で開く。
+- TODO と Issue の進捗は progress bar で表示する。
+- release readiness は `pass` / `missing` を一覧化する。
+- Dashboard は参照専用とし、編集は Markdown を直接開く。
+
 ### FirstPrompt Webview
 
 - 分野、ガバナンス、工程、進行の4つの select を配置する。
@@ -26,6 +41,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 入力なし: `<repo-name>` と標準目的を補完する。
 - 設定変更: `includeQcdsChecklist` に従い QCDS ブロックを出し分ける。
 - Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
+- Issues directory なし: `Initialize Issues Directory` で `Issues/README.md` を作成する。
+- Issue なし: Dashboard は Issue progress を 0% とし、local Issue 作成 command を使う。
 
 ## アクセシビリティ
 
@@ -33,3 +50,4 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - フォーム要素は label と対応させる。
 - ボタンは明示的な操作名にする。
 - エディタ decoration は強すぎないテーマ色を使う。
+- Work Dashboard は VS Code theme color と固定行高の progress bar を使い、TODO/Issue の数が変わっても layout が大きく崩れないようにする。

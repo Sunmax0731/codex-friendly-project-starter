@@ -13,6 +13,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 ## MVP 要件
 
 - ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を Tree View に表示する。
+- `TODO.md` の checkbox を解析し、未完了 TODO と進捗率を Tree View と Webview で可視化する。
+- `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の local Issue backlog を管理できる。
+- `Issues/*.md` の status、priority、acceptance criteria を解析し、TODO と同じ dashboard で可視化する。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、工程、進行速度を選択して FirstPrompt を生成する。
 - 生成結果を untitled Markdown で開き、Webview からはクリップボードにもコピーできる。
@@ -24,7 +27,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 ## 対象外
 
 - OpenAI API の直接実行。
-- GitHub Issue の自動作成や自動更新。
+- GitHub Issue の自動作成や自動更新。local Issue Markdown は repo 内の `Issues` ディレクトリに限定する。
 - VSIX Marketplace 公開。
 - ユーザー固有テンプレートの永続化。
 
@@ -33,3 +36,4 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `npm test` が通る。
 - `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
+- Work Items Tree と Work Dashboard が `TODO.md` と `Issues/*.md` を読み取り、release readiness を表示できる。

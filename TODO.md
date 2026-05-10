@@ -10,7 +10,9 @@
 
 ## 後続候補
 
+- [x] `TODO.md` を解析して進捗を Tree View / Webview で可視化する。
+- [x] `Issues` ディレクトリと各 `Issue.md` を管理するローカル Issue 駆動の仕組みを追加する。
+- [x] Issue も TODO と同じ Work Dashboard で可視化する。
 - [ ] VSIX package とローカルインストール確認をリリース工程へ追加する。
 - [ ] ワークスペース固有の `D:\AI\IDEAS\<Domain>` 情報から候補 project name を補完する。
 - [ ] 生成した FirstPrompt の履歴保存と再利用 UI を追加する。
-

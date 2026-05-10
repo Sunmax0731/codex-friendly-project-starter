@@ -13,14 +13,18 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 1. VS Code の Activity Bar に `Codex Starter` が表示されることを確認する。
 2. `Codex Starter` の `Agent Docs` に `AGENTS.md`、`SKILL.md`、`README.md` が表示されることを確認する。
 3. `AGENTS.md` を開き、見出しと `QCDS` などの語がハイライトされることを確認する。
-4. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
-5. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。
-6. Command Palette から `Codex Starter: Open Project Starter` を実行する。
-7. Webview で分野と進め方を選び、`FirstPrompt を開く`、`クリップボードへコピー`、`Codex CLI で実行` が動くことを確認する。
-8. Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
-9. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
-10. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
-11. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
+4. `Codex Starter` の `Work Items` に `TODO`、`Issues`、`Release readiness` が表示されることを確認する。
+5. Command Palette から `Codex Starter: Open Work Dashboard` を実行し、TODO と Issue の progress bar が表示されることを確認する。
+6. Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が開くことを確認する。
+7. Command Palette から `Codex Starter: Create Local Issue` を実行し、`Issues/000x-*.md` が作成されることを確認する。
+8. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
+9. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。
+10. Command Palette から `Codex Starter: Open Project Starter` を実行する。
+11. Webview で分野と進め方を選び、`FirstPrompt を開く`、`クリップボードへコピー`、`Codex CLI で実行` が動くことを確認する。
+12. Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
+13. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
+14. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
+15. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
 
 詳細な確認項目は docs/vscode-verification-guide.md を参照する。
 

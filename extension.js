@@ -6,7 +6,14 @@ const { DOMAINS } = require('./src/domains.cjs');
 const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('./src/workflows.cjs');
 const { buildFirstPrompt } = require('./src/prompt-builder.cjs');
 const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
-const { renderStarterWebview } = require('./src/webview.cjs');
+const {
+  scanWorkItems,
+  ensureIssuesDirectory,
+  nextIssueFilePath,
+  createIssueMarkdown,
+  isWorkItemDocPath
+} = require('./src/work-items.cjs');
+const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
 const { resolveInvocationTarget } = require('./src/invocation-target.cjs');
 const {
   buildCodexExecScript,
@@ -17,6 +24,7 @@ const {
 
 function activate(context) {
   const treeProvider = new AgentDocsTreeProvider();
+  const workItemsProvider = new WorkItemsTreeProvider();
   const headingDecoration = vscode.window.createTextEditorDecorationType({
     backgroundColor: new vscode.ThemeColor('editor.findMatchHighlightBackground'),
     border: '1px solid',
@@ -28,9 +36,16 @@ function activate(context) {
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('codexFriendlyAgentDocs', treeProvider),
+    vscode.window.registerTreeDataProvider('codexFriendlyWorkItems', workItemsProvider),
     vscode.window.registerFileDecorationProvider(new AgentDocFileDecorationProvider()),
+    vscode.window.registerFileDecorationProvider(new WorkItemFileDecorationProvider()),
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshAgentDocs', () => treeProvider.refresh()),
+    vscode.commands.registerCommand('codex-friendly-project-starter.refreshWorkItems', () => workItemsProvider.refresh()),
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithFirstPrompt', () => invokeCodexWithFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithCurrentPrompt', () => invokeCodexWithCurrentPromptCommand(context)),
@@ -48,6 +63,7 @@ function activate(context) {
 
   updateEditorDecorations(vscode.window.activeTextEditor, headingDecoration, keywordDecoration);
   treeProvider.refresh();
+  workItemsProvider.refresh();
 }
 
 function deactivate() {}
@@ -219,11 +235,61 @@ function openStarterWebview(context) {
   }, undefined, context.subscriptions);
 }
 
+async function openWorkDashboard(context) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const panel = vscode.window.createWebviewPanel(
+    'codexFriendlyWorkDashboard',
+    'Codex Work Dashboard',
+    vscode.ViewColumn.One,
+    { enableScripts: true, retainContextWhenHidden: false }
+  );
+  const nonce = String(Date.now()) + String(Math.random()).slice(2);
+  panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+}
+
+async function initializeIssuesDirectoryCommand(workItemsProvider) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const result = ensureIssuesDirectory(workspaceRoot);
+  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(result.readmePath)));
+  workItemsProvider.refresh();
+  vscode.window.setStatusBarMessage('Codex Starter: Issues directory initialized', 4000);
+}
+
+async function createLocalIssueCommand(workItemsProvider) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const title = await vscode.window.showInputBox({ prompt: 'Issue title', placeHolder: 'Add release-ready VSIX packaging' });
+  if (!title) return;
+  const priority = await vscode.window.showQuickPick(['P0', 'P1', 'P2', 'P3', 'P4'], { placeHolder: 'Priority' });
+  if (!priority) return;
+  const type = await vscode.window.showQuickPick(['feature', 'bug', 'docs', 'release', 'task'], { placeHolder: 'Issue type' });
+  if (!type) return;
+  const acceptance = await vscode.window.showInputBox({ prompt: 'Acceptance criteria', placeHolder: '完了条件を短く入力' });
+  const issuePath = nextIssueFilePath(workspaceRoot, title);
+  const markdown = createIssueMarkdown({ title, priority, type, acceptance });
+  await fs.promises.writeFile(issuePath, markdown, 'utf8');
+  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(issuePath)));
+  workItemsProvider.refresh();
+  vscode.window.setStatusBarMessage('Codex Starter: Local Issue created', 4000);
+}
+
 async function openAgentDoc(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath;
   if (!filePath) return;
   const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
   await vscode.window.showTextDocument(doc);
+}
+
+async function openWorkItem(item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath;
+  if (!filePath) return;
+  const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
+  const editor = await vscode.window.showTextDocument(doc);
+  if (item.lineNumber) {
+    const position = new vscode.Position(Math.max(0, item.lineNumber - 1), 0);
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+  }
 }
 
 class AgentDocsTreeProvider {
@@ -266,6 +332,93 @@ class AgentDocsTreeProvider {
   }
 }
 
+class WorkItemsTreeProvider {
+  constructor() {
+    this.roots = [];
+    this.onDidChangeTreeDataEmitter = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
+  }
+
+  refresh() {
+    this.load();
+  }
+
+  async load() {
+    const folders = vscode.workspace.workspaceFolders || [];
+    const roots = [];
+    for (const folder of folders) {
+      const dashboard = await scanWorkItems(folder.uri.fsPath);
+      roots.push(...buildWorkItemTreeRoots(folder.name, dashboard));
+    }
+    this.roots = roots;
+    this.onDidChangeTreeDataEmitter.fire();
+  }
+
+  getTreeItem(item) {
+    const treeItem = new vscode.TreeItem(item.label, item.children ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
+    treeItem.description = item.description;
+    treeItem.tooltip = item.tooltip || item.filePath;
+    treeItem.iconPath = item.icon;
+    if (item.filePath) treeItem.resourceUri = vscode.Uri.file(item.filePath);
+    if (item.filePath) {
+      treeItem.command = {
+        command: 'codex-friendly-project-starter.openWorkItem',
+        title: 'Open Work Item',
+        arguments: [item]
+      };
+    }
+    return treeItem;
+  }
+
+  getChildren(item) {
+    return item?.children || this.roots;
+  }
+}
+
+function buildWorkItemTreeRoots(folderName, dashboard) {
+  const openTodos = dashboard.todos.filter((item) => !item.done).slice(0, 20).map((item) => ({
+    ...item,
+    label: item.title,
+    description: item.priority + ' ' + item.relativePath + ':' + item.lineNumber,
+    tooltip: item.section,
+    icon: new vscode.ThemeIcon('checklist')
+  }));
+  const openIssues = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 20).map((item) => ({
+    ...item,
+    label: item.title,
+    description: item.priority + ' ' + item.status,
+    tooltip: item.relativePath,
+    icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'issues')
+  }));
+  const readiness = dashboard.releaseReadiness.map((item) => ({
+    label: item.label,
+    description: item.status,
+    tooltip: item.detail,
+    icon: new vscode.ThemeIcon(item.status === 'pass' ? 'pass' : 'warning')
+  }));
+  const prefix = vscode.workspace.workspaceFolders?.length > 1 ? folderName + ' ' : '';
+  return [
+    {
+      label: prefix + 'TODO ' + dashboard.stats.todos.done + '/' + dashboard.stats.todos.total,
+      description: dashboard.stats.todos.percent + '%',
+      children: openTodos,
+      icon: new vscode.ThemeIcon('graph')
+    },
+    {
+      label: prefix + 'Issues ' + dashboard.stats.issues.closed + '/' + dashboard.stats.issues.total,
+      description: dashboard.stats.issues.percent + '%',
+      children: openIssues,
+      icon: new vscode.ThemeIcon('issues')
+    },
+    {
+      label: prefix + 'Release readiness',
+      description: readiness.filter((item) => item.description === 'pass').length + '/' + readiness.length,
+      children: readiness,
+      icon: new vscode.ThemeIcon('milestone')
+    }
+  ];
+}
+
 class AgentDocFileDecorationProvider {
   provideFileDecoration(uri) {
     if (!isAgentDocPath(uri.fsPath)) return undefined;
@@ -273,8 +426,24 @@ class AgentDocFileDecorationProvider {
   }
 }
 
+class WorkItemFileDecorationProvider {
+  provideFileDecoration(uri) {
+    if (isIssueFileDecoration(uri.fsPath)) return new vscode.FileDecoration('IS', 'Local Issue', new vscode.ThemeColor('charts.yellow'));
+    if (isTodoFileDecoration(uri.fsPath)) return new vscode.FileDecoration('TD', 'TODO document', new vscode.ThemeColor('charts.blue'));
+    return undefined;
+  }
+}
+
+function isIssueFileDecoration(filePath) {
+  return isWorkItemDocPath(filePath) && /[\\/]Issues[\\/]/i.test(filePath);
+}
+
+function isTodoFileDecoration(filePath) {
+  return isWorkItemDocPath(filePath) && /TODO\.md$/i.test(filePath);
+}
+
 function updateEditorDecorations(editor, headingDecoration, keywordDecoration) {
-  if (!editor || !isAgentDocPath(editor.document.uri.fsPath)) {
+  if (!editor || (!isAgentDocPath(editor.document.uri.fsPath) && !isWorkItemDocPath(editor.document.uri.fsPath))) {
     if (editor) {
       editor.setDecorations(headingDecoration, []);
       editor.setDecorations(keywordDecoration, []);
@@ -285,7 +454,7 @@ function updateEditorDecorations(editor, headingDecoration, keywordDecoration) {
   const headingRanges = [];
   const keywordRanges = [];
   const headingPattern = /^#{1,3}\s.+$/gm;
-  const keywordPattern = /(完了条件|制約|参照順序|Start Order|QCDS|AGENTS|SKILL|FirstPrompt|ファーストプロンプト)/g;
+  const keywordPattern = /(完了条件|制約|参照順序|Start Order|QCDS|AGENTS|SKILL|TODO|Issue|Status|Priority|Acceptance Criteria|FirstPrompt|ファーストプロンプト)/g;
   collectRanges(editor.document, text, headingPattern, headingRanges);
   collectRanges(editor.document, text, keywordPattern, keywordRanges);
   editor.setDecorations(headingDecoration, headingRanges);

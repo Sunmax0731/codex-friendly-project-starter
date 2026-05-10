@@ -17,6 +17,7 @@ const product = {
     'src/workflows.cjs',
     'src/prompt-builder.cjs',
     'src/workspace-docs.cjs',
+    'src/work-items.cjs',
     'src/webview.cjs',
     'src/codex-cli.cjs',
     'src/invocation-target.cjs'
@@ -24,6 +25,7 @@ const product = {
   testFiles: [
     'tests/prompt-builder.test.cjs',
     'tests/workspace-docs.test.cjs',
+    'tests/work-items.test.cjs',
     'tests/codex-cli.test.cjs',
     'tests/invocation-target.test.cjs',
     'samples/representative-suite.json'
@@ -159,7 +161,12 @@ function commandContract() {
     'codex-friendly-project-starter.checkCodexCli',
     'codex-friendly-project-starter.openCodexApp',
     'codex-friendly-project-starter.refreshAgentDocs',
-    'codex-friendly-project-starter.openAgentDoc'
+    'codex-friendly-project-starter.refreshWorkItems',
+    'codex-friendly-project-starter.openWorkDashboard',
+    'codex-friendly-project-starter.initializeIssuesDirectory',
+    'codex-friendly-project-starter.createLocalIssue',
+    'codex-friendly-project-starter.openAgentDoc',
+    'codex-friendly-project-starter.openWorkItem'
   ];
   return { pass: required.every((item) => commands.has(item)), detail: required.every((item) => commands.has(item)) ? 'commands ok' : 'commands missing' };
 }

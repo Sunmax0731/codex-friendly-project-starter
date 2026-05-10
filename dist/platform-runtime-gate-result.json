@@ -46,9 +46,24 @@
       "detail": "Tree View contribution exists"
     },
     {
+      "id": "work-items-view",
+      "pass": true,
+      "detail": "Work Items Tree View contribution exists"
+    },
+    {
+      "id": "work-dashboard-command",
+      "pass": true,
+      "detail": "Work dashboard and local issue commands exist"
+    },
+    {
       "id": "webview-panel",
       "pass": true,
       "detail": "webview contract exists"
+    },
+    {
+      "id": "work-dashboard-webview",
+      "pass": true,
+      "detail": "work dashboard webview contract exists"
     },
     {
       "id": "webview-run-codex",
@@ -69,6 +84,11 @@
       "id": "agent-doc-scan",
       "pass": true,
       "detail": "agent docs scan wired"
+    },
+    {
+      "id": "work-item-scan",
+      "pass": true,
+      "detail": "work item scan wired"
     },
     {
       "id": "codex-exec-terminal",

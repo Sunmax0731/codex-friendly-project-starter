@@ -4,6 +4,9 @@
 | --- | --- | --- |
 | Agent docs を一覧化する | `src/workspace-docs.cjs`, `extension.js` | `tests/workspace-docs.test.cjs` |
 | Agent docs をハイライトする | `extension.js` | `tools/platform-runtime-gate.mjs` |
+| TODO を可視化する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
+| local Issue を管理する | `src/work-items.cjs`, `extension.js`, `Issues/README.md` | `tests/work-items.test.cjs`, `Issues/*.md` |
+| Work Dashboard を表示する | `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | 分野を選んで FirstPrompt を作る | `src/domains.cjs`, `src/prompt-builder.cjs` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
 | 進め方を選べる | `src/workflows.cjs` | `tests/prompt-builder.test.cjs` |
 | Webview から生成できる | `src/webview.cjs`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |

@@ -24,6 +24,14 @@
 - Codex CLI command builder の unit test を追加する。
 - docs ZIP を生成する。
 
+## Phase 3.5: Work Items と local Issue 管理
+
+- `TODO.md` と `Issues/*.md` を解析する `src/work-items.cjs` を追加する。
+- Activity Bar に `Work Items` Tree View を追加する。
+- TODO / Issue / release readiness を表示する `Work Dashboard` Webview を追加する。
+- `Issues` ディレクトリ初期化と local Issue 作成 command を追加する。
+- Issue 駆動の後続候補を `Issues/*.md` として記録する。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。
