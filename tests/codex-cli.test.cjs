@@ -28,7 +28,9 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     model: 'gpt-5.4',
     profile: 'default'
   });
-  assert.match(script, /Get-Content -LiteralPath/);
+  assert.match(script, /\$OutputEncoding = \$utf8NoBom/);
+  assert.match(script, /chcp\.com 65001/);
+  assert.match(script, /Get-Content -LiteralPath \$promptFile -Encoding UTF8 -Raw/);
   assert.match(script, /& 'codex' @codexArgs/);
   assert.match(script, /'exec'/);
   assert.match(script, /'-C'/);

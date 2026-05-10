@@ -25,11 +25,16 @@ function buildCodexExecScript(options = {}) {
   args.push('-');
   const lines = [
     `$ErrorActionPreference = 'Stop'`,
+    `$utf8NoBom = New-Object System.Text.UTF8Encoding($false)`,
+    `[Console]::InputEncoding = $utf8NoBom`,
+    `[Console]::OutputEncoding = $utf8NoBom`,
+    `$OutputEncoding = $utf8NoBom`,
+    `try { chcp.com 65001 | Out-Null } catch {}`,
     `$promptFile = ${quotePowerShell(options.promptFilePath)}`,
     `$codexArgs = @(`,
     ...args.map((arg) => `  ${quotePowerShell(arg)}`),
     `)`,
-    `Get-Content -LiteralPath $promptFile -Raw | & ${quotePowerShell(normalized.cliPath)} @codexArgs`,
+    `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & ${quotePowerShell(normalized.cliPath)} @codexArgs`,
     `if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }`
   ];
   return lines.join('\n');

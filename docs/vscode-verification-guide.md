@@ -94,6 +94,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - FirstPrompt が stdin 経由で Codex Agent に渡る。
 - 生成元 prompt file と `run-codex-*.ps1` launcher は extension storage に保存される。
 - terminal に prompt 本文そのものが `>>` 継続入力として表示されたり、PowerShell の構文エラーになったりしない。
+- 日本語が `?` に置換されず、`D:\AI` や日本語の目的文が読める形で Codex CLI 側へ渡る。
 
 注意:
 

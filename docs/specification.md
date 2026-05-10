@@ -51,7 +51,7 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 
 ## Codex CLI 呼び出し
 
-`codex exec` は VS Code 統合ターミナルで実行する。拡張はプロンプト本文を storage directory の一時 Markdown に保存し、同じ場所に一時 `.ps1` launcher を作成して `Get-Content -Raw` から stdin として渡す。
+`codex exec` は VS Code 統合ターミナルで実行する。拡張はプロンプト本文を storage directory の一時 Markdown に UTF-8 で保存し、同じ場所に一時 `.ps1` launcher を作成して、PowerShell の console encoding と `$OutputEncoding` を UTF-8 にしてから `Get-Content -Encoding UTF8 -Raw` で stdin として渡す。
 
 既定の実行形式:
 

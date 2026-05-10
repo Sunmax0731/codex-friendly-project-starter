@@ -6,6 +6,7 @@
 - [x] Webview message は `generate`、`copy`、`runCodex` のみ処理する。
 - [x] ワークスペーススキャンは `.git`、`node_modules`、`dist`、`out` を除外する。
 - [x] Codex CLI へ渡す prompt file と launcher script は extension storage または temp directory に保存する。
+- [x] launcher は prompt file を `-Encoding UTF8` で読み、PowerShell から native process へ渡す stdin の encoding も UTF-8 にする。
 - [x] `codex exec` 起動前に workspace root と sandbox mode を確認する。
 - [x] `danger-full-access` を選んだ場合は確認文言で明示する。
 - [ ] Marketplace 公開前に VSIX 内容と extension permissions を再確認する。

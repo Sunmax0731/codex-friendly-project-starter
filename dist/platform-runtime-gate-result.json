@@ -73,7 +73,7 @@
     {
       "id": "codex-exec-terminal",
       "pass": true,
-      "detail": "Codex exec launcher command exists"
+      "detail": "Codex exec UTF-8 launcher command exists"
     }
   ]
 }

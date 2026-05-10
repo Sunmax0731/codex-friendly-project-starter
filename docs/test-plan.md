@@ -12,7 +12,7 @@ npm test
 - 分野テンプレートに主要 domain が含まれる。
 - Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行を選べる。
 - FirstPrompt に選択した分野、進め方、runtime gate、QCDS、完了条件が入る。
-- Codex CLI command builder が prompt file と `.ps1` launcher を使い、stdin 経由で `codex exec` に渡す。
+- Codex CLI command builder が prompt file と `.ps1` launcher を使い、UTF-8 の stdin 経由で `codex exec` に渡す。
 - Codex App と CLI check の command builder が設定された CLI path を使う。
 - Agent docs 判定とスキャンが `node_modules` を除外する。
 - QCDS metrics の grade が定義済み値だけを使う。
