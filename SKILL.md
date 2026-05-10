@@ -18,6 +18,7 @@
 - AI Agent 起動は `codex exec` への terminal command 生成に限定し、プロンプトは一時 Markdown に保存して stdin 経由で渡します。
 - 文字化け検査は code point ベースで行い、典型的な文字化け断片を検査コードに直書きしません。
 - Local Issue は `Issues/*.md` に保存し、GitHub Issue 連携前でも Issue 駆動の作業単位として扱えるようにします。
+- QCDS 改善は TODO の `[QCDS:Delivery]` tag または Issue metadata の `- QCDS: Delivery, Satisfaction` で可視化に紐づけます。
 
 ## Validation
 

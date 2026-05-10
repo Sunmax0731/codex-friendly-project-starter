@@ -5,6 +5,7 @@
 - [x] Webview は外部ネットワークへ接続しない。
 - [x] Starter Webview message は `generate`、`copy`、`runCodex` のみ処理する。
 - [x] Work Dashboard Webview は読み取り専用で、workspace ファイルを書き換えない。
+- [x] QCDS Status は `docs/qcds-strict-metrics.json` と TODO / Issue metadata を読むだけで、外部送信しない。
 - [x] ワークスペーススキャンは `.git`、`node_modules`、`dist`、`out` を除外する。
 - [x] Local Issue 作成は現在の workspace root の `Issues` ディレクトリに限定する。
 - [x] Codex CLI へ渡す prompt file と launcher script は extension storage または temp directory に保存する。

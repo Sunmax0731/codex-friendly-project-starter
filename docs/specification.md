@@ -12,6 +12,7 @@
 - `codex-friendly-project-starter.openAgentDoc`: Tree View の文書を開く。
 - `codex-friendly-project-starter.refreshWorkItems`: Work Items Tree を再スキャンする。
 - `codex-friendly-project-starter.openWorkDashboard`: TODO / Issue / release readiness の dashboard Webview を開く。
+- `codex-friendly-project-starter.openQcdsStatus`: QCDS current status を含む dashboard Webview を開く。
 - `codex-friendly-project-starter.initializeIssuesDirectory`: workspace root に `Issues/README.md` を作成または開く。
 - `codex-friendly-project-starter.createLocalIssue`: `Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO または Issue を該当行で開く。
@@ -43,6 +44,7 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 - Type: feature
 - Source: local
 - Created: YYYY-MM-DD
+- QCDS: Quality, Delivery
 ```
 
 `Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。
@@ -53,6 +55,9 @@ Dashboard Webview は次を表示する。
 
 - TODO 完了数 / 総数の progress bar。
 - Issue closed 数 / 総数の progress bar。
+- QCDS overall grade / score と check pass 数。
+- QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。
+- QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO と未完了 Issue の上位一覧。
 

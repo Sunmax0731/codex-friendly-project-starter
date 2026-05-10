@@ -8,6 +8,7 @@
 - ファイル名は `0001-short-title.md` のように連番と短い slug を使います。
 - `Status` は `open`、`in-progress`、`blocked`、`closed` のいずれかにします。
 - `Priority` は `P0` から `P4` を使います。
+- `QCDS` は `Quality`、`Cost`、`Delivery`、`Satisfaction` から関連する観点を列挙します。
 - `Acceptance Criteria` の checkbox は dashboard の進捗として扱います。
 
 ## Template
@@ -20,6 +21,7 @@
 - Type: feature
 - Source: local
 - Created: YYYY-MM-DD
+- QCDS: Quality, Delivery
 
 ## Context
 

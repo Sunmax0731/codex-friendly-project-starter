@@ -7,6 +7,7 @@ const {
   parseTodoMarkdown,
   parseIssueMarkdown,
   scanWorkItems,
+  buildQcdsStatus,
   ensureIssuesDirectory,
   nextIssueFilePath,
   createIssueMarkdown,
@@ -28,13 +29,14 @@ test('parseTodoMarkdown extracts status, section, priority, and line number', ()
 });
 
 test('parseIssueMarkdown reads local issue metadata and acceptance progress', () => {
-  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
+  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- QCDS: Quality, Satisfaction\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
     rootPath: 'D:/repo',
     filePath: 'D:/repo/Issues/0001-work-dashboard.md'
   });
   assert.equal(issue.title, 'Add work dashboard');
   assert.equal(issue.status, 'in-progress');
   assert.equal(issue.priority, 'P2');
+  assert.deepEqual(issue.qcdsAxes, ['Quality', 'Satisfaction']);
   assert.equal(issue.progress.done, 1);
   assert.equal(issue.progress.total, 2);
 });
@@ -67,7 +69,52 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   const dashboard = await scanWorkItems(root);
   const html = renderWorkDashboardWebview('nonce', dashboard);
   assert.match(html, /Codex Work Dashboard/);
+  assert.match(html, /QCDS Current Status/);
+  assert.match(html, /QCDS Improvements/);
   assert.match(html, /Release Readiness/);
   assert.match(html, /Open TODO/);
   assert.match(html, /width:0%|width:50%|width:100%/);
+});
+
+test('buildQcdsStatus reads strict metrics and links QCDS-tagged TODO and Issue work', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-qcds-'));
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1][QCDS:Delivery] Add VSIX release evidence\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-history.md'), createIssueMarkdown({
+    title: 'Prompt history reuse',
+    priority: 'P2',
+    type: 'feature',
+    qcdsAxes: ['Satisfaction']
+  }), 'utf8');
+  fs.writeFileSync(path.join(root, 'docs', 'qcds-strict-metrics.json'), JSON.stringify({
+    overallGrade: 'A-',
+    overallScore: 80,
+    dimensions: {
+      delivery: {
+        label: 'Delivery',
+        score: 80,
+        grade: 'A-',
+        passed: 1,
+        expected: 1,
+        checks: [{ id: 'release-evidence', description: 'Release evidence exists', pass: true, detail: 'ok' }]
+      },
+      satisfaction: {
+        label: 'Satisfaction',
+        score: 75,
+        grade: 'B+',
+        passed: 0,
+        expected: 1,
+        checks: [{ id: 'history-reuse', description: 'Prompt history reuse exists', pass: false, detail: 'missing' }]
+      }
+    }
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  assert.equal(dashboard.qcds.available, true);
+  assert.equal(dashboard.qcds.overallGrade, 'A-');
+  assert.deepEqual(dashboard.qcds.summary.belowAMinus, ['Satisfaction']);
+  assert.equal(dashboard.qcds.improvements.some((item) => item.title.includes('VSIX')), true);
+  assert.equal(dashboard.qcds.improvements.some((item) => item.title.includes('Prompt history')), true);
+  const direct = buildQcdsStatus(root, { todos: dashboard.todos, issues: dashboard.issues });
+  assert.equal(direct.summary.totalChecks, 2);
 });

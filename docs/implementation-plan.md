@@ -29,6 +29,7 @@
 - `TODO.md` と `Issues/*.md` を解析する `src/work-items.cjs` を追加する。
 - Activity Bar に `Work Items` Tree View を追加する。
 - TODO / Issue / release readiness を表示する `Work Dashboard` Webview を追加する。
+- QCDS current status と QCDS improvements を dashboard に統合する。
 - `Issues` ディレクトリ初期化と local Issue 作成 command を追加する。
 - Issue 駆動の後続候補を `Issues/*.md` として記録する。
 

@@ -53,7 +53,7 @@
     {
       "id": "work-dashboard-command",
       "pass": true,
-      "detail": "Work dashboard and local issue commands exist"
+      "detail": "Work dashboard, QCDS status, and local issue commands exist"
     },
     {
       "id": "webview-panel",
@@ -88,7 +88,7 @@
     {
       "id": "work-item-scan",
       "pass": true,
-      "detail": "work item scan wired"
+      "detail": "work item and QCDS scan wired"
     },
     {
       "id": "codex-exec-terminal",

@@ -163,6 +163,7 @@ function commandContract() {
     'codex-friendly-project-starter.refreshAgentDocs',
     'codex-friendly-project-starter.refreshWorkItems',
     'codex-friendly-project-starter.openWorkDashboard',
+    'codex-friendly-project-starter.openQcdsStatus',
     'codex-friendly-project-starter.initializeIssuesDirectory',
     'codex-friendly-project-starter.createLocalIssue',
     'codex-friendly-project-starter.openAgentDoc',

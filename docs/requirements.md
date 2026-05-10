@@ -16,6 +16,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `TODO.md` の checkbox を解析し、未完了 TODO と進捗率を Tree View と Webview で可視化する。
 - `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の local Issue backlog を管理できる。
 - `Issues/*.md` の status、priority、acceptance criteria を解析し、TODO と同じ dashboard で可視化する。
+- `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue を可視化する。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、工程、進行速度を選択して FirstPrompt を生成する。
 - 生成結果を untitled Markdown で開き、Webview からはクリップボードにもコピーできる。
@@ -37,3 +38,4 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
 - Work Items Tree と Work Dashboard が `TODO.md` と `Issues/*.md` を読み取り、release readiness を表示できる。
+- QCDS Status が現在の grade と `QCDS:` metadata/tag で紐づいた TODO / Issue を表示できる。

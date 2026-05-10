@@ -24,8 +24,15 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - `Codex Starter: Open Work Dashboard` で開く。
 - TODO と Issue の進捗は progress bar で表示する。
+- QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
 - Dashboard は参照専用とし、編集は Markdown を直接開く。
+
+### QCDS Status
+
+- `Codex Starter: Open QCDS Status` で開く。
+- 表示 UI は Work Dashboard と同じデータを使い、QCDS Current Status と QCDS Improvements を最初に確認できるようにする。
+- `QCDS:` metadata/tag がある TODO / Issue を改善候補として紐づける。
 
 ### FirstPrompt Webview
 
@@ -43,6 +50,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
 - Issues directory なし: `Initialize Issues Directory` で `Issues/README.md` を作成する。
 - Issue なし: Dashboard は Issue progress を 0% とし、local Issue 作成 command を使う。
+- QCDS metrics なし: Dashboard は QCDS を `missing` として表示し、QCDS docs の作成を release readiness の不足として扱う。
 
 ## アクセシビリティ
 

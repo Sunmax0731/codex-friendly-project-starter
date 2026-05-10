@@ -8,6 +8,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Agent Doc Highlight: Agent 向け文書を開いたとき、重要見出しと制約語をエディタ上でハイライトします。
 - Work Items Tree: `TODO.md` と `Issues/*.md` を読み取り、未完了 TODO、local Issue、release readiness を常設 Tree View で確認できます。
 - Work Dashboard: TODO と Issue の進捗を progress bar と未完了一覧でグラフィカルに表示します。
+- QCDS Status: `docs/qcds-strict-metrics.json` の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行などの進め方から開始プロンプトを生成します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示またはクリップボードへコピーできます。
@@ -25,6 +26,7 @@ VS Code 起動後、Command Palette から次を実行します。
 
 - `Codex Starter: Open Project Starter`
 - `Codex Starter: Open Work Dashboard`
+- `Codex Starter: Open QCDS Status`
 - `Codex Starter: Initialize Issues Directory`
 - `Codex Starter: Create Local Issue`
 - `Codex Starter: Generate FirstPrompt`

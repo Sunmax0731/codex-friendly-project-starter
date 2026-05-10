@@ -8,6 +8,7 @@
 - [ ] `docs/manual-test.md` にユーザー側手動確認手順がある。
 - [ ] `docs/vscode-verification-guide.md` に Codex CLI 呼び出し確認手順がある。
 - [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / release readiness を確認する。
+- [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。
 - [ ] `Issues` ディレクトリの open Issue が正式リリース範囲と整合している。
 - [ ] `git status --short --branch` が clean である。
 - [ ] `main` と `origin/main` が同期している。

@@ -5,6 +5,8 @@ const TODO_FILE_NAMES = new Set(['TODO.md', 'ToDo.md', 'Todo.md']);
 const ISSUE_DIR_NAMES = new Set(['Issues', 'issues']);
 const ISSUE_README_NAMES = new Set(['README.md', 'readme.md']);
 const IGNORED_DIRECTORIES = new Set(['.git', 'node_modules', 'dist', 'out', '.vscode-test']);
+const QCDS_AXES = ['Quality', 'Cost', 'Delivery', 'Satisfaction'];
+const GRADE_RANK = new Map(['D-', 'D+', 'C-', 'C+', 'B-', 'B+', 'A-', 'A+', 'S-', 'S+'].map((grade, index) => [grade, index]));
 
 function toSlash(value) {
   return value.replace(/\\/g, '/');
@@ -98,6 +100,7 @@ function parseTodoMarkdown(content, context = {}) {
       title,
       section,
       priority: detectPriority(title),
+      qcdsAxes: detectQcdsAxes(title),
       filePath,
       relativePath,
       lineNumber: index + 1
@@ -127,6 +130,7 @@ function parseIssueMarkdown(content, context = {}) {
     done: normalizedStatus === 'closed',
     title,
     priority: detectPriority(metadata.priority || title),
+    qcdsAxes: detectQcdsAxes(metadata.qcds || title),
     type: metadata.type || 'task',
     source: metadata.source || 'local',
     created: metadata.created || '',
@@ -146,7 +150,7 @@ function parseIssueMetadata(lines) {
     const match = bullet || colon;
     if (!match) continue;
     const key = match[1].toLowerCase().replace(/\s+/g, '');
-    if (['id', 'status', 'priority', 'type', 'source', 'created'].includes(key)) metadata[key] = match[2].trim();
+    if (['id', 'status', 'priority', 'type', 'source', 'created', 'qcds'].includes(key)) metadata[key] = match[2].trim();
   }
   return metadata;
 }
@@ -173,6 +177,13 @@ function detectPriority(value) {
   return match ? 'P' + match[1] : 'P3';
 }
 
+function detectQcdsAxes(value) {
+  const text = String(value || '');
+  const explicit = /\[?QCDS:([^\]\n]+)\]?/i.exec(text);
+  const source = explicit ? explicit[1] : text;
+  return QCDS_AXES.filter((axis) => new RegExp('\\b' + axis + '\\b', 'i').test(source));
+}
+
 function normalizeIssueStatus(value) {
   const status = String(value || '').trim().toLowerCase();
   if (['done', 'closed', 'complete', 'completed', 'resolved'].includes(status)) return 'closed';
@@ -197,12 +208,14 @@ function buildWorkItemDashboard({ rootPath, todos, issues }) {
     todos: { total: todos.length, done: todoDone, open: todos.length - todoDone, percent: percent(todoDone, todos.length) },
     issues: { total: issues.length, closed: issueClosed, open: issueOpen, active: issueActive, blocked: issueBlocked, percent: percent(issueClosed, issues.length) }
   };
+  const qcds = buildQcdsStatus(rootPath, { todos, issues });
   return {
     rootPath,
     generatedAt: new Date().toISOString(),
     todos: sortWorkItems(todos),
     issues: sortWorkItems(issues),
     stats,
+    qcds,
     releaseReadiness: buildReleaseReadiness(rootPath, stats)
   };
 }
@@ -227,6 +240,165 @@ function buildReleaseReadiness(rootPath, stats) {
     readiness('manual-test', 'Manual test docs', exists(rootPath, 'docs/manual-test.md') || exists(rootPath, 'docs/user-guide.md'), 'manual/user guide')
   ];
   return checks;
+}
+
+function buildQcdsStatus(rootPath, workItems = {}) {
+  const metricsPath = path.join(rootPath, 'docs', 'qcds-strict-metrics.json');
+  const fallbackPath = path.join(rootPath, 'docs', 'qcds-evaluation.md');
+  if (!fs.existsSync(metricsPath)) {
+    return {
+      available: false,
+      metricsPath: fs.existsSync(fallbackPath) ? fallbackPath : '',
+      overallGrade: '',
+      overallScore: 0,
+      dimensions: [],
+      improvements: [],
+      summary: { totalChecks: 0, passedChecks: 0, failedChecks: 0, percent: 0, belowAMinus: [] }
+    };
+  }
+
+  let metrics;
+  try {
+    metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
+  } catch {
+    return {
+      available: false,
+      metricsPath,
+      overallGrade: '',
+      overallScore: 0,
+      dimensions: [],
+      improvements: [],
+      summary: { totalChecks: 0, passedChecks: 0, failedChecks: 0, percent: 0, belowAMinus: [] }
+    };
+  }
+
+  const work = [...(workItems.todos || []), ...(workItems.issues || [])];
+  const dimensions = Object.entries(metrics.dimensions || {}).map(([id, dimension]) => {
+    const label = dimension.label || labelFromDimensionId(id);
+    const checks = (dimension.checks || []).map((check) => {
+      const linkedItems = linkQcdsWorkItems(label, check, work);
+      return {
+        id: check.id || '',
+        description: check.description || '',
+        pass: check.pass === true,
+        detail: check.detail || '',
+        linkedItems
+      };
+    });
+    const linkedItems = uniqueLinkedItems(checks.flatMap((check) => check.linkedItems).concat(linkQcdsWorkItems(label, { id, description: label }, work)));
+    return {
+      id,
+      label,
+      score: Number(dimension.score || 0),
+      grade: dimension.grade || gradeFromScore(Number(dimension.score || 0)),
+      passed: Number(dimension.passed || checks.filter((check) => check.pass).length),
+      expected: Number(dimension.expected || checks.length),
+      status: isGradeAtLeast(dimension.grade, 'A-') ? 'pass' : 'needs-improvement',
+      checks,
+      linkedItems
+    };
+  });
+  const totalChecks = dimensions.reduce((sum, item) => sum + item.expected, 0);
+  const passedChecks = dimensions.reduce((sum, item) => sum + item.passed, 0);
+  const failedChecks = Math.max(0, totalChecks - passedChecks);
+  const belowAMinus = dimensions.filter((item) => !isGradeAtLeast(item.grade, 'A-')).map((item) => item.label);
+  const improvements = buildQcdsImprovements(dimensions, work);
+  return {
+    available: true,
+    metricsPath,
+    overallGrade: metrics.overallGrade || gradeFromScore(Number(metrics.overallScore || 0)),
+    overallScore: Number(metrics.overallScore || 0),
+    dimensions,
+    improvements,
+    summary: {
+      totalChecks,
+      passedChecks,
+      failedChecks,
+      percent: percent(passedChecks, totalChecks),
+      belowAMinus
+    }
+  };
+}
+
+function linkQcdsWorkItems(axis, check, workItems) {
+  const checkText = [check.id, check.description, check.detail].filter(Boolean).join(' ');
+  const checkTokens = tokenSet(checkText);
+  return uniqueLinkedItems(workItems.filter((item) => {
+    if (item.qcdsAxes?.includes(axis)) return true;
+    if (!item.title) return false;
+    const itemTokens = tokenSet(item.title + ' ' + (item.section || '') + ' ' + (item.type || ''));
+    let overlap = 0;
+    for (const token of checkTokens) if (itemTokens.has(token)) overlap++;
+    return overlap >= 2;
+  }));
+}
+
+function buildQcdsImprovements(dimensions, workItems) {
+  const linked = [];
+  for (const dimension of dimensions) {
+    for (const item of dimension.linkedItems) {
+      if (item.done) continue;
+      linked.push({ ...item, qcdsAxis: dimension.label, qcdsGrade: dimension.grade });
+    }
+  }
+  return uniqueLinkedItems(linked);
+}
+
+function uniqueLinkedItems(items) {
+  const seen = new Set();
+  const results = [];
+  for (const item of items) {
+    const key = item.kind + ':' + item.relativePath + ':' + (item.lineNumber || 1) + ':' + (item.qcdsAxis || '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    results.push({
+      kind: item.kind,
+      title: item.title,
+      status: item.status,
+      done: item.done,
+      priority: item.priority,
+      qcdsAxes: item.qcdsAxes || [],
+      qcdsAxis: item.qcdsAxis,
+      qcdsGrade: item.qcdsGrade,
+      filePath: item.filePath,
+      relativePath: item.relativePath,
+      lineNumber: item.lineNumber || 1
+    });
+  }
+  return sortWorkItems(results);
+}
+
+function tokenSet(value) {
+  return new Set(String(value || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length >= 4 && !['with', 'from', 'that', 'this'].includes(token)));
+}
+
+function labelFromDimensionId(id) {
+  const lower = String(id || '').toLowerCase();
+  if (lower === 'quality') return 'Quality';
+  if (lower === 'cost') return 'Cost';
+  if (lower === 'delivery') return 'Delivery';
+  if (lower === 'satisfaction') return 'Satisfaction';
+  return id;
+}
+
+function gradeFromScore(score) {
+  if (score >= 95) return 'S+';
+  if (score >= 90) return 'S-';
+  if (score >= 85) return 'A+';
+  if (score >= 80) return 'A-';
+  if (score >= 75) return 'B+';
+  if (score >= 70) return 'B-';
+  if (score >= 65) return 'C+';
+  if (score >= 60) return 'C-';
+  if (score >= 55) return 'D+';
+  return 'D-';
+}
+
+function isGradeAtLeast(value, floor) {
+  return (GRADE_RANK.get(value) ?? -1) >= (GRADE_RANK.get(floor) ?? -1);
 }
 
 function readiness(id, label, pass, detail) {
@@ -268,6 +440,7 @@ function createIssueMarkdown(input = {}) {
   const status = input.status || 'open';
   const source = input.source || 'local';
   const created = input.created || new Date().toISOString().slice(0, 10);
+  const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const context = input.context || '背景、目的、制約をここに記録します。';
   const acceptance = input.acceptance || '完了条件をここに記録します。';
   return [
@@ -278,6 +451,7 @@ function createIssueMarkdown(input = {}) {
     '- Type: ' + type,
     '- Source: ' + source,
     '- Created: ' + created,
+    qcds ? '- QCDS: ' + qcds : '',
     '',
     '## Context',
     '',
@@ -290,7 +464,7 @@ function createIssueMarkdown(input = {}) {
     '## Notes',
     '',
     '- '
-  ].join('\n') + '\n';
+  ].filter((line, index, lines) => line !== '' || lines[index - 1] !== '').join('\n') + '\n';
 }
 
 function defaultIssuesReadme() {
@@ -316,6 +490,7 @@ function defaultIssuesReadme() {
     '- Type: feature',
     '- Source: local',
     '- Created: YYYY-MM-DD',
+    '- QCDS: Quality, Delivery',
     '',
     '## Context',
     '',
@@ -350,6 +525,7 @@ module.exports = {
   parseIssueMarkdown,
   scanWorkItems,
   buildWorkItemDashboard,
+  buildQcdsStatus,
   ensureIssuesDirectory,
   nextIssueFilePath,
   createIssueMarkdown,

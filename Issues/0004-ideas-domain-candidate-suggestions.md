@@ -5,6 +5,7 @@
 - Type: feature
 - Source: local
 - Created: 2026-05-11
+- QCDS: Satisfaction, Delivery
 
 ## Context
 

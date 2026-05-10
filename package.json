@@ -22,6 +22,7 @@
     "onCommand:codex-friendly-project-starter.refreshAgentDocs",
     "onCommand:codex-friendly-project-starter.refreshWorkItems",
     "onCommand:codex-friendly-project-starter.openWorkDashboard",
+    "onCommand:codex-friendly-project-starter.openQcdsStatus",
     "onCommand:codex-friendly-project-starter.initializeIssuesDirectory",
     "onCommand:codex-friendly-project-starter.createLocalIssue",
     "onCommand:codex-friendly-project-starter.openWorkItem",
@@ -65,6 +66,10 @@
       {
         "command": "codex-friendly-project-starter.openWorkDashboard",
         "title": "Codex Starter: Open Work Dashboard"
+      },
+      {
+        "command": "codex-friendly-project-starter.openQcdsStatus",
+        "title": "Codex Starter: Open QCDS Status"
       },
       {
         "command": "codex-friendly-project-starter.initializeIssuesDirectory",

@@ -39,15 +39,18 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Work Items` を開く。
 3. `TODO`、`Issues`、`Release readiness` の group を確認する。
 4. `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
-5. `Ctrl+Shift+P` から `Codex Starter: Initialize Issues Directory` を実行する。
-6. `Ctrl+Shift+P` から `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
-7. `Codex Starter: Refresh Work Items` を実行する。
+5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行する。
+6. `Ctrl+Shift+P` から `Codex Starter: Initialize Issues Directory` を実行する。
+7. `Ctrl+Shift+P` から `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
+8. `Codex Starter: Refresh Work Items` を実行する。
 
 期待結果:
 
 - `TODO.md` の未完了 task が `Work Items` に表示される。
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
 - Dashboard に TODO と Issue の progress bar が表示される。
+- Dashboard に QCDS Current Status と QCDS Improvements が表示される。
+- QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 

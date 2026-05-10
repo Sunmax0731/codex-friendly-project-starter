@@ -14,6 +14,13 @@
 4. 未完了 TODO または Issue を選択すると、該当 Markdown が対象行で開く。
 5. Command Palette から `Codex Starter: Open Work Dashboard` を実行すると、TODO と Issue の進捗を progress bar で確認できる。
 
+## QCDS 状況を確認する
+
+1. Command Palette から `Codex Starter: Open QCDS Status` を実行する。
+2. `QCDS Current Status` で Quality、Cost、Delivery、Satisfaction の grade と score を確認する。
+3. `QCDS Improvements` で QCDS 観点に紐づく未完了 TODO / Issue を確認する。
+4. TODO または Issue に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または Issue metadata に `- QCDS: Delivery, Satisfaction` を追加する。
+
 ## Local Issue を管理する
 
 1. Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。

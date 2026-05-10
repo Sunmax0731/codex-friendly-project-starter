@@ -145,7 +145,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
+    ${metricHtml('QCDS', dashboard.qcds.available ? dashboard.qcds.overallGrade + ' / ' + dashboard.qcds.overallScore : 'missing', dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
   </section>
+  <h2>QCDS Current Status</h2>
+  <div class="list">${dashboard.qcds.available ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
+  <h2>QCDS Improvements</h2>
+  <div class="list">${dashboard.qcds.improvements.length ? dashboard.qcds.improvements.slice(0, 12).map(qcdsImprovementHtml).join('') : '<div class="empty">QCDS に紐づく未完了 TODO / Issue はありません。</div>'}</div>
   <h2>Release Readiness</h2>
   ${dashboard.releaseReadiness.map(readinessHtml).join('')}
   <h2>Open TODO</h2>
@@ -179,6 +184,15 @@ function todoHtml(item) {
 
 function issueHtml(item) {
   return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.type)} / ${item.progress.done}/${item.progress.total}</span></span><span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status)}</span></div>`;
+}
+
+function qcdsDimensionHtml(item) {
+  const cls = item.status === 'pass' ? 'status-pass' : 'status-blocked';
+  return `<div class="row"><span class="pill">${escapeHtml(item.grade)}</span><span>${escapeHtml(item.label)}<br><span class="path">${item.passed}/${item.expected} checks / ${item.linkedItems.length} linked work items</span></span><span class="${cls}">${item.score}</span></div>`;
+}
+
+function qcdsImprovementHtml(item) {
+  return `<div class="row"><span class="pill">${escapeHtml(item.qcdsAxis || item.qcdsAxes.join(','))}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.kind)} / ${escapeHtml(item.priority)}</span></span><span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status)}</span></div>`;
 }
 
 function escapeHtml(value) {

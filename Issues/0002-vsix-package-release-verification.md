@@ -5,6 +5,7 @@
 - Type: release
 - Source: local
 - Created: 2026-05-11
+- QCDS: Delivery, Satisfaction
 
 ## Context
 

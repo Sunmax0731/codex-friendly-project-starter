@@ -44,6 +44,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', () => openQcdsStatus(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
@@ -248,6 +249,19 @@ async function openWorkDashboard(context) {
   panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
 }
 
+async function openQcdsStatus(context) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const panel = vscode.window.createWebviewPanel(
+    'codexFriendlyQcdsStatus',
+    'Codex QCDS Status',
+    vscode.ViewColumn.One,
+    { enableScripts: true, retainContextWhenHidden: false }
+  );
+  const nonce = String(Date.now()) + String(Math.random()).slice(2);
+  panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+}
+
 async function initializeIssuesDirectoryCommand(workItemsProvider) {
   const workspaceRoot = pickWorkspaceRoot();
   const result = ensureIssuesDirectory(workspaceRoot);
@@ -396,6 +410,21 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
     tooltip: item.detail,
     icon: new vscode.ThemeIcon(item.status === 'pass' ? 'pass' : 'warning')
   }));
+  const qcdsDimensions = dashboard.qcds.dimensions.map((dimension) => ({
+    label: dimension.label,
+    description: dimension.grade + ' ' + dimension.score,
+    tooltip: dimension.passed + '/' + dimension.expected + ' checks',
+    filePath: dashboard.qcds.metricsPath,
+    lineNumber: 1,
+    icon: new vscode.ThemeIcon(dimension.status === 'pass' ? 'pass' : 'warning'),
+    children: dimension.linkedItems.filter((item) => !item.done).slice(0, 8).map((item) => ({
+      ...item,
+      label: item.title,
+      description: item.priority + ' ' + item.status,
+      tooltip: item.relativePath,
+      icon: new vscode.ThemeIcon(item.kind === 'issue' ? 'issues' : 'checklist')
+    }))
+  }));
   const prefix = vscode.workspace.workspaceFolders?.length > 1 ? folderName + ' ' : '';
   return [
     {
@@ -409,6 +438,12 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
       description: dashboard.stats.issues.percent + '%',
       children: openIssues,
       icon: new vscode.ThemeIcon('issues')
+    },
+    {
+      label: prefix + 'QCDS ' + (dashboard.qcds.available ? dashboard.qcds.overallGrade + ' ' + dashboard.qcds.overallScore : 'missing'),
+      description: dashboard.qcds.summary.percent + '%',
+      children: qcdsDimensions,
+      icon: new vscode.ThemeIcon('dashboard')
     },
     {
       label: prefix + 'Release readiness',
