@@ -5,7 +5,7 @@ const {
   buildCodexExecScript,
   buildCodexAppScript,
   buildCodexCheckScript,
-  buildCodexExecTerminalCommand,
+  buildPowerShellFileTerminalCommand,
   quotePowerShell
 } = require('../src/codex-cli.cjs');
 
@@ -29,24 +29,25 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     profile: 'default'
   });
   assert.match(script, /Get-Content -LiteralPath/);
-  assert.match(script, /'codex' 'exec'/);
-  assert.match(script, /'-C' 'D:\\AI\\VSCodeExtension\\sample'/);
-  assert.match(script, /'-s' 'read-only'/);
-  assert.match(script, /'-m' 'gpt-5\.4'/);
-  assert.match(script, /'-p' 'default'/);
-  assert.match(script, /'-'$/);
+  assert.match(script, /& 'codex' @codexArgs/);
+  assert.match(script, /'exec'/);
+  assert.match(script, /'-C'/);
+  assert.match(script, /'D:\\AI\\VSCodeExtension\\sample'/);
+  assert.match(script, /'-s'/);
+  assert.match(script, /'read-only'/);
+  assert.match(script, /'-m'/);
+  assert.match(script, /'gpt-5\.4'/);
+  assert.match(script, /'-p'/);
+  assert.match(script, /'default'/);
+  assert.match(script, /'-'/);
 });
 
-test('buildCodexExecTerminalCommand uses encoded PowerShell', () => {
-  const command = buildCodexExecTerminalCommand({
-    cwd: 'D:\\AI',
-    promptFilePath: 'D:\\tmp\\prompt.md'
-  });
-  assert.match(command, /^powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand /);
+test('buildPowerShellFileTerminalCommand launches a visible script file', () => {
+  const command = buildPowerShellFileTerminalCommand('D:\\tmp\\run-codex.ps1');
+  assert.equal(command, "powershell -NoProfile -ExecutionPolicy Bypass -File 'D:\\tmp\\run-codex.ps1'");
 });
 
 test('app and check scripts use the configured CLI command', () => {
   assert.equal(buildCodexAppScript({ cliPath: 'E:\\DevEnv\\codex\\codex.exe' }), "& 'E:\\DevEnv\\codex\\codex.exe' app");
   assert.match(buildCodexCheckScript({ cliPath: 'codex' }), /exec --help/);
 });
-

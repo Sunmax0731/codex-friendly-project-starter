@@ -23,7 +23,16 @@ function buildCodexExecScript(options = {}) {
   if (normalized.model) args.push('-m', normalized.model);
   if (normalized.profile) args.push('-p', normalized.profile);
   args.push('-');
-  return `Get-Content -LiteralPath ${quotePowerShell(options.promptFilePath)} -Raw | & ${quotePowerShell(normalized.cliPath)} ${args.map(quotePowerShell).join(' ')}`;
+  const lines = [
+    `$ErrorActionPreference = 'Stop'`,
+    `$promptFile = ${quotePowerShell(options.promptFilePath)}`,
+    `$codexArgs = @(`,
+    ...args.map((arg) => `  ${quotePowerShell(arg)}`),
+    `)`,
+    `Get-Content -LiteralPath $promptFile -Raw | & ${quotePowerShell(normalized.cliPath)} @codexArgs`,
+    `if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }`
+  ];
+  return lines.join('\n');
 }
 
 function buildCodexAppScript(options = {}) {
@@ -45,8 +54,9 @@ function buildPowerShellTerminalCommand(script) {
   return `powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encoded}`;
 }
 
-function buildCodexExecTerminalCommand(options = {}) {
-  return buildPowerShellTerminalCommand(buildCodexExecScript(options));
+function buildPowerShellFileTerminalCommand(scriptFilePath) {
+  if (!clean(scriptFilePath)) throw new Error('scriptFilePath is required');
+  return `powershell -NoProfile -ExecutionPolicy Bypass -File ${quotePowerShell(scriptFilePath)}`;
 }
 
 function buildCodexAppTerminalCommand(options = {}) {
@@ -71,9 +81,8 @@ module.exports = {
   buildCodexExecScript,
   buildCodexAppScript,
   buildCodexCheckScript,
-  buildCodexExecTerminalCommand,
+  buildPowerShellFileTerminalCommand,
   buildCodexAppTerminalCommand,
   buildCodexCheckTerminalCommand,
   quotePowerShell
 };
-

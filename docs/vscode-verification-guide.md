@@ -92,7 +92,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - VS Code 統合ターミナルに `codex exec` が起動する。
 - FirstPrompt が stdin 経由で Codex Agent に渡る。
-- 生成元 prompt file は extension storage に保存される。
+- 生成元 prompt file と `run-codex-*.ps1` launcher は extension storage に保存される。
+- terminal に prompt 本文そのものが `>>` 継続入力として表示されたり、PowerShell の構文エラーになったりしない。
 
 注意:
 
@@ -134,4 +135,3 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - sandbox mode。
 - `codex exec` が起動した workspace root。
 - 失敗した場合の terminal 出力。
-

@@ -27,7 +27,7 @@ function runVsCodeExtensionGate() {
     check('file-decoration', extension.includes('registerFileDecorationProvider'), 'file decoration provider exists'),
     check('editor-decoration', extension.includes('createTextEditorDecorationType'), 'editor decoration exists'),
     check('agent-doc-scan', extension.includes('scanAgentDocs'), 'agent docs scan wired'),
-    check('codex-exec-terminal', extension.includes('buildCodexExecTerminalCommand') && readText('src/codex-cli.cjs').includes('codex') && readText('src/codex-cli.cjs').includes('exec'), 'Codex exec terminal command exists')
+    check('codex-exec-terminal', extension.includes('buildCodexExecScript') && extension.includes('writeLauncherFile') && readText('src/codex-cli.cjs').includes('@codexArgs'), 'Codex exec launcher command exists')
   ];
   return {
     product: config.product,

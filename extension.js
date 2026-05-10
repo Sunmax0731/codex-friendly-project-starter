@@ -8,7 +8,8 @@ const { buildFirstPrompt } = require('./src/prompt-builder.cjs');
 const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const { renderStarterWebview } = require('./src/webview.cjs');
 const {
-  buildCodexExecTerminalCommand,
+  buildCodexExecScript,
+  buildPowerShellFileTerminalCommand,
   buildCodexAppTerminalCommand,
   buildCodexCheckTerminalCommand
 } = require('./src/codex-cli.cjs');
@@ -128,7 +129,7 @@ async function invokeCodexAgent(context, prompt, sourceLabel) {
     if (answer !== 'Run Codex') return;
   }
   const promptFilePath = await writePromptFile(context, prompt);
-  const command = buildCodexExecTerminalCommand({
+  const launcherScript = buildCodexExecScript({
     cliPath: config.get('codexCliPath', 'codex'),
     cwd,
     promptFilePath,
@@ -136,6 +137,8 @@ async function invokeCodexAgent(context, prompt, sourceLabel) {
     model: config.get('codexModel', ''),
     profile: config.get('codexProfile', '')
   });
+  const launcherFilePath = await writeLauncherFile(context, launcherScript);
+  const command = buildPowerShellFileTerminalCommand(launcherFilePath);
   runTerminalCommand('Codex Agent', command, cwd);
   vscode.window.setStatusBarMessage(`Codex Starter: ${sourceLabel} を Codex CLI に渡しました`, 5000);
 }
@@ -159,6 +162,15 @@ async function writePromptFile(context, prompt) {
   const promptFilePath = path.join(storageRoot, `first-prompt-${stamp}.md`);
   await fs.promises.writeFile(promptFilePath, prompt, 'utf8');
   return promptFilePath;
+}
+
+async function writeLauncherFile(context, script) {
+  const storageRoot = context.storageUri?.fsPath || path.join(os.tmpdir(), 'codex-friendly-project-starter');
+  await fs.promises.mkdir(storageRoot, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  const launcherFilePath = path.join(storageRoot, `run-codex-${stamp}.ps1`);
+  await fs.promises.writeFile(launcherFilePath, script, 'utf8');
+  return launcherFilePath;
 }
 
 function runTerminalCommand(name, command, cwd) {
