@@ -25,11 +25,12 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 13. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
 14. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。
 15. Command Palette から `Codex Starter: Open Project Starter` を実行する。
-16. Webview で分野と進め方を選び、`FirstPrompt を開く`、`クリップボードへコピー`、`Codex CLI で実行` が動くことを確認する。
-17. Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
-18. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
-19. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
-20. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
+16. Webview で分野と進め方を選び、`FirstPrompt を開く`、`VS Code Codexへコピー`、`Codex CLI で実行` が動くことを確認する。
+17. コピーした FirstPrompt を VS Code 右側の Codex パネルへ貼り付け、本文に VS Code Codex / Codex CLI 相当のローカル workspace agent 前提が含まれることを確認する。
+18. Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
+19. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
+20. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
+21. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
 
 詳細な確認項目は docs/vscode-verification-guide.md を参照する。
 

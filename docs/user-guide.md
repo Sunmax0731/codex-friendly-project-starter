@@ -62,13 +62,15 @@ Command Palette から `Codex Starter: Generate FirstPrompt` を実行し、次�
 
 生成された Markdown を Codex への最初の指示として使う。
 
+既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。FirstPrompt 本文には、作業実行が Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先することが明記される。
+
 ## Webview で生成する
 
-Command Palette から `Codex Starter: Open Project Starter` を実行する。選択肢を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。Codex CLI が使える環境では `Codex CLI で実行` からそのまま AI Agent を起動できる。
+Command Palette から `Codex Starter: Open Project Starter` を実行する。選択肢を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
 
 ## AI Agent を起動する
 
-次の2通りを使い分ける。
+主導線は VS Code 内の Codex 拡張 / Codex パネルへ FirstPrompt を貼り付ける方法です。直接実行が必要な場合は次の2通りを使い分ける。
 
 - `Codex Starter: Invoke AI Agent with FirstPrompt`: 選択式に FirstPrompt を作り、そのまま `codex exec` に渡す。
 - `Codex Starter: Invoke AI Agent with Current Prompt`: 現在開いているプロンプト、または選択範囲だけを `codex exec` に渡す。

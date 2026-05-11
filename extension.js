@@ -244,7 +244,7 @@ function openStarterWebview(context) {
     }
     if (message.type === 'copy') {
       await vscode.env.clipboard.writeText(buildFirstPrompt(input));
-      vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied', 4000);
+      vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
     }
   }, undefined, context.subscriptions);
 }

@@ -44,7 +44,7 @@ function renderStarterWebview(nonce) {
   <div class="actions">
     <button id="generate">FirstPrompt を開く</button>
     <button id="runCodex">Codex CLI で実行</button>
-    <button id="copy" class="secondary">クリップボードへコピー</button>
+    <button id="copy" class="secondary">VS Code Codexへコピー</button>
   </div>
   <div id="summary" class="summary"></div>
 </main>

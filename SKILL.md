@@ -16,6 +16,7 @@
 
 - Agent Docs の対象は `AGENTS.md` と `SKILL.md` だけに限定せず、`README.md`、`TODO.md`、`docs/requirements.md`、`docs/specification.md`、`docs/design.md` も同じ初期把握面に出します。
 - FirstPrompt は「分野」と「進め方」を別軸にし、Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行を組み合わせられるようにします。
+- FirstPrompt は VS Code 内の Codex 拡張 / Codex パネルへ貼り付ける運用を主導線にします。`Codex CLI で実行` は同じ内容を `codex exec` へ渡す補助導線です。
 - Webview は選択と生成に限定し、プロンプト生成ロジックはテスト可能な `src/prompt-builder.cjs` に置きます。
 - AI Agent 起動は `codex exec` への terminal command 生成に限定し、プロンプトは一時 Markdown に保存して stdin 経由で渡します。
 - 文字化け検査は code point ベースで行い、典型的な文字化け断片を検査コードに直書きしません。

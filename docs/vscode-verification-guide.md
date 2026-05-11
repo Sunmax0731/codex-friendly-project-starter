@@ -82,11 +82,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Codex Starter: Generate FirstPrompt` を実行する。
 3. 分野、ガバナンス、工程、進行を選ぶ。
 4. Repo 名と目的を入力する。
+5. 生成された FirstPrompt に `VS Code 内の Codex 拡張 / Codex パネル` と `Codex CLI 相当のローカル workspace agent` の前提が含まれることを確認する。
 
 期待結果:
 
 - untitled Markdown が開く。
 - 選んだ分野と進め方が本文に入る。
+- VS Code の Codex パネルに貼り付ける前提が本文に入る。
 - `README.md`、`AGENTS.md`、`SKILL.md` の確認順、QCDS、runtime gate、完了条件が入る。
 
 ## 4. Webview 生成
@@ -97,13 +99,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Codex Starter: Open Project Starter` を実行する。
 3. Webview で分野、ガバナンス、工程、進行を切り替える。
 4. `FirstPrompt を開く` を押す。
-5. `クリップボードへコピー` を押し、任意のエディタへ貼り付ける。
+5. `VS Code Codexへコピー` を押し、右側の Codex パネルへ貼り付ける。
 
 期待結果:
 
 - Webview の summary が選択内容に応じて更新される。
 - FirstPrompt が Markdown として開く。
-- クリップボードへ同じ内容をコピーできる。
+- クリップボードへ同じ内容をコピーでき、VS Code の Codex パネルへ貼り付けられる。
 
 ## 5. Codex CLI 確認
 
@@ -121,7 +123,22 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - Settings で `codexFriendlyProjectStarter.codexCliPath` に `codex` または `C:\Users\<user>\AppData\Roaming\npm\codex.ps1` などの実パスを設定する。
 
-## 6. 生成プロンプトで AI Agent を起動
+## 6. 生成プロンプトを VS Code Codex へ渡す
+
+手順:
+
+1. `Codex Starter: Open Project Starter` または `Codex Starter: Generate FirstPrompt` で FirstPrompt を生成する。
+2. `VS Code Codexへコピー` または editor からの copy で FirstPrompt をクリップボードへ入れる。
+3. VS Code 右側の Codex パネルへ貼り付ける。
+4. Codex が workspace、branch、remote、TODO、docs を確認しながら作業を始めることを確認する。
+
+期待結果:
+
+- Codex パネル側で、作業環境を VS Code workspace として扱う。
+- Codex Desktop / Codex App 固有の操作を前提にしない。
+- 必要な terminal / git / docs 確認は VS Code 内で進む。
+
+## 7. 生成プロンプトで Codex CLI を直接起動
 
 手順:
 
@@ -145,7 +162,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - まず挙動確認だけをしたい場合は Settings で `codexFriendlyProjectStarter.codexSandboxMode` を `read-only` にする。
 - FirstPrompt が `D:\AI\ChromeExtension\movie-loop-tool` など現在の starter repo 外を対象にする場合、確認ダイアログの workspace root が `D:\AI\ChromeExtension` など対象 repo の親ディレクトリになっていることを確認する。
 
-## 7. 現在のプロンプトで AI Agent を起動
+## 8. 現在のプロンプトで Codex CLI を直接起動
 
 手順:
 
@@ -160,7 +177,9 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 統合ターミナルで Codex Agent が起動する。
 - 文書全体の FirstPrompt を渡した場合、target repo path が抽出され、対象 domain の既存親ディレクトリが `-C` root になる。
 
-## 8. Codex App 起動
+## 9. Codex App 起動
+
+この導線は補助用です。通常の作業依頼は VS Code 内の Codex 拡張 / Codex パネルへ FirstPrompt を渡す。
 
 手順:
 
@@ -172,7 +191,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 統合ターミナルで `codex app` が実行される。
 - Codex desktop app が起動、または CLI が案内を表示する。
 
-## 9. 確認後の記録
+## 10. 確認後の記録
 
 確認が終わったら次を記録する。
 
@@ -180,4 +199,5 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `codexFriendlyProjectStarter.codexCliPath` の設定値。
 - sandbox mode。
 - `codex exec` が起動した workspace root。
+- VS Code Codex パネルへ貼り付けた FirstPrompt の対象 repo。
 - 失敗した場合の terminal 出力。

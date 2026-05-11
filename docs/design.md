@@ -53,8 +53,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - 分野、ガバナンス、工程、進行の4つの select を配置する。
 - Repo 名と目的を任意入力にする。
-- `FirstPrompt を開く` と `クリップボードへコピー` を提供する。
-- Codex CLI が使える環境向けに `Codex CLI で実行` を提供する。
+- `FirstPrompt を開く` と `VS Code Codexへコピー` を提供する。
+- 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。
+- Codex CLI を直接使う環境向けに `Codex CLI で実行` も提供する。
 
 ## 状態
 

@@ -15,6 +15,7 @@
       "expectedContains": [
         "Web アプリ",
         "Issue駆動",
+        "VS Code 内の Codex 拡張",
         "リリースまで一気に進める",
         "headless browser",
         "docs/qcds-strict-metrics.json"
@@ -60,4 +61,3 @@
     }
   ]
 }
-

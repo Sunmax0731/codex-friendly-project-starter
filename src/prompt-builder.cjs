@@ -18,6 +18,13 @@ function buildFirstPrompt(input = {}) {
     '',
     `対象分野は ${domain.label} です。プロジェクト \`${projectName}\` を \`${repoPath}\` で開始または継続し、目的「${goal}」を満たすところまで進めてください。`,
     '',
+    '## 実行環境の前提',
+    '',
+    '- このプロンプトは VS Code 内の Codex 拡張 / Codex パネルへ渡される前提です。',
+    '- 作業実行は Codex CLI 相当のローカル workspace agent として進め、VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先してください。',
+    '- Codex Desktop / Codex App 固有の操作を前提にせず、VS Code で開いている workspace と terminal で確認できる状態を根拠にしてください。',
+    '- 拡張側から `codex exec` を直接起動された場合も、同じ完了条件と報告形式で進めてください。',
+    '',
     '## 最初に確認すること',
     '',
     `- 共通ルートは \`D:\\AI\` です。新しい基準パスとして \`D:\\Claude\` を再導入しないでください。`,
@@ -82,4 +89,3 @@ function clean(value) {
 }
 
 module.exports = { buildFirstPrompt, buildPromptInputSummary };
-

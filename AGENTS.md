@@ -8,6 +8,7 @@
 - 変更は VS Code Extension の範囲に閉じ、他の `D:\AI\VSCodeExtension` repo には混ぜません。
 - 主要ロジックは `src/` に置き、`extension.js` は VS Code API への薄い接続に保ちます。
 - FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
+- FirstPrompt の実行前提は VS Code 内の Codex 拡張 / Codex パネルです。`codex exec` 直接起動は補助導線として扱います。
 - Codex CLI 呼び出しを変更する場合は、`src/codex-cli.cjs`、`tests/codex-cli.test.cjs`、`docs/vscode-verification-guide.md` を同時に更新します。
 - TODO / Issue 可視化を変更する場合は、`src/work-items.cjs`、`src/webview.cjs`、`tests/work-items.test.cjs`、`docs/vscode-verification-guide.md`、`Issues/README.md` を同時に確認します。
 - Markdown WebView を変更する場合は、`src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs`、`docs/manual-test.md` を同時に確認します。

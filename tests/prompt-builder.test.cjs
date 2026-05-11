@@ -35,6 +35,8 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
   assert.match(prompt, /Issue駆動/);
   assert.match(prompt, /リリースまで一気に進める/);
   assert.match(prompt, /MV3 manifest/);
+  assert.match(prompt, /VS Code 内の Codex 拡張 \/ Codex パネル/);
+  assert.match(prompt, /Codex CLI 相当のローカル workspace agent/);
   assert.match(prompt, /docs\/qcds-strict-metrics\.json/);
   assert.match(prompt, /git status --short --branch/);
 });
@@ -60,4 +62,3 @@ test('summary is concise and user-facing', () => {
   });
   assert.equal(summary, 'VS Code 拡張 / TDD / 工程ごとに進める / 調査優先');
 });
-

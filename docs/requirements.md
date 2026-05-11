@@ -22,8 +22,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、工程、進行速度を選択して FirstPrompt を生成する。
-- 生成結果を untitled Markdown で開き、Webview からはクリップボードにもコピーできる。
-- Codex CLI が利用できる環境では、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡せる。
+- 生成結果を untitled Markdown で開き、Webview からは VS Code 内の Codex パネルへ貼り付けるためにコピーできる。
+- 生成 FirstPrompt は、VS Code 内の Codex 拡張 / Codex パネルで Codex CLI 相当のローカル workspace agent として作業する前提を含む。
+- Codex CLI を直接利用したい環境では、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡せる。
 - Codex CLI の存在確認と Codex App 起動導線を Command Palette から呼べる。
 - AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension を最低限サポートする。
 - QCDS、platform runtime gate、docs ZIP、代表シナリオを検証できる。
