@@ -211,7 +211,7 @@ function parseIssueMetadata(lines) {
     const match = bullet || colon;
     if (!match) continue;
     const key = match[1].toLowerCase().replace(/\s+/g, '');
-    if (['id', 'status', 'priority', 'type', 'source', 'draftsource', 'created', 'qcds', 'phase', 'tasks', 'evidence'].includes(key)) metadata[key] = match[2].trim();
+  if (['id', 'status', 'priority', 'type', 'source', 'draftsource', 'created', 'qcds', 'phase', 'tasks', 'evidence', 'githubissue'].includes(key)) metadata[key] = match[2].trim();
   }
   return metadata;
 }
@@ -643,6 +643,7 @@ function createIssueMarkdown(input = {}) {
   const phase = input.phase || '';
   const created = input.created || new Date().toISOString().slice(0, 10);
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
+  const githubIssue = formatGitHubIssueLink(input);
   const tasks = Array.isArray(input.tasks) ? input.tasks : [];
   const context = input.context || '背景、目的、制約をここに記録します。';
   const acceptance = Array.isArray(input.acceptance) && input.acceptance.length
@@ -659,6 +660,7 @@ function createIssueMarkdown(input = {}) {
     phase ? '- Phase: ' + phase : '',
     '- Created: ' + created,
     qcds ? '- QCDS: ' + qcds : '',
+    githubIssue ? '- GitHub Issue: ' + githubIssue : '',
     tasks.length ? '- Tasks: ' + tasks.map((item) => {
       if (typeof item === 'object' && item) return `[${item.label || item.href}](${item.href || item.label})`;
       return `[${item}](${item})`;
@@ -686,6 +688,7 @@ function createTaskMarkdown(input = {}) {
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const source = input.source || 'local';
   const draftSource = input.draftSource || input.inferenceSource || '';
+  const githubIssue = formatGitHubIssueLink(input);
   const acceptance = Array.isArray(input.acceptance) && input.acceptance.length ? input.acceptance : ['完了条件をここに記録します。'];
   const issue = input.issue || '';
   return [
@@ -699,6 +702,7 @@ function createTaskMarkdown(input = {}) {
     '- Phase: ' + phase,
     issue ? '- Issue: [' + issue + '](' + issue + ')' : '',
     qcds ? '- QCDS: ' + qcds : '',
+    githubIssue ? '- GitHub Issue: ' + githubIssue : '',
     '',
     '## Acceptance Criteria',
     '',
@@ -708,6 +712,13 @@ function createTaskMarkdown(input = {}) {
     '',
     '- [ ] 実施結果と証跡を関連 docs に反映する。'
   ].filter((line, index, lines) => line !== '' || lines[index - 1] !== '').join('\n') + '\n';
+}
+
+function formatGitHubIssueLink(input = {}) {
+  const url = input.githubIssueUrl || '';
+  if (!url) return '';
+  const number = input.githubIssueNumber ? '#' + input.githubIssueNumber : 'GitHub Issue';
+  return `[${number}](${url})`;
 }
 
 function defaultIssuesReadme() {

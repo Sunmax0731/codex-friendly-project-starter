@@ -47,6 +47,18 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 詳細な確認項目は docs/vscode-verification-guide.md を参照する。
 
+## GitHub Issues 取込の手動確認
+
+前提: インターネット接続があり、public GitHub repository を指定できること。認証は必須ではないが、rate limit を避けたい場合は `gh auth status` が通る環境で確認する。
+
+1. Extension Development Host で対象 workspace を開く。
+2. `Codex Work Dashboard` の日常操作から `GitHub Issues 取込` を押すか、Command Palette から `Codex Starter: Import GitHub Issues` を実行する。
+3. 入力欄に `owner/repo` または `https://github.com/owner/repo` を入れる。workspace の `git remote -v` が GitHub を指す場合は既定値が補完されることを確認する。
+4. QuickPick に open GitHub Issues が表示され、複数選択できることを確認する。既に取り込まれた issue は `imported` と表示される。
+5. 1 件以上を選択して import し、`Issues/*.md`、`Tasks/*.md`、`TODO.md` が作成または更新されることを確認する。
+6. 作成された local Issue、local Task、TODO のすべてに GitHub Issue 個別リンクが残っていることを確認する。
+7. 同じ GitHub Issue を再度 import しようとしても重複した Issue / Task が作成されないことを確認する。
+
 ## Codex 側の実施状況
 
 - 自動テスト、QCDS、platform runtime gate、docs ZIP 生成は `npm test` で確認する。

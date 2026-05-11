@@ -24,4 +24,5 @@ v0.1.0 は開発モードで利用する MVP です。Marketplace 公開、VSIX 
 
 - `Start Selected Work Items with Codex` が Dashboard checkbox と Command Palette multi-select の両方で動作する。
 - Work Item Start 系の model / インテリジェンス選択が prompt と `codex exec` 引数に反映される。
+- `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue / Task に変換し、GitHub Issue URL と重複防止を保持する。
 - `Codex Starter: Check Codex CLI` が VS Code 内 PowerShell で `rg.exe`、`gh.exe`、`gh auth status` を確認する。

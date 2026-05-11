@@ -42,6 +42,7 @@
     "onCommand:codex-friendly-project-starter.createLocalTask",
     "onCommand:codex-friendly-project-starter.openWorkItemComposer",
     "onCommand:codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
+    "onCommand:codex-friendly-project-starter.importGitHubIssues",
     "onCommand:codex-friendly-project-starter.openAgentDoc",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
@@ -171,6 +172,11 @@
         "icon": "$(sparkle)"
       },
       {
+        "command": "codex-friendly-project-starter.importGitHubIssues",
+        "title": "Codex Starter: Import GitHub Issues",
+        "icon": "$(github)"
+      },
+      {
         "command": "codex-friendly-project-starter.openAgentDoc",
         "title": "Codex Starter: Open Agent Doc",
         "icon": "$(go-to-file)"
@@ -255,24 +261,29 @@
           "group": "navigation@2"
         },
         {
-          "command": "codex-friendly-project-starter.refreshWorkItems",
+          "command": "codex-friendly-project-starter.importGitHubIssues",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@3"
         },
         {
-          "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
+          "command": "codex-friendly-project-starter.refreshWorkItems",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@4"
         },
         {
-          "command": "codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
+          "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@5"
         },
         {
-          "command": "codex-friendly-project-starter.refreshAll",
+          "command": "codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@6"
+        },
+        {
+          "command": "codex-friendly-project-starter.refreshAll",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@7"
         }
       ],
       "view/item/context": [
@@ -320,7 +331,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {
@@ -415,6 +426,13 @@
           "type": "boolean",
           "default": true,
           "description": "Use Codex CLI read-only inference when reflecting natural language into Work Item Composer fields."
+        },
+        "codexFriendlyProjectStarter.githubIssueImportLimit": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Maximum number of public GitHub Issues to fetch in one import operation."
         },
         "codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs": {
           "type": "number",

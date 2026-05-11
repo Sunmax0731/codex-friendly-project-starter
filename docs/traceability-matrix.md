@@ -10,6 +10,7 @@
 | local Task を管理する | `src/work-items.cjs`, `extension.js`, `Tasks/README.md` | `tests/work-items.test.cjs`, `Tasks/*.md` |
 | GUI で Issue / Task を作成する | `src/work-item-composer.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
 | 自然言語から Issue / Task を下書きする | `src/work-item-composer.cjs`, `src/codex-work-item-draft.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
+| GitHub Issues を local TODO / Issue / Task に取り込む | `src/github-issues.cjs`, `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/github-issues.test.cjs`, `tests/work-items.test.cjs`, `Issues/0012-github-issues-import.md` |
 | Issue / Task 作成時に TODO へ同期する | `src/work-items.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
 | Issue / Task の分類を拡張する | `src/work-item-composer.cjs`, `src/work-items.cjs` | `tests/work-items.test.cjs` |
 | TODO / Issue / Task から Codex に着手する | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |

@@ -12,6 +12,7 @@
 - [ ] `tools/vsix-readiness.mjs` が package metadata、docs、必須 command を確認する。
 - [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / Task / release readiness を確認する。
 - [ ] `Start Selected Work Items` と `Start All Work Items` の model / インテリジェンス選択を確認する。
+- [ ] `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue / Task に取り込み、GitHub Issue URL を保持することを確認する。
 - [ ] `Codex Starter: Check Codex CLI` で `rg.exe`、`gh.exe`、`gh auth status` の確認手順が残っている。
 - [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。
 - [ ] `Open Markdown WebView` で AGENTS / SKILL / TODO / Issues / Tasks / docs のリンク遷移を確認する。

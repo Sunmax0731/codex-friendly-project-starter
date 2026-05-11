@@ -53,6 +53,14 @@ const {
   buildCodexWorkItemDraftPrompt,
   parseCodexWorkItemDraftOutput
 } = require('./src/codex-work-item-draft.cjs');
+const {
+  parseGitHubRepository,
+  repositoryFromGitRemoteOutput,
+  fetchGitHubIssues,
+  buildGitHubIssueImportInput,
+  findExistingGitHubIssueImport,
+  createLocalWorkItemsFromGitHubIssue
+} = require('./src/github-issues.cjs');
 
 const execFileAsync = promisify(execFile);
 let lastMarkdownWebview = null;
@@ -93,6 +101,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeTasksDirectory', () => initializeTasksDirectoryCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.importGitHubIssues', () => importGitHubIssuesCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
     vscode.commands.registerCommand('codex-friendly-project-starter.createWorkItemFromNaturalLanguage', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand(context)),
@@ -551,6 +560,11 @@ async function handleDashboardMessage(args) {
     openWorkItemComposer(context, workItemsProvider, message.mode || 'linked');
     return;
   }
+  if (message?.type === 'importGitHubIssues') {
+    await importGitHubIssuesCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
   if (message?.type === 'openQcdsStatus') {
     openQcdsStatus(context, treeProvider, workItemsProvider);
     return;
@@ -647,6 +661,95 @@ function createLocalTaskCommand(context, workItemsProvider) {
   openWorkItemComposer(context, workItemsProvider, 'task');
 }
 
+async function importGitHubIssuesCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const detected = await detectGitHubRepository(workspaceRoot);
+  const repositoryInput = await vscode.window.showInputBox({
+    prompt: '取り込む GitHub repository (owner/repo または GitHub URL)',
+    value: detected?.fullName || '',
+    placeHolder: 'Sunmax0731/example-repo'
+  });
+  if (repositoryInput === undefined) return;
+  const repository = parseGitHubRepository(repositoryInput);
+  if (!repository) {
+    vscode.window.showWarningMessage('Codex Starter: GitHub repository を owner/repo 形式で指定してください。');
+    return;
+  }
+  const limit = Math.max(1, Math.min(100, Number(config.get('githubIssueImportLimit', 30)) || 30));
+  let remoteIssues;
+  try {
+    remoteIssues = await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: `GitHub Issues を取得しています: ${repository.fullName}`,
+      cancellable: false
+    }, () => fetchGitHubIssues(repository, { state: 'open', limit }));
+  } catch (error) {
+    vscode.window.showErrorMessage('Codex Starter: GitHub Issues を取得できませんでした: ' + String(error?.message || error).slice(0, 180));
+    return;
+  }
+  if (!remoteIssues.length) {
+    vscode.window.showInformationMessage(`Codex Starter: ${repository.fullName} に open GitHub Issue はありません。`);
+    return;
+  }
+  const selected = await vscode.window.showQuickPick(remoteIssues.map((issue) => {
+    const existing = findExistingGitHubIssueImport(workspaceRoot, issue);
+    return {
+      label: `#${issue.number} ${issue.title}`,
+      description: existing ? 'imported' : (issue.labels || []).join(', '),
+      detail: existing ? `既に取り込み済み: ${existing.relativePath}` : issue.url,
+      picked: !existing,
+      issue,
+      existing
+    };
+  }), {
+    canPickMany: true,
+    placeHolder: 'ローカル TODO / Issues / Tasks に取り込む GitHub Issue を選択'
+  });
+  const targets = (selected || []).filter((item) => !item.existing).map((item) => item.issue);
+  if (!targets.length) {
+    vscode.window.showInformationMessage('Codex Starter: 新しく取り込む GitHub Issue はありません。');
+    return;
+  }
+  const imported = [];
+  await vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: `GitHub Issues をローカル Work Items に取り込んでいます (${targets.length})`,
+    cancellable: false
+  }, async (progress) => {
+    for (const issue of targets) {
+      progress.report({ message: `#${issue.number} ${issue.title}` });
+      const input = buildGitHubIssueImportInput(issue);
+      const result = await inferWorkItemDraftWithCodex(context, input, workspaceRoot);
+      const draft = {
+        ...result.draft,
+        draftSource: result.source,
+        inferenceSource: result.source
+      };
+      imported.push(createLocalWorkItemsFromGitHubIssue(workspaceRoot, issue, draft));
+    }
+  });
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+  const created = imported.filter((item) => item.created);
+  vscode.window.setStatusBarMessage(`Codex Starter: GitHub Issues ${created.length}件を TODO / Issues / Tasks に取り込みました`, 7000);
+  if (created[0]?.issuePath) await openMarkdownWebview(context, created[0].issuePath);
+}
+
+async function detectGitHubRepository(workspaceRoot) {
+  try {
+    const { stdout } = await execFileAsync('git', ['remote', '-v'], {
+      cwd: workspaceRoot,
+      windowsHide: true,
+      timeout: 10000,
+      maxBuffer: 256 * 1024
+    });
+    return repositoryFromGitRemoteOutput(stdout);
+  } catch {
+    return undefined;
+  }
+}
+
 function openWorkItemComposer(context, workItemsProvider, mode = 'linked') {
   const panel = vscode.window.createWebviewPanel(
     'codexFriendlyWorkItemComposer',
@@ -676,12 +779,12 @@ function openWorkItemComposer(context, workItemsProvider, mode = 'linked') {
   }, undefined, context.subscriptions);
 }
 
-async function inferWorkItemDraftWithCodex(context, input) {
+async function inferWorkItemDraftWithCodex(context, input, workspaceRootOverride) {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   if (!config.get('useCodexForWorkItemInference', true)) {
     return { source: 'local', draft: { ...inferWorkItemDraft(input), inferenceSource: 'local' } };
   }
-  const workspaceRoot = pickWorkspaceRoot();
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
   const prompt = buildCodexWorkItemDraftPrompt(input, { workspaceRoot });
   const promptFilePath = await writeStorageFile(context, 'work-item-draft-prompt', '.md', prompt);
   const schemaFilePath = await writeStorageFile(context, 'work-item-draft-schema', '.json', JSON.stringify(WORK_ITEM_DRAFT_JSON_SCHEMA, null, 2) + '\n');

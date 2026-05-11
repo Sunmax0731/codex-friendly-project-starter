@@ -61,6 +61,11 @@
       "detail": "Work Item Composer and Tasks init commands exist"
     },
     {
+      "id": "github-issue-import-command",
+      "pass": true,
+      "detail": "GitHub Issues import command and dashboard action exist"
+    },
+    {
       "id": "work-item-start-command",
       "pass": true,
       "detail": "Single, selected, and all Work Item Start commands exist"
@@ -129,6 +134,11 @@
       "id": "codex-work-item-draft",
       "pass": true,
       "detail": "Codex CLI work item draft inference exists"
+    },
+    {
+      "id": "github-issue-import-contract",
+      "pass": true,
+      "detail": "GitHub Issues import normalizes remote issues into local TODO, Issue, and Task"
     },
     {
       "id": "markdown-webview",

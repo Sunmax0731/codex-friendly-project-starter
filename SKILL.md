@@ -26,6 +26,7 @@
 - Work Item Composer の自然言語反映は Codex CLI の read-only `codex exec` を優先し、JSON 解析失敗や timeout 時だけローカル heuristic にフォールバックします。
 - VS Code 内 PowerShell で起動する Codex は環境 PATH が不足することがあるため、`src/codex-cli.cjs` のランチャで Codex bundled `rg.exe` と `E:\DevEnv\GitHubCLI` などを先頭追加し、`Check Codex CLI` で `rg.exe` / `gh.exe` / `gh auth status` を確認します。
 - TODO / Issue / Task を Codex に渡す導線は、単一、複数選択、全件の 3 種を保ち、いずれもモデルとインテリジェンス選択を起動前に通します。
+- GitHub Issues 取込は public repository の読み取り専用 import とし、GitHub Issue URL を TODO / Issue / Task のすべてに残します。実装変更時は `tests/github-issues.test.cjs` と README / manual / user guide / release gate を同時に更新します。
 - Markdown WebView は `source` を直接開く代替ではなく、work item と docs のリンク遷移を一画面で追える確認面として扱います。
 - 工程別 Skill 生成では、ルート `SKILL.md` に Phase Skills のリンクを置き、`skills/01-requirements` から `skills/06-release` までを読み込み先にします。
 

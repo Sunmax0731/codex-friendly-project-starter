@@ -15,6 +15,7 @@
 - Markdown WebView を変更する場合は、`src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs`、`docs/manual-test.md` を同時に確認します。
 - `D:\AI` 既定 docs 生成を変更する場合は、`src/default-docs.cjs`、`tests/default-docs.test.cjs`、`docs/user-guide.md`、`docs/traceability-matrix.md` を同時に確認します。
 - Task 管理を変更する場合は、`Tasks/*.md`、`Issues/*.md`、`TODO.md` のリンクを同じ変更でそろえます。
+- GitHub Issues 取込を変更する場合は、`src/github-issues.cjs`、`extension.js`、`src/work-items.cjs`、`tests/github-issues.test.cjs`、README / manual / user guide を同時に更新し、GitHub Issue URL の重複防止と local TODO / Issue / Task のリンクを確認します。
 - QCDS 可視化を変更する場合は、`docs/qcds-strict-metrics.json`、`docs/qcds-evaluation.md`、`TODO.md`、`Issues/*.md` の `QCDS:` 紐づけを同時に確認します。
 - 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
 - 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。

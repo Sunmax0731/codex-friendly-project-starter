@@ -69,6 +69,14 @@
 - Dashboard checkbox と Command Palette multi-select から選択 Work Items だけを Codex に渡せるようにする。
 - README、manual test、user guide、VSIX readiness、QCDS / traceability を同期する。
 
+## Phase 3.11: GitHub Issues 取込
+
+- `src/github-issues.cjs` を追加し、public GitHub repository 入力、remote URL 解析、Issues API 取得、PR 除外、GitHub Issue 正規化を担当させる。
+- Dashboard と Command Palette に `GitHub Issues 取込` を追加し、GitHub Issue を複数選択して取り込めるようにする。
+- 選択 issue は Codex CLI read-only inference に渡し、local Issue + Task の下書きに整えて `TODO.md` に linked checkbox を追加する。
+- GitHub Issue URL が既に `TODO.md` / `Issues` / `Tasks` にある場合は import 済みとして重複作成しない。
+- tests、platform runtime gate、VSIX readiness gate、manual/user/release docs を更新する。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

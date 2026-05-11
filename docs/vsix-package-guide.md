@@ -51,6 +51,7 @@ code
 - `Codex Starter: Open Work Dashboard` と `Codex Starter: Open QCDS Status` が表示できる。
 - Dashboard で `選択Work Itemを開始` と `全Work Itemを開始` が表示される。
 - Work Item Start 前に model とインテリジェンスの選択が表示される。
+- Dashboard または Command Palette で `GitHub Issues 取込` が表示され、public GitHub Issue を local TODO / Issue / Task へ取り込める。
 - `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 
 ## 記録

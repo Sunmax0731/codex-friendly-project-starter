@@ -258,6 +258,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     <div class="action-heading">プロジェクト進行中に使う操作</div>
     <div class="actions">
       <button class="action" data-action="openComposer" data-mode="linked">自然言語から Issue + Task</button>
+      <button class="action" data-action="importGitHubIssues">GitHub Issues 取込</button>
       <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
       <button class="action" data-action="openComposer" data-mode="task">Task を作成</button>
       <button class="action secondary" data-action="openStarter">FirstPrompt</button>

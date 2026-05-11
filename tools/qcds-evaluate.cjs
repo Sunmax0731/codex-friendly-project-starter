@@ -26,7 +26,8 @@ const product = {
     'src/codex-cli.cjs',
     'src/invocation-target.cjs',
     'src/prompt-history.cjs',
-    'src/idea-candidates.cjs'
+    'src/idea-candidates.cjs',
+    'src/github-issues.cjs'
   ],
   testFiles: [
     'tests/prompt-builder.test.cjs',
@@ -39,6 +40,7 @@ const product = {
     'tests/invocation-target.test.cjs',
     'tests/prompt-history.test.cjs',
     'tests/idea-candidates.test.cjs',
+    'tests/github-issues.test.cjs',
     'samples/representative-suite.json'
   ]
 };
@@ -186,6 +188,7 @@ function commandContract() {
     'codex-friendly-project-starter.createLocalTask',
     'codex-friendly-project-starter.openWorkItemComposer',
     'codex-friendly-project-starter.createWorkItemFromNaturalLanguage',
+    'codex-friendly-project-starter.importGitHubIssues',
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem',
     'codex-friendly-project-starter.startWorkItemWithCodex',

@@ -25,6 +25,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の checkbox または Command Palette の複数選択から、選択した TODO / Issue / Task だけを Codex CLI に渡して着手できる。
 - Dashboard または Command Palette から、未完了 TODO / Issues / Tasks を優先度順に連結した一括開始プロンプトを Codex CLI に渡せる。
 - TODO / Issue / Task を Codex CLI に渡す前に、使用モデルとインテリジェンスを選択でき、選択値を `codex exec` と開始プロンプトに反映できる。
+- public GitHub repository の open Issues を取得し、選択した GitHub Issue を Codex CLI read-only inference で整理して `TODO.md`、`Issues/*.md`、`Tasks/*.md` に取り込める。
+- GitHub Issues 取込では、自由フォーマットの GitHub Issue 本文を local format の context / acceptance criteria へ再構成し、TODO / Issue / Task のすべてに GitHub Issue 個別リンクを残す。
+- 同じ GitHub Issue URL が既に local TODO / Issue / Task に存在する場合、重複した local work item を作成しない。
 - VS Code 内 PowerShell から拡張が起動する Codex セッションで、`rg.exe` と `gh.exe` の候補ディレクトリを `PATH` に追加し、`Codex Starter: Check Codex CLI` で検出と `gh auth status` を確認できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / Task を可視化する。
@@ -46,7 +49,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 ## 対象外
 
 - OpenAI API の直接実行。
-- GitHub Issue の自動作成や自動更新。local Issue Markdown は repo 内の `Issues` ディレクトリに限定する。
+- GitHub Issue の自動作成、自動更新、close、コメント投稿。GitHub Issues 取込は public repository の読み取り専用 import に限定する。
 - VSIX Marketplace 公開。VSIX package と local install の手動確認手順は docs に残す。
 - ユーザー固有テンプレートの永続化。
 
@@ -62,5 +65,6 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Work Item の `Start` が、選択 work item と関連 Issue / Task を含む開始プロンプトを `codex exec` に渡せる。
 - `Start Selected Work Items` が、選択した TODO / Issue / Task だけを含む開始プロンプトを `codex exec` に渡せる。
 - `Start All Work Items` が、未完了 TODO / Issue / Task の件数、優先度、QCDS、release readiness を含む一括開始プロンプトを `codex exec` に渡せる。
+- `GitHub Issues 取込` が public GitHub Issue を複数選択で取り込み、GitHub Issue URL 付きの TODO / Issue / Task を作成し、重複 import を防げる。
 - Work Item Start の起動前にモデルとインテリジェンスを選択でき、`rg.exe` と `gh.exe` が PATH 補強後に解決される。
 - FirstPrompt と Work Item Start Prompt に Git 書き込み方針が含まれる。

@@ -11,6 +11,7 @@
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
 - `src/work-item-start.cjs`: TODO / Issue / Task を Codex CLI へ渡す開始プロンプト生成。
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
+- `src/github-issues.cjs`: public GitHub Issues の取得、repository 入力の正規化、GitHub Issue URL による重複検出、local TODO / Issue / Task 作成。
 - `src/codex-cli.cjs`: Codex CLI に渡す PowerShell command と terminal command 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
 - `tools/`: QCDS、runtime gate、docs ZIP、closed alpha guard。
@@ -22,6 +23,8 @@ VS Code API は `extension.js` に閉じ、生成ロジックとスキャンロ�
 Codex CLI 呼び出しも VS Code API から分離し、`src/codex-cli.cjs` で launcher script と command string を生成する。拡張本体は一時 prompt file と `.ps1` launcher の作成、実行前確認、terminal 起動または background 実行だけを担当する。launcher は Windows PowerShell 5 系でも日本語が壊れないように、console encoding と `$OutputEncoding` を UTF-8 にしてから prompt を stdin へ流す。
 
 Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` が JSON 専用 prompt と JSON schema を作り、拡張本体が `codex exec -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を background 実行して last-message file から JSON を取り出す。Codex CLI の失敗、timeout、JSON 不正時は `src/work-item-composer.cjs` のローカル補完に戻す。
+
+GitHub Issues 取込は `src/github-issues.cjs` が public GitHub Issues API と local work item 書き込みの境界を担当する。拡張本体は repository 入力、issue 選択、進捗表示、Codex inference 呼び出しだけを担い、GitHub Issue の内容を local `Issues/*.md` / `Tasks/*.md` / `TODO.md` に書く処理は helper に閉じ込める。GitHub 側への書き込みは行わない。
 
 Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` の結果へ解決し、`src/work-item-start.cjs` が selected Markdown と関連 Issue / Task を含む開始プロンプトに変換する。実行は既存の `invokeCodexAgent` を再利用し、確認ダイアログ、sandbox mode、model/profile 設定を共通化する。
 

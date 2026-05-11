@@ -63,6 +63,15 @@
 7. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
 8. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` で Tree View を更新する。
 
+## GitHub Issues 取込
+
+1. public GitHub repository を指定できる workspace を開く。
+2. Dashboard の `GitHub Issues 取込`、Work Items title action、または Command Palette の `Codex Starter: Import GitHub Issues` を実行する。
+3. `owner/repo` または GitHub URL を入力する。現在の Git remote が GitHub の場合は repository 名が既定値として入る。
+4. QuickPick で取り込む GitHub Issue を複数選択する。既に同じ URL が local TODO / Issue / Task にある item は `imported` として表示される。
+5. 選択した issue は Codex CLI read-only inference で title、priority、type、phase、QCDS、acceptance criteria に整理され、`Issues/*.md` と `Tasks/*.md`、`TODO.md` に作成される。
+6. 取り込まれた local Issue / Task / TODO には GitHub Issue の個別リンクが残る。GitHub 側の issue は作成、編集、close されない。
+
 ## Local Task を管理する
 
 1. Dashboard の `Task を作成`、または Command Palette から `Codex Starter: Create Local Task` を実行する。
@@ -146,6 +155,7 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
 - `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションで PATH 先頭に追加するディレクトリ。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
+- `codexFriendlyProjectStarter.githubIssueImportLimit`: GitHub Issues 取込で一度に取得する open issue 件数。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。

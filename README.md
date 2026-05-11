@@ -14,6 +14,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - QCDS Status: `docs/qcds-strict-metrics.json` の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。
 - Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md`、`Tasks/*.md`、または Issue + Task のペアを作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。
+- GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md`、`Issues/*.md`、`Tasks/*.md` に取り込みます。取り込んだ local Issue / Task / TODO には GitHub Issue の個別リンクを残します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Local Tasks: `Tasks/*.md` を具体作業の実施単位として作成し、TODO / Issue / QCDS と紐づけて管理できます。
 - D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。
@@ -29,6 +30,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 ## Codex CLI 連携
 
 Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。Codex CLI 由来の下書きから作成した Issue / Task には `Draft source: codex-cli` を記録します。
+`GitHub Issues 取込` も同じ下書き変換を使います。入力は `owner/repo` または GitHub URL で、現在の Git remote が GitHub の場合は既定値として補完します。public Issues API から open issue を取得し、複数選択した issue だけを local format に再構成します。既に同じ GitHub Issue URL を含む TODO / Issue / Task がある場合は重複作成しません。
 
 Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue / Task と関連リンクをまとめた Work Item Start Prompt を作り、通常の Codex CLI 実行確認を経て `codex exec` に渡します。Issue / Task / Issue + Task を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox が追加され、TODO を入口にして作業を進められます。
 
@@ -62,6 +64,7 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 - `Codex Starter: Create Local Task`
 - `Codex Starter: Open Work Item Composer`
 - `Codex Starter: Create Work Item from Natural Language`
+- `Codex Starter: Import GitHub Issues`
 - `Codex Starter: Start Work Item with Codex`
 - `Codex Starter: Start Selected Work Items with Codex`
 - `Codex Starter: Start All Work Items with Codex`

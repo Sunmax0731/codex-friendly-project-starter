@@ -72,6 +72,7 @@
             "tests/invocation-target.test.cjs",
             "tests/prompt-history.test.cjs",
             "tests/idea-candidates.test.cjs",
+            "tests/github-issues.test.cjs",
             "samples/representative-suite.json"
           ],
           "pass": true,
@@ -110,7 +111,8 @@
             "src/codex-cli.cjs",
             "src/invocation-target.cjs",
             "src/prompt-history.cjs",
-            "src/idea-candidates.cjs"
+            "src/idea-candidates.cjs",
+            "src/github-issues.cjs"
           ],
           "pass": true,
           "detail": "ok"

@@ -24,6 +24,8 @@ gh auth status
 
 導入後は `Codex Starter: Check Codex CLI` を実行し、`codex`、`rg.exe`、`gh.exe`、`gh auth status` が同じ統合ターミナルで確認できることを見ます。
 
+GitHub Issues 取込は public repository の読み取りに限定しているため GitHub CLI 認証は必須ではありません。rate limit や private repository 対応が必要な場合は、先に通常の PowerShell で `gh auth login -h github.com` を完了してから VS Code を再起動してください。
+
 ## VSIX 化の手順
 
 VSIX package と local install の詳細は `docs/vsix-package-guide.md` を参照します。最小手順は次の通りです。

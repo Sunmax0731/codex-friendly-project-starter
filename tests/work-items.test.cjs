@@ -134,17 +134,23 @@ test('createIssueMarkdown and createTaskMarkdown record Codex draft source when 
   const issue = createIssueMarkdown({
     title: 'Codex draft issue',
     draftSource: 'codex-cli',
-    phase: '03-design'
+    phase: '03-design',
+    githubIssueUrl: 'https://github.com/Sunmax0731/repo/issues/10',
+    githubIssueNumber: 10
   });
   const task = createTaskMarkdown({
     title: 'Codex draft task',
-    draftSource: 'codex-cli'
+    draftSource: 'codex-cli',
+    githubIssueUrl: 'https://github.com/Sunmax0731/repo/issues/10',
+    githubIssueNumber: 10
   });
   assert.match(issue, /- Source: local/);
   assert.match(issue, /- Draft source: codex-cli/);
   assert.match(issue, /- Phase: 03-design/);
+  assert.match(issue, /- GitHub Issue: \[#10\]\(https:\/\/github\.com\/Sunmax0731\/repo\/issues\/10\)/);
   assert.match(task, /- Source: local/);
   assert.match(task, /- Draft source: codex-cli/);
+  assert.match(task, /- GitHub Issue: \[#10\]\(https:\/\/github\.com\/Sunmax0731\/repo\/issues\/10\)/);
 });
 
 test('renderWorkDashboardWebview includes graphical summary and open work sections', async () => {
@@ -167,6 +173,8 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /openQcdsStatus/);
   assert.match(html, /openCodexApp/);
   assert.match(html, /invokeCurrentPrompt/);
+  assert.match(html, /GitHub Issues 取込/);
+  assert.match(html, /importGitHubIssues/);
   assert.match(html, /選択Work Itemを開始/);
   assert.match(html, /startSelectedWorkItems/);
   assert.match(html, /全Work Itemを開始/);

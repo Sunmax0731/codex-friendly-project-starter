@@ -14,5 +14,7 @@
 - [x] `codex exec` 起動前に workspace root と sandbox mode を確認する。
 - [x] Work Item Start 系では起動前に model とインテリジェンスを表示し、選択値を prompt に記録する。
 - [x] `rg.exe` / `gh.exe` 用 PATH 補強はディレクトリ追加だけを行い、token や認証情報を保存しない。
+- [x] GitHub Issues 取込は public GitHub Issues API の読み取りだけを行い、GitHub token を保存せず、issue 作成、更新、close、コメント投稿を行わない。
+- [x] GitHub Issues 取込で保存する情報は issue title、body 由来の local work item、labels などの公開 metadata、GitHub Issue 個別 URL に限定する。
 - [x] `danger-full-access` を選んだ場合は確認文言で明示する。
 - [ ] Marketplace 公開前に VSIX 内容と extension permissions を再確認する。

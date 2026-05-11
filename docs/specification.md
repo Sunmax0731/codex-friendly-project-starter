@@ -26,6 +26,7 @@
 - `codex-friendly-project-starter.createLocalTask`: Task 作成用 Work Item Composer を開き、`Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
 - `codex-friendly-project-starter.openWorkItemComposer`: 自然言語または GUI フォームから Issue / Task / Issue + Task を作成する Webview を開く。
 - `codex-friendly-project-starter.createWorkItemFromNaturalLanguage`: 自然言語から Issue + Task を起票する Composer を Command Palette から直接開く。
+- `codex-friendly-project-starter.importGitHubIssues`: public GitHub repository の open Issues を取得し、選択した issue を local TODO / Issue / Task に取り込む。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 - `codex-friendly-project-starter.startWorkItemWithCodex`: 選択した TODO、Issue、Task と関連リンクを開始プロンプト化し、Codex CLI に渡して着手する。
 - `codex-friendly-project-starter.startSelectedWorkItemsWithCodex`: Dashboard checkbox または Command Palette の複数選択で選んだ TODO、Issue、Task だけを開始プロンプト化し、Codex CLI に渡して着手する。
@@ -69,6 +70,8 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 
 Issue / Task / Issue + Task を Work Item Composer から作成した場合は、`TODO.md` の `## Work Items` section に未完了 checkbox を追加し、作成した `Issues/*.md` と `Tasks/*.md` への Markdown link を残す。既に同じ link を持つ TODO がある場合は重複追加しない。
 
+GitHub Issues 取込では、入力された `owner/repo`、GitHub HTTPS URL、GitHub SSH remote を public repository として解決し、GitHub Issues API から open issue を取得する。`pull_request` を持つ item は PR として除外する。QuickPick で選択された issue は Codex CLI read-only inference に渡し、title、priority、type、phase、QCDS axes、context、acceptance criteria を local work item format に再構成する。生成した `TODO.md`、`Issues/*.md`、`Tasks/*.md` には GitHub Issue の個別 URL を Markdown link として残す。同じ URL が既に `TODO.md`、`Issues/`、`Tasks/` に存在する場合は import 済みとして扱い、重複作成しない。
+
 ## Work Dashboard
 
 Dashboard Webview は次を表示する。
@@ -82,6 +85,7 @@ Dashboard Webview は次を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
 - GUI action として、日常操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt 画面、QCDS Status、Codex App、現在Prompt実行、Dashboard refresh を提供する。
+- GUI action として、GitHub Issues 取込を日常操作に配置し、remote backlog を local work item format に同期できる。
 - 日常操作には `選択Work Itemを開始` と `全Work Itemを開始` も含め、選択した TODO / Issue / Task だけ、または未完了 TODO / Issue / Task 全体を開始できる。
 - 初回セットアップ / 環境確認には Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、Codex CLI 確認を折りたたみで提供する。
 - QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は折りたたみ可能な section にする。
@@ -180,6 +184,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションの `PATH` に追加するディレクトリ。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を行う。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
+- `codexFriendlyProjectStarter.githubIssueImportLimit`: GitHub Issues 取込で一度に取得する issue 件数。1 から 100 の範囲で扱う。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
 - `codexFriendlyProjectStarter.codexGitWritePolicy`: Work Item Start Prompt に含める Git 書き込み方針。
 

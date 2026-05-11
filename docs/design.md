@@ -23,7 +23,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 未完了 Task は priority と phase を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
 - 未完了 TODO / Issue / Task には inline action として Codex 着手ボタンを出す。
-- Tree title には Work Dashboard、Work Item Composer、Start Selected、Start All、refresh all を icon action として置く。
+- Tree title には Work Dashboard、Work Item Composer、GitHub Issues 取込、Start Selected、Start All、refresh all を icon action として置く。
 - item context から Start、Markdown WebView、Markdown Source、Copy Path にアクセスできる。
 
 ### Work Dashboard
@@ -34,7 +34,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - release readiness は `pass` / `missing` を一覧化する。
 - TODO / Issue / Task / QCDS improvements の行には `Select` checkbox、`Start`、`Open` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
-- 進行中操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
+- 進行中操作には自然言語から Issue + Task、GitHub Issues 取込、Issue 作成、Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
 - 進行中操作には `選択Work Itemを開始` と `全Work Itemを開始` も置き、選択した TODO / Issue / Task だけ、または未完了 TODO / Issue / Task 全体を Codex CLI へ渡せるようにする。
 - 初回セットアップには `D:\AI` docs 生成、Issues / Tasks 初期化、Codex CLI 確認を折りたたみ領域として置く。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は `<details>` で折りたためるようにする。
@@ -50,6 +50,14 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - `作成して開く` で Markdown を作成し、作成結果を WebView で表示する。
 - `Issue + Task` では相互リンクを自動生成する。
 - `Issue`、`Task`、`Issue + Task` のどの作成でも `TODO.md` にリンク付き checkbox を追加し、TODO を入口にする。
+
+### GitHub Issues 取込
+
+- Dashboard と Command Palette から `GitHub Issues 取込` を起動する。
+- 入力欄は `owner/repo` または GitHub URL を受け付ける。workspace の `git remote -v` が GitHub を指す場合は repository 名を既定値にする。
+- GitHub Issues は QuickPick multi-select で表示し、既に local TODO / Issue / Task に同じ URL がある issue は `imported` として分かるようにする。
+- 選択された issue は Work Item Composer と同じ Codex CLI read-only inference に渡し、local Issue + Task の下書きへ整える。Codex CLI が使えない場合はローカル補完で継続する。
+- 作成後は `TODO.md`、local Issue、local Task に GitHub Issue 個別リンクを残し、最初に作成した local Issue を Markdown WebView で開く。
 
 ### QCDS Status
 
@@ -93,6 +101,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Work Item Start 実行前: `promptForCodexRunOptions` が true の場合は model とインテリジェンスを QuickPick で選択する。
 - VS Code 内 PowerShell の PATH が不足する場合: extension-launched Codex の launcher で `rg.exe` と `gh.exe` の候補ディレクトリを PATH 先頭に追加し、`Check Codex CLI` で同じ環境を確認する。
 - Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
+- GitHub Issues 取込: public GitHub Issues API 取得に失敗した場合はエラーを表示してローカルファイルを書き換えない。Codex 下書き生成だけに失敗した場合はローカル補完で import を続ける。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。
 - Tasks directory なし: Dashboard の `Tasks 初期化`、Work Item Composer、または default docs scaffold で `Tasks/README.md` を作成する。
 - Issue なし: Dashboard は Issue progress を 0% とし、Dashboard の `Issue を作成` または Work Item Composer を使う。

@@ -11,6 +11,7 @@
 | Webview | `src/webview.cjs` | Starter UI と Work Dashboard HTML |
 | Work item composer | `src/work-item-composer.cjs` | GUI 作成フォーム、ローカル補完、Codex CLI 下書き結果の表示 |
 | Codex work item draft | `src/codex-work-item-draft.cjs` | 自然言語メモを JSON 下書きにする Codex prompt と出力解析 |
+| GitHub Issues import | `src/github-issues.cjs` | public GitHub Issues 取得、URL 重複検出、local TODO / Issue / Task 生成 |
 | Codex CLI | `src/codex-cli.cjs` | `codex exec` / `codex app` の terminal command と launcher script 生成 |
 | Invocation target | `src/invocation-target.cjs` | FirstPrompt の対象 repo path から実行 root を解決 |
 | Validation | `tools/` | QCDS、runtime gate、docs ZIP、guard |
