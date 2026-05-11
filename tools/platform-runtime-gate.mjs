@@ -13,6 +13,7 @@ function runVsCodeExtensionGate() {
   const extension = readText('extension.js');
   const webview = readText('src/webview.cjs');
   const workItems = readText('src/work-items.cjs');
+  const workItemComposer = readText('src/work-item-composer.cjs');
   const markdownWebview = readText('src/markdown-webview.cjs');
   const defaultDocs = readText('src/default-docs.cjs');
   const commands = new Set((pkg.contributes?.commands || []).map((item) => item.command));
@@ -27,10 +28,12 @@ function runVsCodeExtensionGate() {
     check('tree-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyAgentDocs'), 'Tree View contribution exists'),
     check('work-items-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyWorkItems'), 'Work Items Tree View contribution exists'),
     check('work-dashboard-command', commands.has('codex-friendly-project-starter.openWorkDashboard') && commands.has('codex-friendly-project-starter.openQcdsStatus') && commands.has('codex-friendly-project-starter.initializeIssuesDirectory') && commands.has('codex-friendly-project-starter.createLocalIssue'), 'Work dashboard, QCDS status, and local issue commands exist'),
+    check('work-composer-command', commands.has('codex-friendly-project-starter.openWorkItemComposer') && commands.has('codex-friendly-project-starter.initializeTasksDirectory'), 'Work Item Composer and Tasks init commands exist'),
     check('markdown-webview-command', commands.has('codex-friendly-project-starter.openMarkdownWebview') && commands.has('codex-friendly-project-starter.openMarkdownSource'), 'Markdown WebView commands exist'),
     check('default-docs-command', commands.has('codex-friendly-project-starter.scaffoldDefaultDocs') && commands.has('codex-friendly-project-starter.createLocalTask'), 'Default docs scaffold and local task commands exist'),
     check('webview-panel', extension.includes('createWebviewPanel') && webview.includes('acquireVsCodeApi'), 'webview contract exists'),
     check('work-dashboard-webview', webview.includes('renderWorkDashboardWebview') && webview.includes('Codex Work Dashboard'), 'work dashboard webview contract exists'),
+    check('work-item-composer-webview', workItemComposer.includes('renderWorkItemComposerWebview') && workItemComposer.includes('inferWorkItemDraft') && extension.includes('openWorkItemComposer'), 'work item composer webview contract exists'),
     check('markdown-webview', markdownWebview.includes('renderMarkdownDocumentWebview') && markdownWebview.includes('resolveMarkdownLink') && extension.includes('openMarkdownWebview'), 'Markdown WebView contract exists'),
     check('default-docs', defaultDocs.includes('ensureDefaultProjectDocs') && defaultDocs.includes('PHASE_SKILLS') && extension.includes('scaffoldDefaultDocsCommand'), 'D:\\AI default docs scaffold exists'),
     check('webview-run-codex', webview.includes('runCodex') && extension.includes('invokeCodexAgent'), 'webview can invoke Codex agent'),

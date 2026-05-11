@@ -21,6 +21,7 @@ const product = {
     'src/default-docs.cjs',
     'src/markdown-webview.cjs',
     'src/webview.cjs',
+    'src/work-item-composer.cjs',
     'src/codex-cli.cjs',
     'src/invocation-target.cjs'
   ],
@@ -172,8 +173,10 @@ function commandContract() {
     'codex-friendly-project-starter.openMarkdownSource',
     'codex-friendly-project-starter.scaffoldDefaultDocs',
     'codex-friendly-project-starter.initializeIssuesDirectory',
+    'codex-friendly-project-starter.initializeTasksDirectory',
     'codex-friendly-project-starter.createLocalIssue',
     'codex-friendly-project-starter.createLocalTask',
+    'codex-friendly-project-starter.openWorkItemComposer',
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem'
   ];

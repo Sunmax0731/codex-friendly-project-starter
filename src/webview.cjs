@@ -122,6 +122,9 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
     h2 { font-size: 14px; margin: 20px 0 8px; font-weight: 600; }
     .root { color: var(--vscode-descriptionForeground); margin-bottom: 14px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+    .action { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-background); color: var(--vscode-button-foreground); padding: 6px 9px; border-radius: 3px; cursor: pointer; }
+    .action.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
     .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
     .metric, .row, .readiness { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; background: var(--vscode-sideBar-background); }
     .metric-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
@@ -144,6 +147,17 @@ function renderWorkDashboardWebview(nonce, dashboard) {
 <main>
   <h1>Codex Work Dashboard</h1>
   <div class="root">${escapeHtml(dashboard.rootPath)}</div>
+  <section class="actions" aria-label="GUI actions">
+    <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
+    <button class="action" data-action="openComposer" data-mode="task">Task を作成</button>
+    <button class="action" data-action="openComposer" data-mode="linked">自然言語から作成</button>
+    <button class="action secondary" data-action="initializeIssues">Issues 初期化</button>
+    <button class="action secondary" data-action="initializeTasks">Tasks 初期化</button>
+    <button class="action secondary" data-action="scaffoldDocs">D:\\AI Docs 生成</button>
+    <button class="action secondary" data-action="openStarter">FirstPrompt</button>
+    <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
+    <button class="action secondary" data-action="refreshDashboard">Refresh</button>
+  </section>
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
@@ -171,6 +185,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       type: 'openMarkdown',
       filePath: button.getAttribute('data-file'),
       lineNumber: Number(button.getAttribute('data-line') || '1')
+    }));
+  }
+  for (const button of document.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: button.getAttribute('data-action'),
+      mode: button.getAttribute('data-mode') || ''
     }));
   }
 </script>

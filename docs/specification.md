@@ -17,8 +17,10 @@
 - `codex-friendly-project-starter.openMarkdownSource`: WebView ではなく編集元の Markdown を開く。
 - `codex-friendly-project-starter.scaffoldDefaultDocs`: `D:\AI` の共通 docs と領域別 docs から既定ドキュメント一式を生成する。
 - `codex-friendly-project-starter.initializeIssuesDirectory`: workspace root に `Issues/README.md` を作成または開く。
-- `codex-friendly-project-starter.createLocalIssue`: `Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
-- `codex-friendly-project-starter.createLocalTask`: `Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
+- `codex-friendly-project-starter.initializeTasksDirectory`: workspace root に `Tasks/README.md` を作成または開く。
+- `codex-friendly-project-starter.createLocalIssue`: Issue 作成用 Work Item Composer を開き、`Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
+- `codex-friendly-project-starter.createLocalTask`: Task 作成用 Work Item Composer を開き、`Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
+- `codex-friendly-project-starter.openWorkItemComposer`: 自然言語または GUI フォームから Issue / Task / Issue + Task を作成する Webview を開く。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 
 ## Tree View
@@ -67,6 +69,21 @@ Dashboard Webview は次を表示する。
 - QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue / Task を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
+- GUI action として Issue 作成、Task 作成、自然言語から作成、Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、FirstPrompt 画面、Codex CLI 確認、Dashboard refresh を提供する。
+
+## Work Item Composer
+
+Work Item Composer Webview は次を入力項目として持つ。
+
+- 作成先: `Issue`、`Task`、`Issue + Task`。
+- 自然言語メモ。
+- title、priority、issue type、task phase、context、acceptance criteria、QCDS axes。
+
+`自然言語から反映` はローカル heuristic で下書きを作る。明示的な `P0` から `P4`、`bug`、`release`、`docs`、`test`、`feature`、日本語の不具合、リリース、検証、UI/UX などを読み取り、priority、type、phase、QCDS を補完する。`作成して開く` は次のいずれかを実行する。
+
+- Issue: `Issues/000x-slug.md` を作成する。
+- Task: `Tasks/000x-slug.md` を作成する。
+- Issue + Task: 両方を作成し、Issue から Task へ、Task から Issue へ Markdown link を張る。
 
 ## Markdown WebView
 
@@ -81,7 +98,7 @@ Dashboard Webview は次を表示する。
 - root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、`skills/01-requirements` から `skills/06-release` の `SKILL.md` を生成する。
 - 既存ファイルは既定で上書きせず、ユーザー選択時だけ上書きする。
 
-Dashboard は読み取り専用とし、編集は Tree View から Markdown を開いて行う。
+Dashboard は閲覧と主要操作の入口にし、実体の編集は Markdown WebView の `Open Source` または生成された Markdown を直接開いて行う。
 
 ## ハイライト
 

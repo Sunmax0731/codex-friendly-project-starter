@@ -39,12 +39,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 1. Activity Bar の `Codex Starter` を開く。
 2. `Work Items` を開く。
 3. `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` の group を確認する。
-4. `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
+4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行する。
-6. `Ctrl+Shift+P` から `Codex Starter: Initialize Issues Directory` を実行する。
-7. `Ctrl+Shift+P` から `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
-8. `Ctrl+Shift+P` から `Codex Starter: Create Local Task` を実行し、title、priority、phase、QCDS、acceptance criteria を入力する。
-9. `Codex Starter: Refresh Work Items` を実行する。
+6. Dashboard の `Issues 初期化` を実行する。
+7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
+8. Dashboard の `Task を作成` を押し、Work Item Composer で title、priority、phase、QCDS、acceptance criteria を入力して Task を作成する。
+9. Dashboard の `自然言語から作成` を押し、自然言語メモから Issue + Task を作成する。
+10. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 
@@ -52,10 +53,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
 - `Tasks/*.md` の open / in-progress / blocked Task が表示される。
 - Dashboard に TODO と Issue の progress bar が表示される。
+- Dashboard 上部に `Issue を作成`、`Task を作成`、`自然言語から作成`、`Issues 初期化`、`Tasks 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`Codex CLI 確認` が表示される。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS に紐づいた TODO / Issue / Task がある場合、改善候補として表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
 - `Tasks/README.md` と `Tasks/000x-*.md` が UTF-8 Markdown として作成される。
+- Work Item Composer の `自然言語から反映` で priority、type、phase、QCDS、acceptance criteria が補完される。
+- `Issue + Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 
 ## 2.5 Markdown WebView と D:\AI 既定 docs

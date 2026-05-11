@@ -35,8 +35,10 @@
     "onCommand:codex-friendly-project-starter.openMarkdownSource",
     "onCommand:codex-friendly-project-starter.scaffoldDefaultDocs",
     "onCommand:codex-friendly-project-starter.initializeIssuesDirectory",
+    "onCommand:codex-friendly-project-starter.initializeTasksDirectory",
     "onCommand:codex-friendly-project-starter.createLocalIssue",
     "onCommand:codex-friendly-project-starter.createLocalTask",
+    "onCommand:codex-friendly-project-starter.openWorkItemComposer",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onView:codexFriendlyAgentDocs",
     "onView:codexFriendlyWorkItems"
@@ -100,12 +102,20 @@
         "title": "Codex Starter: Initialize Issues Directory"
       },
       {
+        "command": "codex-friendly-project-starter.initializeTasksDirectory",
+        "title": "Codex Starter: Initialize Tasks Directory"
+      },
+      {
         "command": "codex-friendly-project-starter.createLocalIssue",
         "title": "Codex Starter: Create Local Issue"
       },
       {
         "command": "codex-friendly-project-starter.createLocalTask",
         "title": "Codex Starter: Create Local Task"
+      },
+      {
+        "command": "codex-friendly-project-starter.openWorkItemComposer",
+        "title": "Codex Starter: Open Work Item Composer"
       },
       {
         "command": "codex-friendly-project-starter.openAgentDoc",
@@ -134,6 +144,40 @@
         {
           "id": "codexFriendlyWorkItems",
           "name": "Work Items"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "codex-friendly-project-starter.openStarter",
+          "when": "view == codexFriendlyAgentDocs",
+          "group": "navigation@1"
+        },
+        {
+          "command": "codex-friendly-project-starter.scaffoldDefaultDocs",
+          "when": "view == codexFriendlyAgentDocs",
+          "group": "navigation@2"
+        },
+        {
+          "command": "codex-friendly-project-starter.refreshAgentDocs",
+          "when": "view == codexFriendlyAgentDocs",
+          "group": "navigation@3"
+        },
+        {
+          "command": "codex-friendly-project-starter.openWorkDashboard",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@1"
+        },
+        {
+          "command": "codex-friendly-project-starter.openWorkItemComposer",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@2"
+        },
+        {
+          "command": "codex-friendly-project-starter.refreshWorkItems",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@3"
         }
       ]
     },

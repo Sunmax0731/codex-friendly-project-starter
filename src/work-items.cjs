@@ -591,7 +591,9 @@ function createIssueMarkdown(input = {}) {
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const tasks = Array.isArray(input.tasks) ? input.tasks : [];
   const context = input.context || '背景、目的、制約をここに記録します。';
-  const acceptance = input.acceptance || '完了条件をここに記録します。';
+  const acceptance = Array.isArray(input.acceptance) && input.acceptance.length
+    ? input.acceptance
+    : [input.acceptance || '完了条件をここに記録します。'];
   return [
     '# ' + title,
     '',
@@ -601,7 +603,10 @@ function createIssueMarkdown(input = {}) {
     '- Source: ' + source,
     '- Created: ' + created,
     qcds ? '- QCDS: ' + qcds : '',
-    tasks.length ? '- Tasks: ' + tasks.map((item) => `[${item}](${item})`).join(', ') : '',
+    tasks.length ? '- Tasks: ' + tasks.map((item) => {
+      if (typeof item === 'object' && item) return `[${item.label || item.href}](${item.href || item.label})`;
+      return `[${item}](${item})`;
+    }).join(', ') : '',
     '',
     '## Context',
     '',
@@ -609,7 +614,7 @@ function createIssueMarkdown(input = {}) {
     '',
     '## Acceptance Criteria',
     '',
-    '- [ ] ' + acceptance,
+    ...acceptance.map((item) => '- [ ] ' + item),
     '',
     '## Notes',
     '',
@@ -625,6 +630,7 @@ function createTaskMarkdown(input = {}) {
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const source = input.source || 'local';
   const acceptance = Array.isArray(input.acceptance) && input.acceptance.length ? input.acceptance : ['完了条件をここに記録します。'];
+  const issue = input.issue || '';
   return [
     '# ' + title,
     '',
@@ -633,6 +639,7 @@ function createTaskMarkdown(input = {}) {
     '- Type: task',
     '- Source: ' + source,
     '- Phase: ' + phase,
+    issue ? '- Issue: [' + issue + '](' + issue + ')' : '',
     qcds ? '- QCDS: ' + qcds : '',
     '',
     '## Acceptance Criteria',

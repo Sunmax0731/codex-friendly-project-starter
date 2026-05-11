@@ -2,7 +2,7 @@
 
 ## UI 方針
 
-VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、単発生成は Command Palette、複数選択は Webview に分ける。
+VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、作成や複数選択は Webview に寄せる。Command Palette は補助導線として残すが、通常操作は GUI から完結できるようにする。
 
 ## 主要画面
 
@@ -28,7 +28,16 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
 - TODO / Issue / Task / QCDS の行には `Open` ボタンを置き、該当 Markdown WebView へ移動できる。
-- Dashboard は参照専用とし、編集は Markdown を直接開く。
+- 上部 action bar に Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、`D:\AI` docs 生成、FirstPrompt、Codex CLI 確認、refresh を置く。
+- Dashboard は確認と操作入口にし、詳細編集は Markdown を直接開く。
+
+### Work Item Composer
+
+- Dashboard action または Command Palette から開く。
+- 作成先は `Issue`、`Task`、`Issue + Task` の select で切り替える。
+- 自然言語メモと構造化フォームを同じ画面に置き、`自然言語から反映` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
+- `作成して開く` で Markdown を作成し、作成結果を WebView で表示する。
+- `Issue + Task` では相互リンクを自動生成する。
 
 ### QCDS Status
 
@@ -64,9 +73,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 入力なし: `<repo-name>` と標準目的を補完する。
 - 設定変更: `includeQcdsChecklist` に従い QCDS ブロックを出し分ける。
 - Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
-- Issues directory なし: `Initialize Issues Directory` で `Issues/README.md` を作成する。
-- Tasks directory なし: `Create Local Task` または default docs scaffold で `Tasks/README.md` を作成する。
-- Issue なし: Dashboard は Issue progress を 0% とし、local Issue 作成 command を使う。
+- Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。
+- Tasks directory なし: Dashboard の `Tasks 初期化`、Work Item Composer、または default docs scaffold で `Tasks/README.md` を作成する。
+- Issue なし: Dashboard は Issue progress を 0% とし、Dashboard の `Issue を作成` または Work Item Composer を使う。
 - QCDS metrics なし: Dashboard は QCDS を `missing` として表示し、QCDS docs の作成を release readiness の不足として扱う。
 
 ## アクセシビリティ

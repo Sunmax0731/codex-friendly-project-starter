@@ -7,7 +7,8 @@
 - `src/workflows.cjs`: ガバナンス、工程、進行速度の選択肢。
 - `src/prompt-builder.cjs`: FirstPrompt 生成ロジック。
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
-- `src/webview.cjs`: Webview HTML 生成。
+- `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
+- `src/work-item-composer.cjs`: Work Item Composer の Webview HTML と自然言語からの下書き推定。
 - `src/codex-cli.cjs`: Codex CLI に渡す PowerShell command と terminal command 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
 - `tools/`: QCDS、runtime gate、docs ZIP、closed alpha guard。

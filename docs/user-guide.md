@@ -13,7 +13,8 @@
 2. Activity Bar の `Codex Starter` を開く。
 3. `Work Items` で `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` を確認する。
 4. 未完了 TODO、Issue、Task を選択すると、該当 Markdown が Markdown WebView で開く。
-5. Command Palette から `Codex Starter: Open Work Dashboard` を実行すると、TODO、Issue、Tasks の進捗を progress bar で確認できる。
+5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks の進捗を progress bar で確認できる。
+6. Dashboard 上部の GUI ボタンから Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、FirstPrompt、Codex CLI 確認を実行できる。
 
 ## QCDS 状況を確認する
 
@@ -24,18 +25,29 @@
 
 ## Local Issue を管理する
 
-1. Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。
+1. Dashboard の `Issues 初期化`、または Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。
 2. `Issues/README.md` が作成または表示される。
-3. `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
-4. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
-5. `Codex Starter: Refresh Work Items` で Tree View を更新する。
+3. Dashboard の `Issue を作成`、または `Codex Starter: Create Local Issue` を実行して Work Item Composer を開く。
+4. 自然言語メモを入力して `自然言語から反映` を押すか、title、priority、type、acceptance criteria を GUI で入力する。
+5. `作成して開く` で `Issues/0001-short-title.md` を作成する。
+6. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
+7. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` で Tree View を更新する。
 
 ## Local Task を管理する
 
-1. Command Palette から `Codex Starter: Create Local Task` を実行する。
-2. title、priority、phase、QCDS、acceptance criteria を入力する。
-3. 作成された `Tasks/*.md` を `TODO.md` または `Issues/*.md` から Markdown link で参照する。
-4. `Tasks/*.md` の checkbox と `Status` を更新すると、Work Items と QCDS Improvements に反映される。
+1. Dashboard の `Task を作成`、または Command Palette から `Codex Starter: Create Local Task` を実行する。
+2. Work Item Composer で自然言語メモを下書きに変換するか、title、priority、phase、QCDS、acceptance criteria を入力する。
+3. `作成して開く` で `Tasks/*.md` を作成する。
+4. 作成された `Tasks/*.md` を `TODO.md` または `Issues/*.md` から Markdown link で参照する。
+5. `Tasks/*.md` の checkbox と `Status` を更新すると、Work Items と QCDS Improvements に反映される。
+
+## 自然言語から Issue と Task を作る
+
+1. Dashboard の `自然言語から作成`、または `Codex Starter: Open Work Item Composer` を実行する。
+2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
+3. `自然言語から反映` を押して title、priority、type、phase、QCDS、acceptance criteria を補完する。
+4. 必要なら GUI 上で修正する。
+5. `作成して開く` を押す。作成先が `Issue + Task` の場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
 
 ## Markdown WebView で読む
 
@@ -47,7 +59,7 @@
 ## D:\AI 既定 docs を生成する
 
 1. 対象 workspace を開く。
-2. Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
+2. Dashboard の `D:\AI Docs 生成`、または Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
 3. 分野、Repo 名、目的、上書き可否を選択する。
 4. `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の docs を参照元として、root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、`skills/*/SKILL.md` が生成される。
 

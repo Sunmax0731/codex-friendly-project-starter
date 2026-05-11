@@ -99,6 +99,7 @@
             "src/default-docs.cjs",
             "src/markdown-webview.cjs",
             "src/webview.cjs",
+            "src/work-item-composer.cjs",
             "src/codex-cli.cjs",
             "src/invocation-target.cjs"
           ],

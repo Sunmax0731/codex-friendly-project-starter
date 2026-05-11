@@ -21,6 +21,10 @@ const {
   isWorkItemDocPath
 } = require('../src/work-items.cjs');
 const { renderWorkDashboardWebview } = require('../src/webview.cjs');
+const {
+  inferWorkItemDraft,
+  renderWorkItemComposerWebview
+} = require('../src/work-item-composer.cjs');
 
 test('parseTodoMarkdown extracts status, section, priority, and line number', () => {
   const items = parseTodoMarkdown('# TODO\n\n## Release\n\n- [ ] [P1] VSIX package\n- [x] docs zip\n', {
@@ -104,7 +108,34 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /Release Readiness/);
   assert.match(html, /Open TODO/);
   assert.match(html, /Open Tasks/);
+  assert.match(html, /Issue を作成/);
+  assert.match(html, /自然言語から作成/);
+  assert.match(html, /D:\\AI Docs 生成/);
   assert.match(html, /width:0%|width:50%|width:100%/);
+});
+
+test('inferWorkItemDraft turns natural language into issue or task fields', () => {
+  const draft = inferWorkItemDraft({
+    mode: 'linked',
+    naturalText: 'P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。'
+  });
+  assert.equal(draft.mode, 'linked');
+  assert.equal(draft.priority, 'P1');
+  assert.equal(draft.type, 'release');
+  assert.equal(draft.phase, '06-release');
+  assert.equal(draft.qcdsAxes.includes('Delivery'), true);
+  assert.equal(draft.acceptance.length > 0, true);
+});
+
+test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
+  const html = renderWorkItemComposerWebview('nonce', {
+    mode: 'task',
+    naturalText: 'GUIでTaskを作成する'
+  });
+  assert.match(html, /Codex Work Item Composer/);
+  assert.match(html, /自然言語から反映/);
+  assert.match(html, /作成して開く/);
+  assert.match(html, /Issue \+ Task/);
 });
 
 test('buildQcdsStatus reads strict metrics and links QCDS-tagged TODO and Issue work', async () => {

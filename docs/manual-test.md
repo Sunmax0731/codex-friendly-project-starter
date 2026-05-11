@@ -14,23 +14,24 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Codex Starter` の `Agent Docs` に `AGENTS.md`、`SKILL.md`、`README.md` が表示されることを確認する。
 3. `AGENTS.md` を開き、見出しと `QCDS` などの語がハイライトされることを確認する。
 4. `Codex Starter` の `Work Items` に `TODO`、`Issues`、`Release readiness` が表示されることを確認する。
-5. Command Palette から `Codex Starter: Open Work Dashboard` を実行し、TODO と Issue の progress bar が表示されることを確認する。
+5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を実行し、TODO と Issue の progress bar と GUI action bar が表示されることを確認する。
 6. Command Palette から `Codex Starter: Open QCDS Status` を実行し、QCDS Current Status と QCDS Improvements が表示されることを確認する。
 7. Command Palette から `Codex Starter: Open Markdown WebView` を実行し、現在の Markdown が WebView 表示されることを確認する。
 8. Markdown WebView の `Open Source`、`Copy Path`、`Refresh` が動作し、`Tasks/*.md` や `Issues/*.md` のリンクをクリックして関連 Markdown に遷移できることを確認する。
-9. Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が Markdown WebView で開くことを確認する。
-10. Command Palette から `Codex Starter: Create Local Issue` を実行し、`Issues/000x-*.md` が作成されることを確認する。
-11. Command Palette から `Codex Starter: Create Local Task` を実行し、`Tasks/000x-*.md` が作成されることを確認する。
-12. Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行し、`D:\AI` 由来の `AGENTS.md`、`SKILL.md`、`Design.md`、`Architecture.md`、工程別 `skills/*/SKILL.md` が生成されることを確認する。
-13. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
-14. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。
-15. Command Palette から `Codex Starter: Open Project Starter` を実行する。
-16. Webview で分野と進め方を選び、`FirstPrompt を開く`、`VS Code Codexへコピー`、`Codex CLI で実行` が動くことを確認する。
-17. コピーした FirstPrompt を VS Code 右側の Codex パネルへ貼り付け、本文に VS Code Codex / Codex CLI 相当のローカル workspace agent 前提が含まれることを確認する。
-18. Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
-19. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
-20. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
-21. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
+9. Dashboard の `Issues 初期化` または Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が Markdown WebView で開くことを確認する。
+10. Dashboard の `Issue を作成` または `Codex Starter: Create Local Issue` から Work Item Composer を開き、`Issues/000x-*.md` が作成されることを確認する。
+11. Dashboard の `Task を作成` または `Codex Starter: Create Local Task` から Work Item Composer を開き、`Tasks/000x-*.md` が作成されることを確認する。
+12. Dashboard の `自然言語から作成` または `Codex Starter: Open Work Item Composer` で自然言語メモを入力し、`自然言語から反映` と `作成して開く` により Issue + Task が相互リンク付きで作成されることを確認する。
+13. Dashboard の `D:\AI Docs 生成` または Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行し、`D:\AI` 由来の `AGENTS.md`、`SKILL.md`、`Design.md`、`Architecture.md`、工程別 `skills/*/SKILL.md` が生成されることを確認する。
+14. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
+15. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。
+16. Dashboard の `FirstPrompt` または Command Palette から `Codex Starter: Open Project Starter` を実行する。
+17. Webview で分野と進め方を選び、`FirstPrompt を開く`、`VS Code Codexへコピー`、`Codex CLI で実行` が動くことを確認する。
+18. コピーした FirstPrompt を VS Code 右側の Codex パネルへ貼り付け、本文に VS Code Codex / Codex CLI 相当のローカル workspace agent 前提が含まれることを確認する。
+19. Dashboard の `Codex CLI 確認` または Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `codex` version と `exec --help` が表示されることを確認する。
+20. 生成した FirstPrompt の untitled Markdown を開いた状態で、Command Palette から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
+21. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選択する。
+22. terminal に `codex exec` が起動し、プロンプトが渡されることを確認する。
 
 詳細な確認項目は docs/vscode-verification-guide.md を参照する。
 
