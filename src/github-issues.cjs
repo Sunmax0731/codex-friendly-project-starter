@@ -77,10 +77,10 @@ function normalizeGitHubIssue(raw = {}) {
 function buildGitHubIssueImportInput(issue = {}) {
   const labels = Array.isArray(issue.labels) ? issue.labels : [];
   return {
-    mode: 'linked',
+    mode: 'issue',
     title: issue.title || '',
     naturalText: [
-      'GitHub Issue をローカルの TODO / Issue / Task 用に整形してください。',
+      'GitHub Issue をローカルの TODO / Issue 用に整形してください。Tasks は legacy compatibility として明示設定時だけ作成します。',
       '',
       `URL: ${issue.url || ''}`,
       `Number: #${issue.number || ''}`,
@@ -114,35 +114,40 @@ function findExistingGitHubIssueImport(rootPath, issue = {}) {
   return undefined;
 }
 
-function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}) {
+function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}, options = {}) {
   const existing = findExistingGitHubIssueImport(rootPath, issue);
   if (existing) {
     return { created: false, skipped: true, reason: 'already-imported', existing };
   }
+  const createTask = options.createTask === true;
   const title = draft.title || issue.title || 'Imported GitHub Issue';
   const source = `GitHub Issue #${issue.number || ''}`.trim();
   const draftSource = draft.draftSource || draft.inferenceSource || 'codex-cli';
   const priority = draft.priority || 'P3';
   const qcdsAxes = Array.isArray(draft.qcdsAxes) ? draft.qcdsAxes : [];
-  const taskPath = nextTaskFilePath(rootPath, title);
   const issuePath = nextIssueFilePath(rootPath, title);
-  const taskRelative = toSlash(path.relative(rootPath, taskPath));
   const issueRelative = toSlash(path.relative(rootPath, issuePath));
+  let taskPath = '';
+  let taskRelative = '';
   const acceptance = Array.isArray(draft.acceptance) && draft.acceptance.length
     ? draft.acceptance
     : ['GitHub Issue の内容をローカル仕様へ整理し、必要な実装または文書更新を完了する。'];
-  fs.writeFileSync(taskPath, createTaskMarkdown({
-    ...draft,
-    title,
-    priority,
-    qcdsAxes,
-    acceptance,
-    source,
-    draftSource,
-    issue: issueRelative,
-    githubIssueUrl: issue.url,
-    githubIssueNumber: issue.number
-  }), 'utf8');
+  if (createTask) {
+    taskPath = nextTaskFilePath(rootPath, title);
+    taskRelative = toSlash(path.relative(rootPath, taskPath));
+    fs.writeFileSync(taskPath, createTaskMarkdown({
+      ...draft,
+      title,
+      priority,
+      qcdsAxes,
+      acceptance,
+      source,
+      draftSource,
+      issue: issueRelative,
+      githubIssueUrl: issue.url,
+      githubIssueNumber: issue.number
+    }), 'utf8');
+  }
   fs.writeFileSync(issuePath, createIssueMarkdown({
     ...draft,
     title,
@@ -151,7 +156,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}) {
     acceptance,
     source,
     draftSource,
-    tasks: [{ label: taskRelative, href: '../' + taskRelative }],
+    tasks: createTask ? [{ label: taskRelative, href: '../' + taskRelative }] : [],
     githubIssueUrl: issue.url,
     githubIssueNumber: issue.number,
     context: draft.context || githubIssueContext(issue)
@@ -162,7 +167,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}) {
     qcdsAxes,
     links: [
       { label: 'Issue', href: issueRelative },
-      { label: 'Task', href: taskRelative },
+      ...(createTask ? [{ label: 'Task', href: taskRelative }] : []),
       { label: `GitHub #${issue.number}`, href: issue.url }
     ]
   });

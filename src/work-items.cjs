@@ -364,7 +364,7 @@ function buildReleaseReadiness(rootPath, stats) {
     readiness('core-docs', 'Core docs', ['README.md', 'AGENTS.md', 'SKILL.md', 'TODO.md'].every((item) => exists(rootPath, item)), 'README / AGENTS / SKILL / TODO'),
     readiness('issues-dir', 'Local Issues', exists(rootPath, 'Issues/README.md'), 'Issues/README.md'),
     readiness('issue-coverage', 'Issue backlog', stats.issues.total > 0, stats.issues.total + ' issue files'),
-    readiness('task-coverage', 'Task work items', stats.tasks.total > 0 || exists(rootPath, 'Tasks'), stats.tasks.total + ' task files'),
+    readiness('legacy-task-coverage', 'Legacy Tasks', true, stats.tasks.total + ' legacy task files (optional)'),
     readiness('todo-triage', 'TODO triage', stats.todos.total > 0, stats.todos.open + ' open TODO items'),
     readiness('qcds', 'QCDS evidence', exists(rootPath, 'docs/qcds-strict-metrics.json') || exists(rootPath, 'docs/qcds-evaluation.md'), 'QCDS docs'),
     readiness('manual-test', 'Manual test docs', exists(rootPath, 'docs/manual-test.md') || exists(rootPath, 'docs/user-guide.md'), 'manual/user guide')
@@ -376,30 +376,14 @@ function buildQcdsStatus(rootPath, workItems = {}) {
   const metricsPath = path.join(rootPath, 'docs', 'qcds-strict-metrics.json');
   const fallbackPath = path.join(rootPath, 'docs', 'qcds-evaluation.md');
   if (!fs.existsSync(metricsPath)) {
-    return {
-      available: false,
-      metricsPath: fs.existsSync(fallbackPath) ? fallbackPath : '',
-      overallGrade: '',
-      overallScore: 0,
-      dimensions: [],
-      improvements: [],
-      summary: { totalChecks: 0, passedChecks: 0, failedChecks: 0, percent: 0, belowAMinus: [] }
-    };
+    return buildUnavailableQcdsStatus(rootPath, workItems, fs.existsSync(fallbackPath) ? fallbackPath : '', 'docs/qcds-strict-metrics.json is missing.');
   }
 
   let metrics;
   try {
     metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
   } catch {
-    return {
-      available: false,
-      metricsPath,
-      overallGrade: '',
-      overallScore: 0,
-      dimensions: [],
-      improvements: [],
-      summary: { totalChecks: 0, passedChecks: 0, failedChecks: 0, percent: 0, belowAMinus: [] }
-    };
+    return buildUnavailableQcdsStatus(rootPath, workItems, metricsPath, 'docs/qcds-strict-metrics.json could not be parsed.');
   }
 
   const work = [...(workItems.todos || []), ...(workItems.issues || []), ...(workItems.tasks || [])];
@@ -446,6 +430,46 @@ function buildQcdsStatus(rootPath, workItems = {}) {
       failedChecks,
       percent: percent(passedChecks, totalChecks),
       belowAMinus
+    }
+  };
+}
+
+function buildUnavailableQcdsStatus(rootPath, workItems = {}, metricsPath = '', reason = '') {
+  const work = [...(workItems.todos || []), ...(workItems.issues || []), ...(workItems.tasks || [])];
+  const dimensions = QCDS_AXES.map((axis) => {
+    const linkedItems = uniqueLinkedItems(linkQcdsWorkItems(axis, { id: axis, description: axis }, work));
+    return {
+      id: axis.toLowerCase(),
+      label: axis,
+      score: 0,
+      grade: 'D-',
+      passed: 0,
+      expected: 1,
+      status: 'needs-improvement',
+      checks: [{
+        id: 'missing-qcds-metrics',
+        description: reason || 'QCDS metrics are not available.',
+        pass: false,
+        detail: metricsPath ? toSlash(path.relative(rootPath, metricsPath)) : 'QCDS metrics file not found.',
+        linkedItems
+      }],
+      linkedItems
+    };
+  });
+  const improvements = buildQcdsImprovements(dimensions, work);
+  return {
+    available: false,
+    metricsPath,
+    overallGrade: 'D-',
+    overallScore: 0,
+    dimensions,
+    improvements,
+    summary: {
+      totalChecks: dimensions.length,
+      passedChecks: 0,
+      failedChecks: dimensions.length,
+      percent: 0,
+      belowAMinus: QCDS_AXES.slice()
     }
   };
 }
@@ -541,6 +565,10 @@ function exists(rootPath, relativePath) {
 
 function percent(done, total) {
   return total > 0 ? Math.round((done / total) * 100) : 0;
+}
+
+function unique(items) {
+  return Array.from(new Set((Array.isArray(items) ? items : []).filter(Boolean)));
 }
 
 function ensureIssuesDirectory(rootPath) {
@@ -714,6 +742,140 @@ function createTaskMarkdown(input = {}) {
   ].filter((line, index, lines) => line !== '' || lines[index - 1] !== '').join('\n') + '\n';
 }
 
+function createBlockedFollowUpIssue(rootPath, item = {}, options = {}) {
+  const documentText = options.documentText !== undefined
+    ? String(options.documentText || '')
+    : (item.filePath && fs.existsSync(item.filePath) ? fs.readFileSync(item.filePath, 'utf8') : '');
+  const blocker = inferBlockedCause({
+    item,
+    documentText,
+    terminalText: options.terminalText || '',
+    sessionText: options.sessionText || ''
+  });
+  const title = 'Blocked: ' + (item.title || titleFromFile(item.filePath || '') || 'Work item');
+  const issuePath = nextIssueFilePath(rootPath, title);
+  const issueRelative = toSlash(path.relative(rootPath, issuePath));
+  const originalRelative = item.relativePath || (item.filePath ? toSlash(path.relative(rootPath, item.filePath)) : '');
+  const qcdsAxes = unique([...(item.qcdsAxes || []), 'Quality', 'Delivery']);
+  const priority = ['P0', 'P1'].includes(item.priority) ? item.priority : 'P2';
+  const evidence = evidenceExcerpt([documentText, options.terminalText, options.sessionText].filter(Boolean).join('\n'));
+  fs.writeFileSync(issuePath, createIssueMarkdown({
+    title,
+    status: 'open',
+    priority,
+    type: blocker.type,
+    source: 'blocked-follow-up',
+    qcdsAxes,
+    context: [
+      `元の Work Item が \`closed\` にならなかったため、blocked 原因を切り出した follow-up Issue です。`,
+      originalRelative ? `- Original: [${originalRelative}](../${originalRelative})` : '',
+      `- Detected blocker: ${blocker.summary}`,
+      '',
+      '## Evidence',
+      '',
+      '```text',
+      evidence || '(evidence was not available)',
+      '```'
+    ].filter(Boolean).join('\n'),
+    acceptance: [
+      blocker.acceptance,
+      '元の Work Item を再実行し、Status または checkbox が完了状態になることを確認する。',
+      '解消内容、検証結果、必要なら手動作業手順を元の Work Item とこの Issue の Notes に記録する。'
+    ]
+  }), 'utf8');
+  const todo = appendTodoWorkItemLink(rootPath, {
+    title,
+    priority,
+    qcdsAxes,
+    links: [
+      { label: 'Issue', href: issueRelative },
+      ...(originalRelative ? [{ label: 'Original', href: originalRelative }] : [])
+    ]
+  });
+  appendBlockedFollowUpReference(item.filePath, rootPath, issueRelative, blocker.summary);
+  return {
+    created: true,
+    issuePath,
+    issueRelative,
+    todoPath: todo.todoPath,
+    todoCreated: todo.created,
+    blocker
+  };
+}
+
+function inferBlockedCause(input = {}) {
+  const item = input.item || {};
+  const source = [
+    item.title,
+    item.status,
+    input.documentText,
+    input.terminalText,
+    input.sessionText
+  ].filter(Boolean).join('\n').toLowerCase();
+  if (/(gh auth|token invalid|authentication|authenticate|github cli|gh\.exe auth|not logged in|bad credentials)/i.test(source)) {
+    return {
+      id: 'github-auth',
+      type: 'chore',
+      summary: 'GitHub CLI authentication or token scope blocked completion.',
+      acceptance: '`gh auth status` が通り、必要な `repo` / `workflow` scope で対象 repository 操作を実行できる。'
+    };
+  }
+  if (/(index\.lock|permission denied|access is denied|\.git[/\\]index|git add|git commit|git push)/i.test(source)) {
+    return {
+      id: 'git-write-permission',
+      type: 'chore',
+      summary: 'Git write permission or .git/index.lock access blocked completion.',
+      acceptance: 'Git index lock / ACL / sandbox 設定を確認し、`git status` と必要な `git add` / `commit` / `push` が実行できる。'
+    };
+  }
+  if (/(eperm|chrome|extension load|runtime gate|headless|browser)/i.test(source)) {
+    return {
+      id: 'runtime-gate',
+      type: 'bug',
+      summary: 'Runtime gate or browser/Chrome environment blocked verification.',
+      acceptance: '対象 runtime gate を再実行できる環境を整え、非 blank 表示または拡張読み込み確認が合格する。'
+    };
+  }
+  if (/(rg\.exe|ripgrep|get-command rg|commandnotfound)/i.test(source)) {
+    return {
+      id: 'tool-path',
+      type: 'chore',
+      summary: 'Required CLI tool PATH resolution blocked completion.',
+      acceptance: 'VS Code 内 PowerShell と extension-launched Codex terminal の両方で必要 CLI を `Get-Command` できる。'
+    };
+  }
+  return {
+    id: 'unknown-blocker',
+    type: 'chore',
+    summary: 'Completion was blocked, but the root cause needs investigation.',
+    acceptance: 'blocked の直接原因を調査し、再現条件、解消策、再実行結果を記録する。'
+  };
+}
+
+function evidenceExcerpt(value) {
+  const text = String(value || '')
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .filter(Boolean)
+    .slice(-40)
+    .join('\n');
+  return text.length <= 3000 ? text : text.slice(text.length - 3000);
+}
+
+function appendBlockedFollowUpReference(filePath, rootPath, issueRelative, summary) {
+  if (!filePath || !fs.existsSync(filePath) || !isWorkItemDocPath(filePath)) return;
+  if (isTodoFilePath(filePath)) return;
+  let content = fs.readFileSync(filePath, 'utf8');
+  const line = `- ${new Date().toISOString()} [${issueRelative}](../${issueRelative}) - ${summary}`;
+  if (content.includes(`](${issueRelative})`) || content.includes(`](../${issueRelative})`)) return;
+  if (!/^##\s+Blocked Follow-up\s*$/mi.test(content)) {
+    content = content.replace(/\s*$/, '') + '\n\n## Blocked Follow-up\n\n';
+  } else if (!content.endsWith('\n')) {
+    content += '\n';
+  }
+  fs.writeFileSync(filePath, content + line + '\n', 'utf8');
+}
+
 function formatGitHubIssueLink(input = {}) {
   const url = input.githubIssueUrl || '';
   if (!url) return '';
@@ -733,7 +895,7 @@ function defaultIssuesReadme() {
     '- ファイル名は `0001-short-title.md` のように連番と短い slug を使います。',
     '- `Status` は `open`、`in-progress`、`blocked`、`closed` のいずれかにします。',
     '- `Priority` は `P0` から `P4` を使います。',
-    '- 具体作業は `Tasks/*.md` に分け、Issue には `Tasks:` でリンクします。',
+    '- 具体作業も原則として Issue の Acceptance Criteria に集約します。既存互換が必要な場合だけ `Tasks/*.md` を `Tasks:` でリンクします。',
     '',
     '## Template',
     '',
@@ -748,7 +910,7 @@ function defaultIssuesReadme() {
     '- Phase: 04-implementation',
     '- Created: YYYY-MM-DD',
     '- QCDS: Quality, Delivery',
-    '- Tasks: [Tasks/0001-example.md](../Tasks/0001-example.md)',
+    '- Tasks: ',
     '',
     '## Context',
     '',
@@ -769,7 +931,7 @@ function defaultTasksReadme() {
   return [
     '# Tasks',
     '',
-    'このディレクトリは、TODO と Issue から参照される具体的な実施内容を管理します。',
+    'このディレクトリは legacy compatibility 用です。新規作業は原則として `Issues/*.md` に集約し、既存プロジェクトとの互換が必要な場合だけ Task を作成します。',
     '',
     '## File Rule',
     '',
@@ -810,5 +972,6 @@ module.exports = {
   nextTaskFilePath,
   createIssueMarkdown,
   createTaskMarkdown,
+  createBlockedFollowUpIssue,
   slugify
 };

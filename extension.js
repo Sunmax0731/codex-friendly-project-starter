@@ -16,6 +16,7 @@ const {
   nextTaskFilePath,
   createIssueMarkdown,
   createTaskMarkdown,
+  createBlockedFollowUpIssue,
   appendTodoWorkItemLink,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
@@ -48,6 +49,10 @@ const {
   buildCodexAppTerminalCommand,
   buildCodexCheckTerminalCommand
 } = require('./src/codex-cli.cjs');
+const {
+  createCodexSessionRecord,
+  recordCodexSession
+} = require('./src/codex-sessions.cjs');
 const {
   WORK_ITEM_DRAFT_JSON_SCHEMA,
   buildCodexWorkItemDraftPrompt,
@@ -102,8 +107,9 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.importGitHubIssues', () => importGitHubIssuesCommand(context, treeProvider, workItemsProvider)),
-    vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
-    vscode.commands.registerCommand('codex-friendly-project-starter.createWorkItemFromNaturalLanguage', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
+    vscode.commands.registerCommand('codex-friendly-project-starter.createBlockedFollowUpIssue', (item) => createBlockedFollowUpIssueCommand(context, workItemsProvider, item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'issue')),
+    vscode.commands.registerCommand('codex-friendly-project-starter.createWorkItemFromNaturalLanguage', () => openWorkItemComposer(context, workItemsProvider, 'issue')),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.copyFirstPrompt', () => copyFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.clearFirstPromptHistory', () => clearFirstPromptHistoryCommand(context)),
@@ -223,17 +229,18 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   const workspaceRoot = options.workspaceRoot || pickWorkspaceRoot();
   const target = resolveInvocationTarget({ workspaceRoot, prompt, input: options.input });
   const cwd = target.cwd;
-  const sandboxMode = config.get('codexSandboxMode', 'workspace-write');
   const runOptions = resolveCodexRunOptions(config, options.runOptions);
+  const sandboxMode = runOptions.sandboxMode;
   if (config.get('confirmBeforeCodexRun', true)) {
     const targetText = target.targetRepositoryPath && target.targetRepositoryPath !== cwd
       ? `\nTarget repo: ${target.targetRepositoryPath}`
       : '';
     const modelText = runOptions.model ? `\nModel: ${runOptions.model}` : '';
     const intelligenceText = runOptions.modelReasoningEffort ? `\nIntelligence: ${runOptions.modelReasoningEffort}` : '';
+    const accessText = sandboxMode ? `\nAccess: ${sandboxMode}` : '';
     const warning = sandboxMode === 'danger-full-access'
-      ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}${modelText}${intelligenceText}\n続行しますか?`
-      : `Codex CLI を ${cwd} で実行します。${targetText}${modelText}${intelligenceText}\n続行しますか?`;
+      ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}${modelText}${intelligenceText}${accessText}\n続行しますか?`
+      : `Codex CLI を ${cwd} で実行します。${targetText}${modelText}${intelligenceText}${accessText}\n続行しますか?`;
     const answer = await vscode.window.showWarningMessage(warning, { modal: false }, 'Run Codex', 'Cancel');
     if (answer !== 'Run Codex') return;
   }
@@ -249,6 +256,22 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
     toolPaths: collectCodexToolPaths(config)
   });
   const launcherFilePath = await writeLauncherFile(context, launcherScript);
+  if (config.get('recordCodexSessions', true)) {
+    try {
+      const record = createCodexSessionRecord({
+        sourceLabel,
+        workspaceRoot,
+        cwd,
+        promptFilePath,
+        launcherFilePath,
+        runOptions,
+        workItems: options.workItems || []
+      });
+      recordCodexSession(workspaceRoot, record);
+    } catch (error) {
+      console.warn('Codex Starter: failed to record Codex session', error);
+    }
+  }
   const command = buildPowerShellFileTerminalCommand(launcherFilePath);
   runTerminalCommand('Codex Agent', command, cwd);
   vscode.window.setStatusBarMessage(`Codex Starter: ${sourceLabel} を Codex CLI に渡しました`, 5000);
@@ -279,7 +302,9 @@ async function pickCodexRunOptions(config) {
   if (model === undefined) return undefined;
   const modelReasoningEffort = await pickCodexReasoningEffort(config, configured.modelReasoningEffort);
   if (modelReasoningEffort === undefined) return undefined;
-  return resolveCodexRunOptions(config, { model, modelReasoningEffort });
+  const sandboxMode = await pickCodexSandboxMode(config, configured.sandboxMode);
+  if (sandboxMode === undefined) return undefined;
+  return resolveCodexRunOptions(config, { model, modelReasoningEffort, sandboxMode });
 }
 
 async function pickCodexModel(config, configuredModel) {
@@ -347,6 +372,52 @@ async function pickCodexReasoningEffort(config, configuredEffort) {
   return picked ? picked.value : undefined;
 }
 
+async function pickCodexSandboxMode(config, configuredSandboxMode) {
+  const picked = await vscode.window.showQuickPick([
+    {
+      label: '設定値を使う',
+      description: configuredSandboxMode || 'workspace-write',
+      detail: 'codexFriendlyProjectStarter.codexSandboxMode',
+      value: configuredSandboxMode,
+      picked: true
+    },
+    {
+      label: 'Default / workspace-write',
+      description: 'workspace files can be edited; external locations remain restricted by Codex CLI sandbox',
+      value: 'workspace-write'
+    },
+    {
+      label: 'Read only',
+      description: 'no file writes',
+      value: 'read-only'
+    },
+    {
+      label: 'Full access',
+      description: 'danger-full-access',
+      value: 'danger-full-access'
+    },
+    {
+      label: 'Custom',
+      description: 'enter a codex exec sandbox mode',
+      custom: true
+    }
+  ], { placeHolder: 'Codex のアクセス権限を選択' });
+  if (!picked) return undefined;
+  if (!picked.custom) return picked.value;
+  const input = await vscode.window.showInputBox({
+    prompt: 'codex exec -s に渡す sandbox mode',
+    value: configuredSandboxMode || 'workspace-write',
+    placeHolder: 'read-only / workspace-write / danger-full-access'
+  });
+  if (input === undefined) return undefined;
+  const value = cleanString(input);
+  if (!['read-only', 'workspace-write', 'danger-full-access'].includes(value)) {
+    vscode.window.showWarningMessage('Codex Starter: unsupported sandbox mode. read-only / workspace-write / danger-full-access から選んでください。');
+    return undefined;
+  }
+  return value;
+}
+
 function resolveCodexRunOptions(config, overrides = {}) {
   const hasOwn = Object.prototype.hasOwnProperty;
   const model = hasOwn.call(overrides, 'model')
@@ -355,11 +426,17 @@ function resolveCodexRunOptions(config, overrides = {}) {
   const modelReasoningEffort = hasOwn.call(overrides, 'modelReasoningEffort')
     ? cleanString(overrides.modelReasoningEffort)
     : cleanString(config.get('codexReasoningEffort', ''));
+  const sandboxMode = hasOwn.call(overrides, 'sandboxMode')
+    ? cleanString(overrides.sandboxMode)
+    : cleanString(config.get('codexSandboxMode', 'workspace-write'));
+  const resolvedSandboxMode = ['read-only', 'workspace-write', 'danger-full-access'].includes(sandboxMode) ? sandboxMode : 'workspace-write';
   return {
     model,
     modelReasoningEffort,
+    sandboxMode: resolvedSandboxMode,
     modelLabel: model || 'Codex CLI default',
-    intelligenceLabel: modelReasoningEffort || 'Codex CLI default'
+    intelligenceLabel: modelReasoningEffort || 'Codex CLI default',
+    sandboxLabel: resolvedSandboxMode
   };
 }
 
@@ -548,6 +625,11 @@ async function handleDashboardMessage(args) {
     await startWorkItemWithCodexCommand(context, message);
     return;
   }
+  if (message?.type === 'createBlockedFollowUpIssue' && message.filePath) {
+    await createBlockedFollowUpIssueCommand(context, workItemsProvider, message);
+    treeProvider?.refresh();
+    return;
+  }
   if (message?.type === 'startAllWorkItems') {
     await startAllWorkItemsWithCodexCommand(context, workspaceRoot);
     return;
@@ -677,6 +759,7 @@ async function importGitHubIssuesCommand(context, treeProvider, workItemsProvide
     return;
   }
   const limit = Math.max(1, Math.min(100, Number(config.get('githubIssueImportLimit', 30)) || 30));
+  const createTask = config.get('workItemDetailMode', 'issues-only') === 'issues-and-tasks';
   let remoteIssues;
   try {
     remoteIssues = await vscode.window.withProgress({
@@ -726,13 +809,13 @@ async function importGitHubIssuesCommand(context, treeProvider, workItemsProvide
         draftSource: result.source,
         inferenceSource: result.source
       };
-      imported.push(createLocalWorkItemsFromGitHubIssue(workspaceRoot, issue, draft));
+      imported.push(createLocalWorkItemsFromGitHubIssue(workspaceRoot, issue, draft, { createTask }));
     }
   });
   treeProvider?.refresh();
   workItemsProvider?.refresh();
   const created = imported.filter((item) => item.created);
-  vscode.window.setStatusBarMessage(`Codex Starter: GitHub Issues ${created.length}件を TODO / Issues / Tasks に取り込みました`, 7000);
+  vscode.window.setStatusBarMessage(`Codex Starter: GitHub Issues ${created.length}件を TODO / Issues${createTask ? ' / Tasks' : ''} に取り込みました`, 7000);
   if (created[0]?.issuePath) await openMarkdownWebview(context, created[0].issuePath);
 }
 
@@ -807,6 +890,7 @@ async function inferWorkItemDraftWithCodex(context, input, workspaceRootOverride
   const timeout = Math.max(5000, Number(config.get('codexWorkItemInferenceTimeoutMs', 60000)) || 60000);
   try {
     const { stdout, stderr } = await execFileAsync('powershell', [
+      '-NoLogo',
       '-NoProfile',
       '-ExecutionPolicy',
       'Bypass',
@@ -880,6 +964,30 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
   return { openPath: issuePath, created: [issuePath, ...(todo.created ? [todo.todoPath] : [])] };
 }
 
+async function createBlockedFollowUpIssueCommand(context, workItemsProvider, item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (!filePath) {
+    vscode.window.showWarningMessage('Codex Starter: blocked follow-up target was not found.');
+    return;
+  }
+  const workspaceRoot = pickWorkspaceRootForPath(filePath);
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const resolved = resolveWorkItemReference(dashboard, {
+    filePath,
+    lineNumber: item?.lineNumber,
+    kind: item?.kind
+  });
+  if (!resolved) {
+    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues / Tasks.');
+    return;
+  }
+  const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
+  const result = createBlockedFollowUpIssue(workspaceRoot, resolved, { documentText });
+  workItemsProvider?.refresh();
+  await openMarkdownWebview(context, result.issuePath);
+  vscode.window.setStatusBarMessage(`Codex Starter: blocked follow-up Issue を作成しました (${result.blocker.id})`, 6000);
+}
+
 async function openAgentDoc(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath;
   if (!filePath) return;
@@ -922,7 +1030,7 @@ async function startWorkItemWithCodexCommand(context, item) {
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
     runConfig: runOptions
   });
-  await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot, runOptions });
+  await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot, runOptions, workItems: [resolved] });
 }
 
 async function startSelectedWorkItemsWithCodexCommand(context, workspaceRootOverride, references = []) {
@@ -947,7 +1055,7 @@ async function startSelectedWorkItemsWithCodexCommand(context, workspaceRootOver
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
     runConfig: runOptions
   });
-  await invokeCodexAgent(context, prompt, `Selected Work Items (${selectedItems.length})`, { workspaceRoot, runOptions });
+  await invokeCodexAgent(context, prompt, `Selected Work Items (${selectedItems.length})`, { workspaceRoot, runOptions, workItems: selectedItems });
 }
 
 async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride) {
@@ -969,7 +1077,7 @@ async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride)
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
     runConfig: runOptions
   });
-  await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot, runOptions });
+  await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot, runOptions, workItems: openWorkItemsFromDashboard(dashboard) });
 }
 
 function resolveWorkItemReference(dashboard, reference = {}) {
@@ -1339,13 +1447,13 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
       icon: new vscode.ThemeIcon('issues')
     },
     {
-      label: prefix + 'Tasks ' + (dashboard.stats.tasks?.closed || 0) + '/' + (dashboard.stats.tasks?.total || 0),
+      label: prefix + 'Legacy Tasks ' + (dashboard.stats.tasks?.closed || 0) + '/' + (dashboard.stats.tasks?.total || 0),
       description: (dashboard.stats.tasks?.percent || 0) + '%',
       children: openTasks,
       icon: new vscode.ThemeIcon('tasklist')
     },
     {
-      label: prefix + 'QCDS ' + (dashboard.qcds.available ? dashboard.qcds.overallGrade + ' ' + dashboard.qcds.overallScore : 'missing'),
+      label: prefix + 'QCDS ' + (dashboard.qcds.overallGrade ? dashboard.qcds.overallGrade + ' ' + dashboard.qcds.overallScore : 'missing'),
       description: dashboard.qcds.summary.percent + '%',
       children: qcdsDimensions,
       icon: new vscode.ThemeIcon('dashboard')

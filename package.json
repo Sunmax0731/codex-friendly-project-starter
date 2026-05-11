@@ -43,6 +43,7 @@
     "onCommand:codex-friendly-project-starter.openWorkItemComposer",
     "onCommand:codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
     "onCommand:codex-friendly-project-starter.importGitHubIssues",
+    "onCommand:codex-friendly-project-starter.createBlockedFollowUpIssue",
     "onCommand:codex-friendly-project-starter.openAgentDoc",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
@@ -148,7 +149,7 @@
       },
       {
         "command": "codex-friendly-project-starter.initializeTasksDirectory",
-        "title": "Codex Starter: Initialize Tasks Directory",
+        "title": "Codex Starter: Initialize Legacy Tasks Directory",
         "icon": "$(tasklist)"
       },
       {
@@ -158,7 +159,7 @@
       },
       {
         "command": "codex-friendly-project-starter.createLocalTask",
-        "title": "Codex Starter: Create Local Task",
+        "title": "Codex Starter: Create Legacy Local Task",
         "icon": "$(add)"
       },
       {
@@ -175,6 +176,11 @@
         "command": "codex-friendly-project-starter.importGitHubIssues",
         "title": "Codex Starter: Import GitHub Issues",
         "icon": "$(github)"
+      },
+      {
+        "command": "codex-friendly-project-starter.createBlockedFollowUpIssue",
+        "title": "Codex Starter: Create Blocked Follow-up Issue",
+        "icon": "$(debug-disconnect)"
       },
       {
         "command": "codex-friendly-project-starter.openAgentDoc",
@@ -313,6 +319,11 @@
           "group": "inline@2"
         },
         {
+          "command": "codex-friendly-project-starter.createBlockedFollowUpIssue",
+          "when": "view == codexFriendlyWorkItems && viewItem == codexWorkItem",
+          "group": "inline@3"
+        },
+        {
           "command": "codex-friendly-project-starter.openMarkdownSource",
           "when": "view == codexFriendlyWorkItems && viewItem == codexWorkItem",
           "group": "navigation@1"
@@ -331,7 +342,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / legacy Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {
@@ -360,7 +371,7 @@
             "danger-full-access"
           ],
           "default": "workspace-write",
-          "description": "Sandbox mode passed to `codex exec`."
+          "description": "Default access permission passed to `codex exec -s`. Work Item starts can override this per run."
         },
         "codexFriendlyProjectStarter.codexGitWritePolicy": {
           "type": "string",
@@ -407,7 +418,21 @@
         "codexFriendlyProjectStarter.promptForCodexRunOptions": {
           "type": "boolean",
           "default": true,
-          "description": "Ask for model and intelligence before starting TODO / Issue / Task processing with Codex."
+          "description": "Ask for model, intelligence, and access permission before starting TODO / Issue / legacy Task processing with Codex."
+        },
+        "codexFriendlyProjectStarter.workItemDetailMode": {
+          "type": "string",
+          "enum": [
+            "issues-only",
+            "issues-and-tasks"
+          ],
+          "default": "issues-only",
+          "description": "Default local detail format for new imported/composed work items. Existing Tasks remain readable as legacy work items."
+        },
+        "codexFriendlyProjectStarter.recordCodexSessions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Write docs/codex-sessions.md and docs/codex-sessions.jsonl in the target project whenever Codex CLI is launched."
         },
         "codexFriendlyProjectStarter.codexProfile": {
           "type": "string",

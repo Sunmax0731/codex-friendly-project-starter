@@ -36,7 +36,13 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     ephemeral: true
   });
   assert.match(script, /\$OutputEncoding = \$utf8NoBom/);
+  assert.match(script, /\$env:PYTHONIOENCODING = 'utf-8'/);
+  assert.match(script, /\$env:LC_ALL = 'C.UTF-8'/);
   assert.match(script, /chcp\.com 65001/);
+  assert.match(script, /=== Codex Starter: Codex exec ===/);
+  assert.match(script, /sandboxMode: read-only/);
+  assert.match(script, /--- Codex CLI output ---/);
+  assert.match(script, /--- Codex CLI finished ---/);
   assert.match(script, /\$codexCommand = 'codex'/);
   assert.match(script, /try \{ \$codexExecutable = \(Get-Command \$codexCommand -ErrorAction Stop\)\.Source \} catch \{\}/);
   assert.match(script, /\$codexToolPathCandidates = @\(/);
@@ -69,7 +75,7 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
 
 test('buildPowerShellFileTerminalCommand launches a visible script file', () => {
   const command = buildPowerShellFileTerminalCommand('D:\\tmp\\run-codex.ps1');
-  assert.equal(command, "powershell -NoProfile -ExecutionPolicy Bypass -File 'D:\\tmp\\run-codex.ps1'");
+  assert.equal(command, "powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File 'D:\\tmp\\run-codex.ps1'");
 });
 
 test('app and check scripts use the configured CLI command', () => {
@@ -78,6 +84,7 @@ test('app and check scripts use the configured CLI command', () => {
   assert.match(app, /& \$codexExecutable app/);
   const check = buildCodexCheckScript({ cliPath: 'codex', toolPaths: ['E:\\DevEnv\\GitHubCLI'] });
   assert.match(check, /\$codexCommand = 'codex'/);
+  assert.match(check, /=== Codex Starter: Codex CLI check ===/);
   assert.match(check, /exec --help/);
   assert.match(check, /Get-Command rg\.exe/);
   assert.match(check, /Get-Command gh\.exe/);

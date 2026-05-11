@@ -11,9 +11,10 @@
 - Webview は VS Code のテーマ色を使う。
 - Work Dashboard の上部 action は、プロジェクト進行中に使う日常操作と初回セットアップ操作に分けている。
 - Work Dashboard の中段セクションは折りたたみ可能にし、QCDS、release readiness、open work items を必要に応じて開閉できる。
-- Issue / Task / TODO の priority、status、type、phase、QCDS は色付き tag として表示する。
+- Issue / legacy Task / TODO の priority、status、type、phase、QCDS は色付き tag として表示する。
 - Work Item Composer は issue type と task phase の分類を拡張し、security、performance、refactor、chore、maintenance などを扱える。
-- AI Agent 起動前に workspace root と sandbox mode を確認できる。
+- AI Agent 起動前に workspace root、アクセス権限、model、インテリジェンスを確認できる。
+- PowerShell launcher は UTF-8 prelude、section 見出し、空行を出し、Codex CLI 出力を読みやすく区切る。
 - GUI で提供している主要機能は Command Palette からも呼び出せる。Command Palette の主要機能は Dashboard、Tree title action、Tree item context menu、Markdown WebView toolbar のいずれかからも辿れる。
 
 ## 後続

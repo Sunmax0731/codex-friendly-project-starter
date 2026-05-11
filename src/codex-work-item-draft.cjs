@@ -45,7 +45,7 @@ function buildCodexWorkItemDraftPrompt(input = {}, options = {}) {
     '# Work Item Draft JSON Task',
     '',
     'あなたは VS Code 拡張の Work Item Composer から呼び出される Codex CLI です。',
-    '入力された自然言語メモを Issue / Task の下書き JSON に構造化してください。',
+    '入力された自然言語メモを Issue の下書き JSON に構造化してください。legacy Task は明示された場合だけ同じ項目を使います。',
     'ファイル編集、コマンド実行、追加調査は不要です。回答は JSON オブジェクトだけにしてください。',
     '',
     '## 出力スキーマ',

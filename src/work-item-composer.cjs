@@ -1,8 +1,8 @@
 const WORK_ITEM_FORM_OPTIONS = {
   modes: [
     { id: 'issue', label: 'Issue' },
-    { id: 'task', label: 'Task' },
-    { id: 'linked', label: 'Issue + Task' }
+    { id: 'task', label: 'Legacy Task' },
+    { id: 'linked', label: 'Issue + Legacy Task' }
   ],
   priorities: ['P0', 'P1', 'P2', 'P3', 'P4'],
   issueTypes: ['feature', 'bug', 'docs', 'release', 'test', 'task', 'ux', 'security', 'performance', 'refactor', 'chore'],
@@ -198,7 +198,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
 <body>
 <main>
   <h1>Codex Work Item Composer</h1>
-  <div class="lead">Codex CLI で自然言語を Issue / Task の下書きへ構造化し、必要な項目を GUI で調整して Markdown 化します。</div>
+  <div class="lead">Codex CLI で自然言語を Issue の下書きへ構造化し、必要な項目を GUI で調整して Markdown 化します。legacy Task は明示選択時だけ作成します。</div>
   <label class="wide">自然言語メモ<textarea id="naturalText" placeholder="例: P1。リリース前にVSIX生成とQCDS evidenceを同期できるようにしたい。完了条件は npm test 成功、release docs更新、GitHub公開状態確認。"></textarea></label>
   <div class="actions">
     <button id="infer">Codexで自然言語から反映</button>
@@ -212,7 +212,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     <label>Issue type<select id="type"></select></label>
     <label>Task phase<select id="phase"></select></label>
   </div>
-  <label class="wide">Title<input id="title" placeholder="Issue / Task title"></label>
+  <label class="wide">Title<input id="title" placeholder="Issue title"></label>
   <label class="wide">Context<textarea id="context" placeholder="背景、目的、制約"></textarea></label>
   <label class="wide">Acceptance Criteria<textarea id="acceptance" placeholder="1行に1つずつ完了条件を書く"></textarea></label>
   <label class="wide">QCDS</label>

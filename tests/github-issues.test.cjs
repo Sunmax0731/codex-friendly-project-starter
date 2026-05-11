@@ -72,13 +72,13 @@ test('buildGitHubIssueImportInput prepares Codex work item inference text', () =
     state: 'open',
     labels: ['bug']
   });
-  assert.equal(input.mode, 'linked');
+  assert.equal(input.mode, 'issue');
   assert.equal(input.title, 'Remote issue');
   assert.match(input.naturalText, /https:\/\/github\.com\/Sunmax0731\/repo\/issues\/7/);
   assert.match(input.naturalText, /Labels: bug/);
 });
 
-test('createLocalWorkItemsFromGitHubIssue writes TODO, Issue, Task, and duplicate guard', () => {
+test('createLocalWorkItemsFromGitHubIssue writes TODO and Issue by default', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-gh-import-'));
   const githubIssue = {
     number: 99,
@@ -101,19 +101,45 @@ test('createLocalWorkItemsFromGitHubIssue writes TODO, Issue, Task, and duplicat
   const result = createLocalWorkItemsFromGitHubIssue(root, githubIssue, draft);
   assert.equal(result.created, true);
   assert.equal(fs.existsSync(result.issuePath), true);
-  assert.equal(fs.existsSync(result.taskPath), true);
+  assert.equal(result.taskPath, '');
 
   const todo = fs.readFileSync(path.join(root, 'TODO.md'), 'utf8');
   const issue = fs.readFileSync(result.issuePath, 'utf8');
-  const task = fs.readFileSync(result.taskPath, 'utf8');
   assert.match(todo, /\[GitHub #99\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/99\)/);
   assert.match(issue, /- GitHub Issue: \[#99\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/99\)/);
-  assert.match(task, /- GitHub Issue: \[#99\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/99\)/);
-  assert.match(issue, /\[Tasks\/0001-remote-backlog-item\.md\]\(\.\.\/Tasks\/0001-remote-backlog-item\.md\)/);
+  assert.doesNotMatch(issue, /Tasks\/0001-remote-backlog-item\.md/);
   assert.equal(findExistingGitHubIssueImport(root, githubIssue).relativePath, 'TODO.md');
 
   const duplicate = createLocalWorkItemsFromGitHubIssue(root, githubIssue, draft);
   assert.equal(duplicate.created, false);
   assert.equal(duplicate.skipped, true);
   assert.equal(fs.readdirSync(path.join(root, 'Issues')).filter((name) => name.endsWith('.md')).length, 2);
+});
+
+test('createLocalWorkItemsFromGitHubIssue can create legacy Task when requested', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-gh-import-task-'));
+  const githubIssue = {
+    number: 100,
+    title: 'Remote legacy task item',
+    body: 'Original GitHub Issue body.',
+    url: 'https://github.com/Sunmax0731/sample/issues/100',
+    state: 'open',
+    labels: ['enhancement']
+  };
+  const draft = {
+    title: 'Remote legacy task item',
+    priority: 'P2',
+    type: 'feature',
+    phase: '04-implementation',
+    qcdsAxes: ['Delivery'],
+    acceptance: ['Legacy Task is linked when enabled.'],
+    draftSource: 'codex-cli'
+  };
+  const result = createLocalWorkItemsFromGitHubIssue(root, githubIssue, draft, { createTask: true });
+  assert.equal(result.created, true);
+  assert.equal(fs.existsSync(result.taskPath), true);
+  const issue = fs.readFileSync(result.issuePath, 'utf8');
+  const task = fs.readFileSync(result.taskPath, 'utf8');
+  assert.match(issue, /\[Tasks\/0001-remote-legacy-task-item\.md\]\(\.\.\/Tasks\/0001-remote-legacy-task-item\.md\)/);
+  assert.match(task, /- GitHub Issue: \[#100\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/100\)/);
 });

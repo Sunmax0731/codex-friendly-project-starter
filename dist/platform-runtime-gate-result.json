@@ -58,12 +58,17 @@
     {
       "id": "work-composer-command",
       "pass": true,
-      "detail": "Work Item Composer and Tasks init commands exist"
+      "detail": "Work Item Composer and legacy Tasks init commands exist"
     },
     {
       "id": "github-issue-import-command",
       "pass": true,
       "detail": "GitHub Issues import command and dashboard action exist"
+    },
+    {
+      "id": "blocked-follow-up-command",
+      "pass": true,
+      "detail": "Blocked Work Items can create follow-up Issues"
     },
     {
       "id": "work-item-start-command",
@@ -138,7 +143,7 @@
     {
       "id": "github-issue-import-contract",
       "pass": true,
-      "detail": "GitHub Issues import normalizes remote issues into local TODO, Issue, and Task"
+      "detail": "GitHub Issues import normalizes remote issues into local TODO and Issue with optional legacy Task"
     },
     {
       "id": "markdown-webview",
@@ -178,12 +183,22 @@
     {
       "id": "codex-exec-terminal",
       "pass": true,
-      "detail": "Codex exec UTF-8 launcher and tool PATH bootstrap command exists"
+      "detail": "Codex exec UTF-8 launcher, readable output, and tool PATH bootstrap command exists"
     },
     {
       "id": "codex-run-options",
       "pass": true,
-      "detail": "Work Item Codex model and intelligence selection exists"
+      "detail": "Work Item Codex model, intelligence, access, and blocked handling selection exists"
+    },
+    {
+      "id": "codex-session-records",
+      "pass": true,
+      "detail": "Codex CLI sessions are recorded in the target project"
+    },
+    {
+      "id": "qcds-fallback-dimensions",
+      "pass": true,
+      "detail": "QCDS tree exposes fallback dimensions when metrics are missing"
     },
     {
       "id": "codex-target-root",

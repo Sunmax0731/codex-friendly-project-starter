@@ -190,7 +190,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
   const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
   const taskItems = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 12);
-  const qcdsStatus = dashboard.qcds.available
+  const qcdsStatus = dashboard.qcds.overallGrade
     ? `${dashboard.qcds.overallGrade} / ${dashboard.qcds.overallScore}`
     : 'missing';
   return `<!doctype html>
@@ -257,10 +257,10 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <section class="action-panel" aria-label="Daily work actions">
     <div class="action-heading">プロジェクト進行中に使う操作</div>
     <div class="actions">
-      <button class="action" data-action="openComposer" data-mode="linked">自然言語から Issue + Task</button>
+      <button class="action" data-action="openComposer" data-mode="issue">自然言語から Issue</button>
       <button class="action" data-action="importGitHubIssues">GitHub Issues 取込</button>
       <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
-      <button class="action" data-action="openComposer" data-mode="task">Task を作成</button>
+      <button class="action" data-action="openComposer" data-mode="task">Legacy Task を作成</button>
       <button class="action secondary" data-action="openStarter">FirstPrompt</button>
       <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
       <button class="action secondary" data-action="openCodexApp">Codex App</button>
@@ -282,12 +282,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
-    ${metricHtml('Tasks', (dashboard.stats.tasks?.closed || 0) + ' / ' + (dashboard.stats.tasks?.total || 0), dashboard.stats.tasks?.percent || 0, (dashboard.stats.tasks?.open || 0) + (dashboard.stats.tasks?.active || 0) + (dashboard.stats.tasks?.blocked || 0) + ' active')}
+    ${metricHtml('Legacy Tasks', (dashboard.stats.tasks?.closed || 0) + ' / ' + (dashboard.stats.tasks?.total || 0), dashboard.stats.tasks?.percent || 0, (dashboard.stats.tasks?.open || 0) + (dashboard.stats.tasks?.active || 0) + (dashboard.stats.tasks?.blocked || 0) + ' active')}
     ${metricHtml('QCDS', qcdsStatus, dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
   </section>
   <details class="section" open>
     <summary>QCDS Current Status</summary>
-    <div class="list">${dashboard.qcds.available ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
+    <div class="list">${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
   </details>
   <details class="section" open>
     <summary>QCDS Improvements</summary>
@@ -306,7 +306,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
   </details>
   <details class="section" open>
-    <summary>Open Tasks</summary>
+    <summary>Open Legacy Tasks</summary>
     <div class="list">${taskItems.length ? taskItems.map(taskHtml).join('') : '<div class="empty">Open Task はありません。</div>'}</div>
   </details>
 </main>
@@ -325,6 +325,14 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       type: 'startWorkItem',
       filePath: button.getAttribute('data-start-file'),
       lineNumber: Number(button.getAttribute('data-start-line') || '1'),
+      kind: button.getAttribute('data-kind') || ''
+    }));
+  }
+  for (const button of document.querySelectorAll('button[data-blocked-file]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'createBlockedFollowUpIssue',
+      filePath: button.getAttribute('data-blocked-file'),
+      lineNumber: Number(button.getAttribute('data-blocked-line') || '1'),
       kind: button.getAttribute('data-kind') || ''
     }));
   }
@@ -423,7 +431,10 @@ function qcdsImprovementHtml(item) {
 function openButton(item) {
   if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
   const lineNumber = Number(item.lineNumber || 1);
-  return `<span class="row-actions"><label class="path"><input type="checkbox" data-select-file="${escapeHtml(item.filePath)}" data-select-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}" aria-label="select ${escapeHtml(item.title || 'work item')}"> Select</label><button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
+  const blocked = item.status === 'blocked'
+    ? `<button class="open-doc" data-blocked-file="${escapeHtml(item.filePath)}" data-blocked-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Follow-up</button>`
+    : '';
+  return `<span class="row-actions"><label class="path"><input type="checkbox" data-select-file="${escapeHtml(item.filePath)}" data-select-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}" aria-label="select ${escapeHtml(item.title || 'work item')}"> Select</label><button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button>${blocked}<button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
 }
 
 function badge(label, className = '') {
