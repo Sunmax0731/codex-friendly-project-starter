@@ -219,6 +219,17 @@
           "default": "",
           "description": "Optional Codex CLI profile passed to `codex exec -p`."
         },
+        "codexFriendlyProjectStarter.useCodexForWorkItemInference": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use Codex CLI read-only inference when reflecting natural language into Work Item Composer fields."
+        },
+        "codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs": {
+          "type": "number",
+          "default": 60000,
+          "minimum": 5000,
+          "description": "Timeout in milliseconds for Codex CLI Work Item Composer inference before falling back to local inference."
+        },
         "codexFriendlyProjectStarter.confirmBeforeCodexRun": {
           "type": "boolean",
           "default": true,

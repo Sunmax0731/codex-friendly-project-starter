@@ -133,7 +133,8 @@ test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
     naturalText: 'GUIでTaskを作成する'
   });
   assert.match(html, /Codex Work Item Composer/);
-  assert.match(html, /自然言語から反映/);
+  assert.match(html, /Codexで自然言語から反映/);
+  assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
   assert.match(html, /Issue \+ Task/);
 });

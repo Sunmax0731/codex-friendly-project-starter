@@ -79,7 +79,7 @@ Work Item Composer Webview は次を入力項目として持つ。
 - 自然言語メモ。
 - title、priority、issue type、task phase、context、acceptance criteria、QCDS axes。
 
-`自然言語から反映` はローカル heuristic で下書きを作る。明示的な `P0` から `P4`、`bug`、`release`、`docs`、`test`、`feature`、日本語の不具合、リリース、検証、UI/UX などを読み取り、priority、type、phase、QCDS を補完する。`作成して開く` は次のいずれかを実行する。
+`Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。`作成して開く` は次のいずれかを実行する。
 
 - Issue: `Issues/000x-slug.md` を作成する。
 - Task: `Tasks/000x-slug.md` を作成する。
@@ -147,5 +147,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.codexModel`: 任意の `-m` 値。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の `-p` 値。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を行う。
+- `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
+- `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
+
+Work Item Composer の自然言語反映では、拡張が prompt file、JSON schema file、last-message output file、launcher file を extension storage に保存し、PowerShell 経由で `codex exec -C <workspaceRoot> -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を実行する。Codex にはファイル編集や追加調査を求めず、JSON オブジェクトのみを返すよう指示する。解析は last-message output file を優先し、空の場合だけ stdout / stderr から JSON を抽出する。
 
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。

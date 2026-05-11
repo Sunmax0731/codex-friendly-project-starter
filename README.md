@@ -10,13 +10,17 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Work Dashboard: TODO、Issue、Task、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、主要操作を GUI ボタンから実行できます。
 - QCDS Status: `docs/qcds-strict-metrics.json` の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。
-- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md`、`Tasks/*.md`、または Issue + Task のペアを作成できます。
+- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md`、`Tasks/*.md`、または Issue + Task のペアを作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Local Tasks: `Tasks/*.md` を具体作業の実施単位として作成し、TODO / Issue / QCDS と紐づけて管理できます。
 - D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。
 - FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行などの進め方から開始プロンプトを生成します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示、または VS Code 内の Codex パネルへ貼り付けるためにコピーできます。
 - VS Code Codex Handoff: 生成した FirstPrompt は VS Code の Codex 拡張 / Codex パネルで実行される前提を明記します。必要に応じて `codex exec` を VS Code 統合ターミナルから直接起動することもできます。
+
+## Codex CLI 連携
+
+Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。
 
 ## 使い方
 

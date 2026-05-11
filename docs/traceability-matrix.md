@@ -8,7 +8,7 @@
 | local Issue を管理する | `src/work-items.cjs`, `extension.js`, `Issues/README.md` | `tests/work-items.test.cjs`, `Issues/*.md` |
 | local Task を管理する | `src/work-items.cjs`, `extension.js`, `Tasks/README.md` | `tests/work-items.test.cjs`, `Tasks/*.md` |
 | GUI で Issue / Task を作成する | `src/work-item-composer.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
-| 自然言語から Issue / Task を下書きする | `src/work-item-composer.cjs` | `tests/work-items.test.cjs`, `docs/manual-test.md` |
+| 自然言語から Issue / Task を下書きする | `src/work-item-composer.cjs`, `src/codex-work-item-draft.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
 | TODO / Issue / Task link を解析する | `src/work-items.cjs` | `tests/work-items.test.cjs`, `Issues/0008-work-item-task-linking.md` |
 | Work Dashboard を表示する | `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | QCDS status を可視化する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `dist/platform-runtime-gate-result.json` |

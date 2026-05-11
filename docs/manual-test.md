@@ -21,7 +21,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 9. Dashboard の `Issues 初期化` または Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が Markdown WebView で開くことを確認する。
 10. Dashboard の `Issue を作成` または `Codex Starter: Create Local Issue` から Work Item Composer を開き、`Issues/000x-*.md` が作成されることを確認する。
 11. Dashboard の `Task を作成` または `Codex Starter: Create Local Task` から Work Item Composer を開き、`Tasks/000x-*.md` が作成されることを確認する。
-12. Dashboard の `自然言語から作成` または `Codex Starter: Open Work Item Composer` で自然言語メモを入力し、`自然言語から反映` と `作成して開く` により Issue + Task が相互リンク付きで作成されることを確認する。
+12. Dashboard の `自然言語から作成` または `Codex Starter: Open Work Item Composer` で自然言語メモを入力し、`Codexで自然言語から反映` により Codex CLI 由来の下書きが title、priority、type、phase、QCDS、acceptance criteria に反映されることを確認する。その後 `作成して開く` により Issue + Task が相互リンク付きで作成されることを確認する。
 13. Dashboard の `D:\AI Docs 生成` または Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行し、`D:\AI` 由来の `AGENTS.md`、`SKILL.md`、`Design.md`、`Architecture.md`、工程別 `skills/*/SKILL.md` が生成されることを確認する。
 14. Command Palette から `Codex Starter: Generate FirstPrompt` を実行する。
 15. 分野、ガバナンス、工程、進行を選び、untitled Markdown に FirstPrompt が開くことを確認する。

@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { execFile } = require('node:child_process');
+const { promisify } = require('node:util');
 const vscode = require('vscode');
 const { DOMAINS } = require('./src/domains.cjs');
 const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('./src/workflows.cjs');
@@ -34,6 +36,13 @@ const {
   buildCodexAppTerminalCommand,
   buildCodexCheckTerminalCommand
 } = require('./src/codex-cli.cjs');
+const {
+  WORK_ITEM_DRAFT_JSON_SCHEMA,
+  buildCodexWorkItemDraftPrompt,
+  parseCodexWorkItemDraftOutput
+} = require('./src/codex-work-item-draft.cjs');
+
+const execFileAsync = promisify(execFile);
 
 function activate(context) {
   const treeProvider = new AgentDocsTreeProvider();
@@ -198,21 +207,20 @@ function openCodexAppCommand() {
 }
 
 async function writePromptFile(context, prompt) {
+  return writeStorageFile(context, 'first-prompt', '.md', prompt);
+}
+
+async function writeStorageFile(context, prefix, extension, content) {
   const storageRoot = context.storageUri?.fsPath || path.join(os.tmpdir(), 'codex-friendly-project-starter');
   await fs.promises.mkdir(storageRoot, { recursive: true });
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  const promptFilePath = path.join(storageRoot, `first-prompt-${stamp}.md`);
-  await fs.promises.writeFile(promptFilePath, prompt, 'utf8');
-  return promptFilePath;
+  const filePath = path.join(storageRoot, `${prefix}-${stamp}${extension}`);
+  await fs.promises.writeFile(filePath, content, 'utf8');
+  return filePath;
 }
 
 async function writeLauncherFile(context, script) {
-  const storageRoot = context.storageUri?.fsPath || path.join(os.tmpdir(), 'codex-friendly-project-starter');
-  await fs.promises.mkdir(storageRoot, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  const launcherFilePath = path.join(storageRoot, `run-codex-${stamp}.ps1`);
-  await fs.promises.writeFile(launcherFilePath, script, 'utf8');
-  return launcherFilePath;
+  return writeStorageFile(context, 'run-codex', '.ps1', script);
 }
 
 function runTerminalCommand(name, command, cwd) {
@@ -394,7 +402,9 @@ function openWorkItemComposer(context, workItemsProvider, mode = 'linked') {
   panel.webview.html = renderWorkItemComposerWebview(nonce, { mode });
   panel.webview.onDidReceiveMessage(async (message) => {
     if (message?.type === 'inferWorkItem') {
-      await panel.webview.postMessage({ type: 'draft', draft: inferWorkItemDraft(message.input || {}) });
+      await panel.webview.postMessage({ type: 'draftStatus', message: 'Codex CLI で自然言語を構造化しています...' });
+      const result = await inferWorkItemDraftWithCodex(context, message.input || {});
+      await panel.webview.postMessage({ type: 'draft', draft: result.draft, source: result.source, warning: result.warning || '' });
       return;
     }
     if (message?.type === 'openDashboard') {
@@ -408,6 +418,58 @@ function openWorkItemComposer(context, workItemsProvider, mode = 'linked') {
       vscode.window.setStatusBarMessage(`Codex Starter: ${result.created.length} work item(s) created`, 4000);
     }
   }, undefined, context.subscriptions);
+}
+
+async function inferWorkItemDraftWithCodex(context, input) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  if (!config.get('useCodexForWorkItemInference', true)) {
+    return { source: 'local', draft: { ...inferWorkItemDraft(input), inferenceSource: 'local' } };
+  }
+  const workspaceRoot = pickWorkspaceRoot();
+  const prompt = buildCodexWorkItemDraftPrompt(input, { workspaceRoot });
+  const promptFilePath = await writeStorageFile(context, 'work-item-draft-prompt', '.md', prompt);
+  const schemaFilePath = await writeStorageFile(context, 'work-item-draft-schema', '.json', JSON.stringify(WORK_ITEM_DRAFT_JSON_SCHEMA, null, 2) + '\n');
+  const outputFilePath = await writeStorageFile(context, 'work-item-draft-output', '.json', '');
+  const launcherScript = buildCodexExecScript({
+    cliPath: config.get('codexCliPath', 'codex'),
+    cwd: workspaceRoot,
+    promptFilePath,
+    sandboxMode: 'read-only',
+    model: config.get('codexModel', ''),
+    profile: config.get('codexProfile', ''),
+    outputSchemaPath: schemaFilePath,
+    outputLastMessagePath: outputFilePath,
+    color: 'never',
+    ephemeral: true
+  });
+  const launcherFilePath = await writeLauncherFile(context, launcherScript);
+  const timeout = Math.max(5000, Number(config.get('codexWorkItemInferenceTimeoutMs', 60000)) || 60000);
+  try {
+    const { stdout, stderr } = await execFileAsync('powershell', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      launcherFilePath
+    ], {
+      cwd: workspaceRoot,
+      windowsHide: true,
+      timeout,
+      maxBuffer: 1024 * 1024
+    });
+    const finalMessage = await fs.promises.readFile(outputFilePath, 'utf8').catch(() => '');
+    const draft = parseCodexWorkItemDraftOutput(finalMessage || [stdout, stderr].filter(Boolean).join('\n'), input);
+    vscode.window.setStatusBarMessage('Codex Starter: Codex CLI で Work Item 下書きを作成しました', 5000);
+    return { source: 'codex-cli', draft };
+  } catch (error) {
+    const warning = String(error?.message || error).split(/\r?\n/)[0].slice(0, 180);
+    vscode.window.setStatusBarMessage('Codex Starter: Codex CLI 推論に失敗したためローカル補完を使いました', 8000);
+    return {
+      source: 'local',
+      warning,
+      draft: { ...inferWorkItemDraft(input), inferenceSource: 'local' }
+    };
+  }
 }
 
 async function createWorkItemFromComposerInput(workspaceRoot, input) {

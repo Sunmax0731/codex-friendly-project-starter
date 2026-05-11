@@ -17,5 +17,6 @@
 - [x] [P1][QCDS:Quality,Satisfaction] [Markdown WebView とリンク遷移を追加する](Tasks/0007-markdown-webview-navigation.md)。
 - [x] [P1][QCDS:Quality,Delivery,Satisfaction] [TODO / Issue / Task / QCDS のリンク解析を追加する](Tasks/0008-work-item-task-linking.md)。
 - [x] [P1][QCDS:Delivery,Satisfaction] [VSIX readiness gate とローカルインストール確認手順をリリース工程へ追加する](Tasks/0009-release-readiness-hardening.md)。
+- [x] [P1][QCDS:Quality,Satisfaction] Work Item Composer の自然言語反映を Codex CLI read-only JSON 下書き生成へ置き換える。
 - [ ] [P2][QCDS:Satisfaction,Delivery] ワークスペース固有の `D:\AI\IDEAS\<Domain>` 情報から候補 project name を補完する。
 - [ ] [P2][QCDS:Satisfaction,Quality] 生成した FirstPrompt の履歴保存と再利用 UI を追加する。

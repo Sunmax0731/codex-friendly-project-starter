@@ -28,7 +28,7 @@
 1. Dashboard の `Issues 初期化`、または Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。
 2. `Issues/README.md` が作成または表示される。
 3. Dashboard の `Issue を作成`、または `Codex Starter: Create Local Issue` を実行して Work Item Composer を開く。
-4. 自然言語メモを入力して `自然言語から反映` を押すか、title、priority、type、acceptance criteria を GUI で入力する。
+4. 自然言語メモを入力して `Codexで自然言語から反映` を押すか、title、priority、type、acceptance criteria を GUI で入力する。
 5. `作成して開く` で `Issues/0001-short-title.md` を作成する。
 6. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
 7. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` で Tree View を更新する。
@@ -36,7 +36,7 @@
 ## Local Task を管理する
 
 1. Dashboard の `Task を作成`、または Command Palette から `Codex Starter: Create Local Task` を実行する。
-2. Work Item Composer で自然言語メモを下書きに変換するか、title、priority、phase、QCDS、acceptance criteria を入力する。
+2. Work Item Composer で `Codexで自然言語から反映` を使って自然言語メモを下書きに変換するか、title、priority、phase、QCDS、acceptance criteria を入力する。
 3. `作成して開く` で `Tasks/*.md` を作成する。
 4. 作成された `Tasks/*.md` を `TODO.md` または `Issues/*.md` から Markdown link で参照する。
 5. `Tasks/*.md` の checkbox と `Status` を更新すると、Work Items と QCDS Improvements に反映される。
@@ -45,9 +45,10 @@
 
 1. Dashboard の `自然言語から作成`、または `Codex Starter: Open Work Item Composer` を実行する。
 2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
-3. `自然言語から反映` を押して title、priority、type、phase、QCDS、acceptance criteria を補完する。
+3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
 5. `作成して開く` を押す。作成先が `Issue + Task` の場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
+6. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
 ## Markdown WebView で読む
 
@@ -97,5 +98,7 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.codexSandboxMode`: `read-only`、`workspace-write`、`danger-full-access`。
 - `codexFriendlyProjectStarter.codexModel`: 任意の model。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
+- `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
+- `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。

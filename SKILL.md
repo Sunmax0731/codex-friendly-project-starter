@@ -8,7 +8,7 @@
 4. TODO / Issue 可視化を触る場合は `src/work-items.cjs`、`src/webview.cjs`、`Issues/README.md` を確認します。
 5. Markdown WebView を触る場合は `src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs` を確認します。
 6. `D:\AI` 既定 docs 生成を触る場合は `src/default-docs.cjs` と `tests/default-docs.test.cjs` を確認します。
-7. Codex CLI 呼び出しを触る場合は `src/codex-cli.cjs` と `docs/vscode-verification-guide.md` を確認します。
+7. Codex CLI 呼び出しを触る場合は `src/codex-cli.cjs`、`src/codex-work-item-draft.cjs`、`docs/vscode-verification-guide.md` を確認します。
 8. 実装後に `npm test` を実行し、docs/qcds-evaluation.md と docs/qcds-strict-metrics.json を再生成します。
 9. 手動確認が必要な範囲は docs/manual-test.md と docs/user-guide.md に具体手順として残します。
 
@@ -23,6 +23,7 @@
 - Local Issue は `Issues/*.md` に保存し、GitHub Issue 連携前でも Issue 駆動の作業単位として扱えるようにします。
 - QCDS 改善は TODO の `[QCDS:Delivery]` tag または Issue metadata の `- QCDS: Delivery, Satisfaction` で可視化に紐づけます。
 - 具体作業は `Tasks/*.md` に分け、`TODO.md` と `Issues/*.md` から Markdown link で辿れるようにします。
+- Work Item Composer の自然言語反映は Codex CLI の read-only `codex exec` を優先し、JSON 解析失敗や timeout 時だけローカル heuristic にフォールバックします。
 - Markdown WebView は `source` を直接開く代替ではなく、work item と docs のリンク遷移を一画面で追える確認面として扱います。
 - 工程別 Skill 生成では、ルート `SKILL.md` に Phase Skills のリンクを置き、`skills/01-requirements` から `skills/06-release` までを読み込み先にします。
 

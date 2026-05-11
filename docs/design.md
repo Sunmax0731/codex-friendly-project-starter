@@ -35,7 +35,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - Dashboard action または Command Palette から開く。
 - 作成先は `Issue`、`Task`、`Issue + Task` の select で切り替える。
-- 自然言語メモと構造化フォームを同じ画面に置き、`自然言語から反映` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
+- 自然言語メモと構造化フォームを同じ画面に置き、`Codexで自然言語から反映` で Codex CLI に title、priority、type、phase、QCDS、acceptance criteria の JSON 下書きを作らせる。
+- Codex CLI 実行中はボタンを disable にし、完了時は Codex CLI 由来かローカル補完由来かを status text で表示する。
 - `作成して開く` で Markdown を作成し、作成結果を WebView で表示する。
 - `Issue + Task` では相互リンクを自動生成する。
 
@@ -73,6 +74,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 入力なし: `<repo-name>` と標準目的を補完する。
 - 設定変更: `includeQcdsChecklist` に従い QCDS ブロックを出し分ける。
 - Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
+- Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。
 - Tasks directory なし: Dashboard の `Tasks 初期化`、Work Item Composer、または default docs scaffold で `Tasks/README.md` を作成する。
 - Issue なし: Dashboard は Issue progress を 0% とし、Dashboard の `Issue を作成` または Work Item Composer を使う。

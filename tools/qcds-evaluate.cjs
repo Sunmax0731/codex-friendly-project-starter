@@ -22,6 +22,7 @@ const product = {
     'src/markdown-webview.cjs',
     'src/webview.cjs',
     'src/work-item-composer.cjs',
+    'src/codex-work-item-draft.cjs',
     'src/codex-cli.cjs',
     'src/invocation-target.cjs'
   ],
@@ -31,6 +32,7 @@ const product = {
     'tests/work-items.test.cjs',
     'tests/default-docs.test.cjs',
     'tests/markdown-webview.test.cjs',
+    'tests/codex-work-item-draft.test.cjs',
     'tests/codex-cli.test.cjs',
     'tests/invocation-target.test.cjs',
     'samples/representative-suite.json'

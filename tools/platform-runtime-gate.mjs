@@ -14,6 +14,7 @@ function runVsCodeExtensionGate() {
   const webview = readText('src/webview.cjs');
   const workItems = readText('src/work-items.cjs');
   const workItemComposer = readText('src/work-item-composer.cjs');
+  const codexWorkItemDraft = readText('src/codex-work-item-draft.cjs');
   const markdownWebview = readText('src/markdown-webview.cjs');
   const defaultDocs = readText('src/default-docs.cjs');
   const commands = new Set((pkg.contributes?.commands || []).map((item) => item.command));
@@ -34,6 +35,7 @@ function runVsCodeExtensionGate() {
     check('webview-panel', extension.includes('createWebviewPanel') && webview.includes('acquireVsCodeApi'), 'webview contract exists'),
     check('work-dashboard-webview', webview.includes('renderWorkDashboardWebview') && webview.includes('Codex Work Dashboard'), 'work dashboard webview contract exists'),
     check('work-item-composer-webview', workItemComposer.includes('renderWorkItemComposerWebview') && workItemComposer.includes('inferWorkItemDraft') && extension.includes('openWorkItemComposer'), 'work item composer webview contract exists'),
+    check('codex-work-item-draft', codexWorkItemDraft.includes('buildCodexWorkItemDraftPrompt') && codexWorkItemDraft.includes('WORK_ITEM_DRAFT_JSON_SCHEMA') && codexWorkItemDraft.includes('parseCodexWorkItemDraftOutput') && extension.includes('inferWorkItemDraftWithCodex') && extension.includes('outputSchemaPath'), 'Codex CLI work item draft inference exists'),
     check('markdown-webview', markdownWebview.includes('renderMarkdownDocumentWebview') && markdownWebview.includes('resolveMarkdownLink') && extension.includes('openMarkdownWebview'), 'Markdown WebView contract exists'),
     check('default-docs', defaultDocs.includes('ensureDefaultProjectDocs') && defaultDocs.includes('PHASE_SKILLS') && extension.includes('scaffoldDefaultDocsCommand'), 'D:\\AI default docs scaffold exists'),
     check('webview-run-codex', webview.includes('runCodex') && extension.includes('invokeCodexAgent'), 'webview can invoke Codex agent'),

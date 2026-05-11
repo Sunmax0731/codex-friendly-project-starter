@@ -86,6 +86,11 @@
       "detail": "work item composer webview contract exists"
     },
     {
+      "id": "codex-work-item-draft",
+      "pass": true,
+      "detail": "Codex CLI work item draft inference exists"
+    },
+    {
       "id": "markdown-webview",
       "pass": true,
       "detail": "Markdown WebView contract exists"

@@ -18,7 +18,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `Issues/*.md` の status、priority、acceptance criteria を解析し、TODO と同じ dashboard で可視化する。
 - `Tasks/*.md` を具体作業単位として管理し、TODO / Issue / QCDS からリンクできる。
 - Work Dashboard から Issue 作成、Task 作成、Issues / Tasks 初期化、FirstPrompt 画面、Codex CLI 確認などの主要操作を GUI で実行できる。
-- GUI フォームに自然言語メモを入力し、title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue / Task を作成できる。
+- GUI フォームに自然言語メモを入力し、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue / Task を作成できる。Codex CLI が利用できない場合はローカル補完で作業を止めない。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / Task を可視化する。
 - `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。
 - `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
@@ -46,4 +46,4 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
 - Work Items Tree と Work Dashboard が `TODO.md`、`Issues/*.md`、`Tasks/*.md` を読み取り、release readiness を表示できる。
 - QCDS Status が現在の grade と `QCDS:` metadata/tag で紐づいた TODO / Issue / Task を表示できる。
-- Work Item Composer が自然言語から Issue / Task の下書きを作り、作成後に Tree View と Dashboard が更新される。
+- Work Item Composer が Codex CLI で自然言語から Issue / Task の下書きを作り、作成後に Tree View と Dashboard が更新される。

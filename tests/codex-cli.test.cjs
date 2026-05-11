@@ -26,7 +26,11 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     promptFilePath: 'D:\\tmp\\first prompt.md',
     sandboxMode: 'read-only',
     model: 'gpt-5.4',
-    profile: 'default'
+    profile: 'default',
+    outputSchemaPath: 'D:\\tmp\\schema.json',
+    outputLastMessagePath: 'D:\\tmp\\last.json',
+    color: 'never',
+    ephemeral: true
   });
   assert.match(script, /\$OutputEncoding = \$utf8NoBom/);
   assert.match(script, /chcp\.com 65001/);
@@ -41,6 +45,13 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /'gpt-5\.4'/);
   assert.match(script, /'-p'/);
   assert.match(script, /'default'/);
+  assert.match(script, /'--output-schema'/);
+  assert.match(script, /'D:\\tmp\\schema\.json'/);
+  assert.match(script, /'-o'/);
+  assert.match(script, /'D:\\tmp\\last\.json'/);
+  assert.match(script, /'--color'/);
+  assert.match(script, /'never'/);
+  assert.match(script, /'--ephemeral'/);
   assert.match(script, /'-'/);
 });
 

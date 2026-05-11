@@ -22,6 +22,10 @@ function buildCodexExecScript(options = {}) {
   ];
   if (normalized.model) args.push('-m', normalized.model);
   if (normalized.profile) args.push('-p', normalized.profile);
+  if (clean(options.outputSchemaPath)) args.push('--output-schema', clean(options.outputSchemaPath));
+  if (clean(options.outputLastMessagePath)) args.push('-o', clean(options.outputLastMessagePath));
+  if (clean(options.color)) args.push('--color', clean(options.color));
+  if (options.ephemeral === true) args.push('--ephemeral');
   args.push('-');
   const lines = [
     `$ErrorActionPreference = 'Stop'`,

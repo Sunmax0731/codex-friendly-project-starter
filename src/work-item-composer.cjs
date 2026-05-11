@@ -180,22 +180,25 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     .wide { margin-top: 12px; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
     button { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-background); color: var(--vscode-button-foreground); padding: 7px 10px; border-radius: 3px; cursor: pointer; }
+    button:disabled { opacity: .65; cursor: wait; }
     button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
     .checks { display: flex; gap: 10px; flex-wrap: wrap; padding: 8px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; }
     .checks label { display: inline-flex; gap: 5px; align-items: center; color: var(--vscode-foreground); }
     .summary { margin-top: 14px; padding: 10px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; background: var(--vscode-sideBar-background); white-space: pre-wrap; }
+    .status { margin-top: 10px; color: var(--vscode-descriptionForeground); min-height: 18px; }
   </style>
 </head>
 <body>
 <main>
   <h1>Codex Work Item Composer</h1>
-  <div class="lead">自然言語から Issue / Task を起こし、必要な項目を GUI で調整して Markdown 化します。</div>
+  <div class="lead">Codex CLI で自然言語を Issue / Task の下書きへ構造化し、必要な項目を GUI で調整して Markdown 化します。</div>
   <label class="wide">自然言語メモ<textarea id="naturalText" placeholder="例: P1。リリース前にVSIX生成とQCDS evidenceを同期できるようにしたい。完了条件は npm test 成功、release docs更新、GitHub公開状態確認。"></textarea></label>
   <div class="actions">
-    <button id="infer">自然言語から反映</button>
+    <button id="infer">Codexで自然言語から反映</button>
     <button id="create">作成して開く</button>
     <button id="dashboard" class="secondary">Dashboard へ戻る</button>
   </div>
+  <div id="draftStatus" class="status"></div>
   <div class="grid wide">
     <label>作成先<select id="mode"></select></label>
     <label>Priority<select id="priority"></select></label>
@@ -226,11 +229,20 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
   applyDraft(state.initial);
   for (const id of fields) document.getElementById(id).addEventListener('input', renderSummary);
   for (const box of document.querySelectorAll('#qcds input')) box.addEventListener('change', renderSummary);
-  document.getElementById('infer').addEventListener('click', () => vscode.postMessage({ type: 'inferWorkItem', input: currentInput() }));
+  document.getElementById('infer').addEventListener('click', () => {
+    setBusy(true, 'Codex CLI で構造化中...');
+    vscode.postMessage({ type: 'inferWorkItem', input: currentInput() });
+  });
   document.getElementById('create').addEventListener('click', () => vscode.postMessage({ type: 'createWorkItem', input: currentInput() }));
   document.getElementById('dashboard').addEventListener('click', () => vscode.postMessage({ type: 'openDashboard' }));
   window.addEventListener('message', (event) => {
-    if (event.data?.type === 'draft') applyDraft(event.data.draft);
+    if (event.data?.type === 'draftStatus') setBusy(true, event.data.message || 'Codex CLI で構造化中...');
+    if (event.data?.type === 'draft') {
+      applyDraft(event.data.draft);
+      const source = event.data.source === 'codex-cli' ? 'Codex CLI' : 'ローカル補完';
+      const warning = event.data.warning ? ' / ' + event.data.warning : '';
+      setBusy(false, source + ' の下書きを反映しました' + warning);
+    }
   });
   function fillSelect(id, items, valueKey, labelKey) {
     const select = document.getElementById(id);
@@ -262,6 +274,10 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     }
     for (const box of document.querySelectorAll('#qcds input')) box.checked = (draft.qcdsAxes || []).includes(box.value);
     renderSummary();
+  }
+  function setBusy(busy, message) {
+    document.getElementById('infer').disabled = busy;
+    document.getElementById('draftStatus').textContent = message || '';
   }
   function renderSummary() {
     const input = currentInput();
