@@ -111,6 +111,11 @@
       "detail": "FirstPrompt includes development method selection"
     },
     {
+      "id": "git-write-policy-prompts",
+      "pass": true,
+      "detail": "FirstPrompt and Work Item Start include Git write policy"
+    },
+    {
       "id": "codex-work-item-draft",
       "pass": true,
       "detail": "Codex CLI work item draft inference exists"

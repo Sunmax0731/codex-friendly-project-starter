@@ -183,6 +183,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
       lineNumber: 8
     },
     documentText: '# TODO\n\n- [ ] [P1] Release docs sync [Issue](Issues/0001-release.md)\n',
+    gitWritePolicyId: 'defer',
     relatedDocuments: [
       {
         relativePath: 'Issues/0001-release.md',
@@ -194,6 +195,8 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
   assert.match(prompt, /Release docs sync/);
   assert.match(prompt, /Issues\/0001-release\.md/);
   assert.match(prompt, /QCDS: Delivery/);
+  assert.match(prompt, /Git 書き込み方針/);
+  assert.match(prompt, /Git 書き込みを保留/);
 });
 
 test('inferWorkItemDraft turns natural language into issue or task fields', () => {

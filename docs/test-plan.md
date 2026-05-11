@@ -11,13 +11,13 @@ npm test
 
 - 分野テンプレートに主要 domain が含まれる。
 - Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行を選べる。
-- FirstPrompt に選択した分野、進め方、runtime gate、QCDS、完了条件が入る。
+- FirstPrompt に選択した分野、進め方、Git 書き込み方針、runtime gate、QCDS、完了条件が入る。
 - Codex CLI command builder が prompt file と `.ps1` launcher を使い、UTF-8 の stdin 経由で `codex exec` に渡す。
 - Codex App と CLI check の command builder が設定された CLI path を使う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
 - Agent docs 判定とスキャンが `node_modules` を除外する。
 - Issue / Task 作成時に `TODO.md` へリンク付き checkbox を同期できる。
-- Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue / Task、QCDS が含まれる。
+- Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue / Task、QCDS、Git 書き込み方針が含まれる。
 - QCDS metrics の grade が定義済み値だけを使う。
 - VSCodeExtension manifest と `extension.js` が activation、commands、Tree View、webview、decoration を満たす。
 

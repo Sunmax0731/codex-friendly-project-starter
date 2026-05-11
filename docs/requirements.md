@@ -22,11 +22,12 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - GUI フォームに自然言語メモを入力し、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue / Task を作成できる。Codex CLI が利用できない場合はローカル補完で作業を止めない。
 - Issue / Task / Issue + Task 作成時に `TODO.md` へリンク付き checkbox を追加し、TODO を作業入口として維持できる。
 - TODO / Issue / Task の行から 1 click で Codex CLI に開始プロンプトを渡し、該当 work item の作業へ着手できる。
+- Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / Task を可視化する。
 - `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。
 - `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
-- 分野、ガバナンス、開発手法、工程、進行速度を選択して FirstPrompt を生成する。
+- 分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を選択して FirstPrompt を生成する。
 - 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - 生成結果を untitled Markdown で開き、Webview からは VS Code 内の Codex パネルへ貼り付けるためにコピーできる。
 - 生成 FirstPrompt は、VS Code 内の Codex 拡張 / Codex パネルで Codex CLI 相当のローカル workspace agent として作業する前提を含む。
@@ -53,3 +54,4 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の中段セクションを折りたたみでき、Issue / Task / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
 - Work Item Composer が Codex CLI で自然言語から Issue / Task の下書きを作り、作成後に Tree View と Dashboard が更新される。
 - Work Item の `Start` が、選択 work item と関連 Issue / Task を含む開始プロンプトを `codex exec` に渡せる。
+- FirstPrompt と Work Item Start Prompt に Git 書き込み方針が含まれる。

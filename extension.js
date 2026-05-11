@@ -5,7 +5,7 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const vscode = require('vscode');
 const { DOMAINS } = require('./src/domains.cjs');
-const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('./src/workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./src/workflows.cjs');
 const { buildFirstPrompt } = require('./src/prompt-builder.cjs');
 const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const {
@@ -135,9 +135,11 @@ async function collectPromptInput() {
   if (!workflow) return undefined;
   const pace = await pick('確認頻度を選択', PACES, 'pace');
   if (!pace) return undefined;
+  const gitWritePolicy = await pick('Git 書き込み方針を選択', GIT_WRITE_POLICIES, 'gitWritePolicy');
+  if (!gitWritePolicy) return undefined;
   const projectName = await vscode.window.showInputBox({ prompt: 'Repo 名またはプロジェクト名', placeHolder: 'my-new-project' });
   const goal = await vscode.window.showInputBox({ prompt: '目的を短く入力', placeHolder: '何を作り、どこまで進めるか' });
-  return { domainId: domain.id, governanceId: governance.id, developmentMethodId: developmentMethod.id, workflowId: workflow.id, paceId: pace.id, projectName, goal };
+  return { domainId: domain.id, governanceId: governance.id, developmentMethodId: developmentMethod.id, workflowId: workflow.id, paceId: pace.id, gitWritePolicyId: gitWritePolicy.id, projectName, goal };
 }
 
 async function pick(placeHolder, items, kind) {
@@ -596,11 +598,13 @@ async function startWorkItemWithCodexCommand(context, item) {
   }
   const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
   const relatedDocuments = await loadRelatedWorkItemDocuments(workspaceRoot, resolved);
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   const prompt = buildWorkItemStartPrompt({
     workspaceRoot,
     item: resolved,
     documentText,
-    relatedDocuments
+    relatedDocuments,
+    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight')
   });
   await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot });
 }

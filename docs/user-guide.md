@@ -64,6 +64,8 @@
 7. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
 8. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
+Work Item の `Start` で Permission denied を避けたい場合は、Settings の `codexFriendlyProjectStarter.codexGitWritePolicy` を `defer` にしておく。開始プロンプトは `git add` / `git commit` / `git push` を保留し、未コミット差分、実行済み検証、ユーザーが実行すべき Git コマンドを報告する方針になる。
+
 ## Markdown WebView で読む
 
 1. Markdown ファイルを開くか、Agent Docs / Work Items の node を選択する。
@@ -87,14 +89,17 @@ Command Palette から `Codex Starter: Generate FirstPrompt` を実行し、次�
 - 開発手法
 - 工程
 - 進行速度
+- Git 書き込み方針
 
 生成された Markdown を Codex への最初の指示として使う。
 
 既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。`Codex Starter: Copy FirstPrompt for VS Code Codex` を使うと、選択式に生成した FirstPrompt を直接 clipboard にコピーできる。FirstPrompt 本文には、作業実行が Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先することが明記される。
 
+Permission denied を避けたい場合は、Git 書き込み方針で `Git 書き込みを保留` を選ぶ。これは OS 権限を変更するものではなく、Codex に `git add` / `git commit` / `git push` を実行させず、未コミット差分とユーザーが実行すべきコマンドを報告させるための方針である。
+
 ## Webview で生成する
 
-Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
+Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
 
 ## AI Agent を起動する
 
@@ -111,6 +116,7 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.includeQcdsChecklist`: FirstPrompt に QCDS ブロックを含めるか。
 - `codexFriendlyProjectStarter.codexCliPath`: `codex` または CLI の絶対パス。
 - `codexFriendlyProjectStarter.codexSandboxMode`: `read-only`、`workspace-write`、`danger-full-access`。
+- `codexFriendlyProjectStarter.codexGitWritePolicy`: Work Item Start Prompt に入れる Git 書き込み方針。`preflight`、`defer`、`normal` を選べる。
 - `codexFriendlyProjectStarter.codexModel`: 任意の model。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。

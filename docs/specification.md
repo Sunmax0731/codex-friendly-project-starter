@@ -128,13 +128,14 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 
 ## FirstPrompt
 
-入力軸は次の5つとする。
+入力軸は次の6つとする。
 
 - 分野: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension、UnityEditor、AdobePlugin、Game、IoT
 - ガバナンス: Issue駆動、TODO駆動、仕様駆動、TDD
 - 開発手法: アジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行
 - 工程: 工程ごと、逐次技術判断、リリースまで一括、最短MVP
 - 進行速度: ノンストップ、節目で確認、調査優先
+- Git 書き込み方針: 事前確認してから Git 書き込み、Git 書き込みを保留、通常どおり Git 書き込み
 
 生成プロンプトには次を含める。
 
@@ -142,6 +143,7 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 - `README.md`、`AGENTS.md`、`SKILL.md` の確認順
 - `D:\AI\IDEAS\<Domain>\Design.md` と `Architecture.md` の参照条件
 - 作業ブランチ、GitHub remote、docs、文字化け検査のルール
+- Git 書き込み方針と Permission denied 時の停止 / 報告条件
 - 分野別 platform runtime gate
 - QCDS と完了条件
 - VS Code 内の Codex 拡張 / Codex パネルで作業する前提
@@ -149,6 +151,8 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 ## Codex CLI 呼び出し
 
 既定の作業導線は、生成した FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルへ貼り付けることです。FirstPrompt には、Codex CLI 相当のローカル workspace agent として VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先する前提を含める。
+
+`.git/index.lock Permission denied` などの Git 書き込み権限問題を避けたい場合、FirstPrompt の Git 書き込み方針で `Git 書き込みを保留` を選べる。これは OS 権限を変更するものではなく、Codex に Git 書き込みを実行させず、未コミット差分、検証結果、ユーザー実行コマンドを報告させるための制御である。
 
 `codex exec` を直接使う場合は VS Code 統合ターミナルで実行する。拡張はプロンプト本文を storage directory の一時 Markdown に UTF-8 で保存し、同じ場所に一時 `.ps1` launcher を作成して、PowerShell の console encoding と `$OutputEncoding` を UTF-8 にしてから `Get-Content -Encoding UTF8 -Raw` で stdin として渡す。
 
@@ -167,9 +171,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を行う。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
+- `codexFriendlyProjectStarter.codexGitWritePolicy`: Work Item Start Prompt に含める Git 書き込み方針。
 
 Work Item Composer の自然言語反映では、拡張が prompt file、JSON schema file、last-message output file、launcher file を extension storage に保存し、PowerShell 経由で `codex exec -C <workspaceRoot> -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を実行する。Codex にはファイル編集や追加調査を求めず、JSON オブジェクトのみを返すよう指示する。解析は last-message output file を優先し、空の場合だけ stdout / stderr から JSON を抽出する。
 
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。
 
-Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue / Task 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue / Task 更新条件を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、sandbox mode、model/profile 設定を使って `codex exec` に渡す。
+Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue / Task 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue / Task 更新条件、Git 書き込み方針を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、sandbox mode、model/profile 設定を使って `codex exec` に渡す。
+
+Work Item Start Prompt の Git 書き込み方針は `codexFriendlyProjectStarter.codexGitWritePolicy` に従う。`preflight` では Git 書き込み前の状態確認と Permission denied 時の停止を指示し、`defer` では `git add` / `git commit` / `git push` を実行しないように指示する。

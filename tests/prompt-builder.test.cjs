@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const { buildFirstPrompt, buildPromptInputSummary } = require('../src/prompt-builder.cjs');
 const { DOMAINS } = require('../src/domains.cjs');
-const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('../src/workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('../src/workflows.cjs');
 
 test('domain catalog covers the requested project families', () => {
   const ids = DOMAINS.map((domain) => domain.id);
@@ -15,6 +15,7 @@ test('workflow catalog supports issue, TODO, spec, TDD, guided, and release mode
   const governanceIds = GOVERNANCE_MODES.map((item) => item.id);
   const developmentMethodIds = DEVELOPMENT_METHODS.map((item) => item.id);
   const workflowIds = WORKFLOWS.map((item) => item.id);
+  const gitWritePolicyIds = GIT_WRITE_POLICIES.map((item) => item.id);
   assert.ok(governanceIds.includes('issue-driven'));
   assert.ok(governanceIds.includes('todo-driven'));
   assert.ok(governanceIds.includes('spec-driven'));
@@ -24,6 +25,9 @@ test('workflow catalog supports issue, TODO, spec, TDD, guided, and release mode
   assert.ok(developmentMethodIds.includes('prototyping'));
   assert.ok(workflowIds.includes('guided-decisions'));
   assert.ok(workflowIds.includes('release-run'));
+  assert.ok(gitWritePolicyIds.includes('preflight'));
+  assert.ok(gitWritePolicyIds.includes('defer'));
+  assert.ok(gitWritePolicyIds.includes('normal'));
 });
 
 test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion gates', () => {
@@ -33,6 +37,7 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
     developmentMethodId: 'waterfall',
     workflowId: 'release-run',
     paceId: 'autonomous',
+    gitWritePolicyId: 'defer',
     projectName: 'domain-purpose-classifier',
     goal: 'リンク整理支援を仕上げる'
   });
@@ -43,6 +48,9 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
   assert.match(prompt, /MV3 manifest/);
   assert.match(prompt, /VS Code 内の Codex 拡張 \/ Codex パネル/);
   assert.match(prompt, /Codex CLI 相当のローカル workspace agent/);
+  assert.match(prompt, /Git 書き込み方針/);
+  assert.match(prompt, /Git 書き込みを保留/);
+  assert.match(prompt, /git add/);
   assert.match(prompt, /docs\/qcds-strict-metrics\.json/);
   assert.match(prompt, /git status --short --branch/);
 });
@@ -66,5 +74,5 @@ test('summary is concise and user-facing', () => {
     workflowId: 'phase-by-phase',
     paceId: 'research-first'
   });
-  assert.equal(summary, 'VS Code 拡張 / TDD / アジャイル / 工程ごとに進める / 調査優先');
+  assert.equal(summary, 'VS Code 拡張 / TDD / アジャイル / 工程ごとに進める / 調査優先 / 事前確認してから Git 書き込み');
 });

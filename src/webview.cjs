@@ -1,5 +1,5 @@
 const { DOMAINS } = require('./domains.cjs');
-const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('./workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./workflows.cjs');
 
 function renderStarterWebview(nonce) {
   const state = JSON.stringify({
@@ -7,7 +7,8 @@ function renderStarterWebview(nonce) {
     governanceModes: GOVERNANCE_MODES,
     developmentMethods: DEVELOPMENT_METHODS,
     workflows: WORKFLOWS,
-    paces: PACES
+    paces: PACES,
+    gitWritePolicies: GIT_WRITE_POLICIES
   }).replace(/</g, '\\u003c');
 
   return `<!doctype html>
@@ -40,6 +41,7 @@ function renderStarterWebview(nonce) {
     <label>開発手法<select id="developmentMethod"></select></label>
     <label>工程<select id="workflow"></select></label>
     <label>進行<select id="pace"></select></label>
+    <label>Git書き込み<select id="gitWritePolicy"></select></label>
   </div>
   <label style="margin-top:12px;">Repo 名<input id="projectName" placeholder="my-new-project"></label>
   <label style="margin-top:12px;">目的<textarea id="goal" placeholder="何を作り、どこまで進めるか"></textarea></label>
@@ -53,13 +55,14 @@ function renderStarterWebview(nonce) {
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const state = ${state};
-  const ids = ['domain', 'governance', 'developmentMethod', 'workflow', 'pace'];
+  const ids = ['domain', 'governance', 'developmentMethod', 'workflow', 'pace', 'gitWritePolicy'];
   const sources = {
     domain: state.domains,
     governance: state.governanceModes,
     developmentMethod: state.developmentMethods,
     workflow: state.workflows,
-    pace: state.paces
+    pace: state.paces,
+    gitWritePolicy: state.gitWritePolicies
   };
   for (const id of ids) {
     const select = document.getElementById(id);
@@ -83,6 +86,7 @@ function renderStarterWebview(nonce) {
       developmentMethodId: document.getElementById('developmentMethod').value,
       workflowId: document.getElementById('workflow').value,
       paceId: document.getElementById('pace').value,
+      gitWritePolicyId: document.getElementById('gitWritePolicy').value,
       projectName: document.getElementById('projectName').value,
       goal: document.getElementById('goal').value
     };
@@ -99,6 +103,7 @@ function renderStarterWebview(nonce) {
       '開発手法: ' + labelOf(state.developmentMethods, input.developmentMethodId),
       '工程: ' + labelOf(state.workflows, input.workflowId),
       '進行: ' + labelOf(state.paces, input.paceId),
+      'Git書き込み: ' + labelOf(state.gitWritePolicies, input.gitWritePolicyId),
       '標準パス: ' + domain.domainPath,
       'runtime gate: ' + domain.runtimeGate
     ].join('\\n');

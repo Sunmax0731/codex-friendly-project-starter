@@ -71,10 +71,11 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 ### FirstPrompt Webview
 
-- 分野、ガバナンス、開発手法、工程、進行の5つの select を配置する。
+- 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針の6つの select を配置する。
 - 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - Repo 名と目的を任意入力にする。
 - `FirstPrompt を開く` と `VS Code Codexへコピー` を提供する。
+- Permission denied 回避のため、Git 書き込み方針で `Git 書き込みを保留` を選ぶと prompt は `git add` / `git commit` / `git push` を実行しないよう指示する。
 - 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。
 - Codex CLI を直接使う環境向けに `Codex CLI で実行` も提供する。
 
@@ -84,6 +85,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Agent docs なし: Tree は空、refresh で再スキャン可能。
 - 入力なし: `<repo-name>` と標準目的を補完する。
 - 設定変更: `includeQcdsChecklist` に従い QCDS ブロックを出し分ける。
+- 設定変更: `codexGitWritePolicy` に従い Work Item Start Prompt の Git 書き込み方針を出し分ける。
 - Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
 - Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。

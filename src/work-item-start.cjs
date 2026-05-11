@@ -1,10 +1,12 @@
 const path = require('node:path');
+const { getGitWritePolicyById } = require('./workflows.cjs');
 
 function buildWorkItemStartPrompt(input = {}) {
   const workspaceRoot = input.workspaceRoot || process.cwd();
   const item = input.item || {};
   const documentText = input.documentText || '';
   const relatedDocuments = Array.isArray(input.relatedDocuments) ? input.relatedDocuments : [];
+  const gitWritePolicy = getGitWritePolicyById(input.gitWritePolicyId);
   const itemPath = item.relativePath || toSlash(path.relative(workspaceRoot, item.filePath || workspaceRoot));
   const relatedSection = relatedDocuments.length
     ? relatedDocuments.map((doc) => [
@@ -44,6 +46,10 @@ function buildWorkItemStartPrompt(input = {}) {
     '- 作業は選択された Work Item の範囲に限定し、必要な実装、テスト、docs、QCDS 証跡を更新してください。',
     '- 完了または中断時は TODO / Issue / Task の状態、チェック項目、残作業を最新化してください。',
     '- 検証コマンドと未実施の手動確認がある場合は最後に短く報告してください。',
+    '',
+    '## Git 書き込み方針',
+    '',
+    `- ${gitWritePolicy.label}: ${gitWritePolicy.instruction}`,
     '',
     '## 選択文書',
     '',

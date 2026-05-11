@@ -90,6 +90,24 @@ const PACES = [
   }
 ];
 
+const GIT_WRITE_POLICIES = [
+  {
+    id: 'preflight',
+    label: '事前確認してから Git 書き込み',
+    instruction: '`git add`、`git commit`、`git push` の前に `git status --short --branch`、`.git/index.lock` の有無、Git 書き込み権限を確認する。Permission denied や lock 作成不可が出た場合は Git 書き込みを繰り返さず、変更内容、未完了の commit / push、ユーザーが実行すべきコマンドを報告して停止する。'
+  },
+  {
+    id: 'defer',
+    label: 'Git 書き込みを保留',
+    instruction: '`git add`、`git commit`、`git push` を実行しない。実装、検証、docs 更新まで進め、最後に未コミット差分、検証結果、ユーザーが実行すべき Git コマンドを報告する。'
+  },
+  {
+    id: 'normal',
+    label: '通常どおり Git 書き込み',
+    instruction: '既存ルールに従い、権限がある場合は `git add`、`git commit`、`git push` まで進める。Permission denied が出た場合は原因と未完了操作を記録して停止する。'
+  }
+];
+
 function findById(items, id, fallbackId) {
   return items.find((item) => item.id === id) || items.find((item) => item.id === fallbackId) || items[0];
 }
@@ -99,8 +117,10 @@ module.exports = {
   DEVELOPMENT_METHODS,
   WORKFLOWS,
   PACES,
+  GIT_WRITE_POLICIES,
   getGovernanceById: (id) => findById(GOVERNANCE_MODES, id, 'issue-driven'),
   getDevelopmentMethodById: (id) => findById(DEVELOPMENT_METHODS, id, 'agile'),
   getWorkflowById: (id) => findById(WORKFLOWS, id, 'phase-by-phase'),
-  getPaceById: (id) => findById(PACES, id, 'autonomous')
+  getPaceById: (id) => findById(PACES, id, 'autonomous'),
+  getGitWritePolicyById: (id) => findById(GIT_WRITE_POLICIES, id, 'preflight')
 };
