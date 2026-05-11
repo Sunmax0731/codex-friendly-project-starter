@@ -82,6 +82,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
+    vscode.commands.registerCommand('codex-friendly-project-starter.createWorkItemFromNaturalLanguage', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
     vscode.commands.registerCommand('codex-friendly-project-starter.copyFirstPrompt', () => copyFirstPromptCommand()),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithFirstPrompt', () => invokeCodexWithFirstPromptCommand(context)),

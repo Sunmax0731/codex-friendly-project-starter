@@ -25,6 +25,7 @@
 - `codex-friendly-project-starter.createLocalIssue`: Issue 作成用 Work Item Composer を開き、`Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
 - `codex-friendly-project-starter.createLocalTask`: Task 作成用 Work Item Composer を開き、`Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
 - `codex-friendly-project-starter.openWorkItemComposer`: 自然言語または GUI フォームから Issue / Task / Issue + Task を作成する Webview を開く。
+- `codex-friendly-project-starter.createWorkItemFromNaturalLanguage`: 自然言語から Issue + Task を起票する Composer を Command Palette から直接開く。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 - `codex-friendly-project-starter.startWorkItemWithCodex`: 選択した TODO、Issue、Task と関連リンクを開始プロンプト化し、Codex CLI に渡して着手する。
 

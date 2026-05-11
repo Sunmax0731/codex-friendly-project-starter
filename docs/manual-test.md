@@ -22,7 +22,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 10. Markdown WebView の `Open Source`、`Copy Path`、`Refresh` が動作し、`Codex Starter: Copy Markdown Path` と `Codex Starter: Refresh Markdown WebView` でも同じ操作を実行できることを確認する。`Tasks/*.md` や `Issues/*.md` のリンクをクリックして関連 Markdown に遷移できることも確認する。
 11. Dashboard の `Issues 初期化` または Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が Markdown WebView で開くことを確認する。
 12. Dashboard の `Task を作成` または `Codex Starter: Create Local Task` から Work Item Composer を開き、`Tasks/000x-*.md` が作成されることを確認する。
-13. Dashboard の `自然言語から Issue + Task` または `Codex Starter: Open Work Item Composer` で自然言語メモを入力し、`Codexで自然言語から反映` により Codex CLI 由来の下書きが title、priority、type、phase、QCDS、acceptance criteria に反映されることを確認する。その後 `作成して開く` により Issue + Task が相互リンク付きで作成されることを確認する。
+13. Dashboard の `自然言語から Issue + Task`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` で自然言語メモを入力し、`Codexで自然言語から反映` により Codex CLI 由来の下書きが title、priority、type、phase、QCDS、acceptance criteria に反映されることを確認する。その後 `作成して開く` により Issue + Task が相互リンク付きで作成されることを確認する。
 14. 作成後に `TODO.md` へ Issue / Task へのリンク付き checkbox が追加されることを確認する。
 15. Dashboard の未完了 TODO / Issue / Task 行に `Start` と `Open` が表示されることを確認する。
 16. `Start` を押し、確認ダイアログで workspace root と sandbox mode が表示されることを確認する。実行する場合は `Run Codex` を選び、terminal に選択 Work Item 起点の `codex exec` が起動することを確認する。

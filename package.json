@@ -41,6 +41,7 @@
     "onCommand:codex-friendly-project-starter.createLocalIssue",
     "onCommand:codex-friendly-project-starter.createLocalTask",
     "onCommand:codex-friendly-project-starter.openWorkItemComposer",
+    "onCommand:codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
     "onCommand:codex-friendly-project-starter.openAgentDoc",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
@@ -160,6 +161,11 @@
         "command": "codex-friendly-project-starter.openWorkItemComposer",
         "title": "Codex Starter: Open Work Item Composer",
         "icon": "$(new-file)"
+      },
+      {
+        "command": "codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
+        "title": "Codex Starter: Create Work Item from Natural Language",
+        "icon": "$(sparkle)"
       },
       {
         "command": "codex-friendly-project-starter.openAgentDoc",

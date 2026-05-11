@@ -181,6 +181,7 @@ function commandContract() {
     'codex-friendly-project-starter.createLocalIssue',
     'codex-friendly-project-starter.createLocalTask',
     'codex-friendly-project-starter.openWorkItemComposer',
+    'codex-friendly-project-starter.createWorkItemFromNaturalLanguage',
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem',
     'codex-friendly-project-starter.copyFirstPrompt',

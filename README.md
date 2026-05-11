@@ -48,6 +48,7 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 - `Codex Starter: Create Local Issue`
 - `Codex Starter: Create Local Task`
 - `Codex Starter: Open Work Item Composer`
+- `Codex Starter: Create Work Item from Natural Language`
 - `Codex Starter: Start Work Item with Codex`
 - `Codex Starter: Generate FirstPrompt`
 - `Codex Starter: Copy FirstPrompt for VS Code Codex`
