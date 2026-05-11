@@ -21,3 +21,4 @@
 - [x] [P2][QCDS:Satisfaction,Delivery] [ワークスペース固有の `D:\AI\IDEAS\<Domain>` 情報から候補 project name を補完する](Tasks/0011-ideas-candidate-suggestions.md)。
 - [x] [P2][QCDS:Satisfaction,Quality] [生成した FirstPrompt の履歴保存と再利用 UI を追加する](Tasks/0010-firstprompt-history-reuse.md)。
 - [x] [P1][QCDS:Delivery,Satisfaction] [TODO / Issues / Tasks を一括で Codex に開始させる](Tasks/0012-start-all-work-items.md)。
+- [x] [P1][QCDS:Quality,Delivery,Satisfaction] [Codex tool environment と選択 Work Items 起動を追加する](Tasks/0013-codex-tool-env-and-selected-work-items.md)。

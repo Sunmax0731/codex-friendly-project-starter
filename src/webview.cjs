@@ -264,6 +264,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
       <button class="action secondary" data-action="openCodexApp">Codex App</button>
       <button class="action secondary" data-action="invokeCurrentPrompt">現在Promptを実行</button>
+      <button class="action secondary" data-selected-start="true">選択Work Itemを開始</button>
       <button class="action secondary" data-action="startAllWorkItems">全Work Itemを開始</button>
       <button class="action subtle" data-action="refreshDashboard">Refresh</button>
     </div>
@@ -324,6 +325,17 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       filePath: button.getAttribute('data-start-file'),
       lineNumber: Number(button.getAttribute('data-start-line') || '1'),
       kind: button.getAttribute('data-kind') || ''
+    }));
+  }
+  const selectedStart = document.querySelector('button[data-selected-start]');
+  if (selectedStart) {
+    selectedStart.addEventListener('click', () => vscode.postMessage({
+      type: 'startSelectedWorkItems',
+      items: Array.from(document.querySelectorAll('input[data-select-file]:checked')).map((input) => ({
+        filePath: input.getAttribute('data-select-file'),
+        lineNumber: Number(input.getAttribute('data-select-line') || '1'),
+        kind: input.getAttribute('data-kind') || ''
+      }))
     }));
   }
   for (const button of document.querySelectorAll('button[data-action]')) {
@@ -410,7 +422,7 @@ function qcdsImprovementHtml(item) {
 function openButton(item) {
   if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
   const lineNumber = Number(item.lineNumber || 1);
-  return `<span class="row-actions"><button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
+  return `<span class="row-actions"><label class="path"><input type="checkbox" data-select-file="${escapeHtml(item.filePath)}" data-select-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}" aria-label="select ${escapeHtml(item.title || 'work item')}"> Select</label><button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
 }
 
 function badge(label, className = '') {

@@ -6,8 +6,8 @@
   "manualPackage": "generated-by-codex",
   "vsixArtifact": {
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 66234,
-    "sha256": "CB2E675185D7491811E050C82C4B489B49D9DD43EEE444644DE126AD9501640A"
+    "sizeBytes": 70767,
+    "sha256": "4CF3BA4F690D04F2CEAF926146D4BAE588243B51B485454A49FC4B7DD9B87227"
   },
   "checks": [
     {
@@ -43,7 +43,7 @@
     {
       "id": "user-guide",
       "pass": true,
-      "detail": "user guide covers docs scaffold, tasks, and history"
+      "detail": "user guide covers docs scaffold, tasks, history, and Codex run options"
     },
     {
       "id": "commands",

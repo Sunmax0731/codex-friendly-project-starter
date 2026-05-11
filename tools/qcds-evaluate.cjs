@@ -189,6 +189,7 @@ function commandContract() {
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem',
     'codex-friendly-project-starter.startWorkItemWithCodex',
+    'codex-friendly-project-starter.startSelectedWorkItemsWithCodex',
     'codex-friendly-project-starter.startAllWorkItemsWithCodex',
     'codex-friendly-project-starter.copyFirstPrompt',
     'codex-friendly-project-starter.clearFirstPromptHistory',

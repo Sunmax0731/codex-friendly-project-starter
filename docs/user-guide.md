@@ -15,7 +15,7 @@
 3. `Work Items` で `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` を確認する。
 4. 未完了 TODO、Issue、Task を選択すると、該当 Markdown が Markdown WebView で開く。
 5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks、QCDS の進捗を progress bar で確認できる。
-6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
+6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`選択Work Itemを開始`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
 7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / Task / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
 8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
@@ -23,16 +23,27 @@
 
 1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue、Task を選ぶ。
 2. Dashboard の対象行にある `Start`、または Work Items Tree の inline action `Start Work Item with Codex` を押す。
-3. 確認ダイアログで workspace root と sandbox mode を確認し、問題なければ `Run Codex` を選ぶ。
-4. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / Task、README / AGENTS / SKILL の確認順を含む開始プロンプトが渡される。
-5. Codex 側の作業完了後、TODO / Issue / Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+3. 起動前にモデルとインテリジェンスを選ぶ。設定値を使う、Codex CLI default、候補モデル、カスタムモデルを選択できる。
+4. 確認ダイアログで workspace root、sandbox mode、model、インテリジェンスを確認し、問題なければ `Run Codex` を選ぶ。
+5. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / Task、README / AGENTS / SKILL の確認順、`Codex 実行設定` を含む開始プロンプトが渡される。
+6. Codex 側の作業完了後、TODO / Issue / Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+
+## TODO / Issue / Task を選択して Codex に渡す
+
+1. `Codex Work Dashboard` の Open TODO / Open Issues / Open Tasks で、処理したい行の `Select` checkbox をオンにする。
+2. Dashboard 上部の `選択Work Itemを開始` を押す。
+3. モデルとインテリジェンスを選び、確認ダイアログで実行条件を確認する。
+4. 統合ターミナルで `codex exec` が起動し、選択した TODO / Issue / Task だけを含む開始 prompt が渡される。
+5. Command Palette の `Codex Starter: Start Selected Work Items with Codex` から実行する場合は、QuickPick の複数選択で対象を選ぶ。
+6. prompt は選択外の Work Item を勝手に完了扱いにしないよう指示する。
 
 ## TODO / Issue / Task を一括で Codex に渡す
 
 1. `Codex Work Dashboard` の `全Work Itemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
-2. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選ぶ。
-3. 統合ターミナルで `codex exec` が起動し、未完了 TODO、Issue、Task の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が渡される。
-4. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
+2. モデルとインテリジェンスを選び、確認ダイアログで workspace root、sandbox mode、model、インテリジェンスを確認する。
+3. 必要な場合だけ `Run Codex` を選ぶ。
+4. 統合ターミナルで `codex exec` が起動し、未完了 TODO、Issue、Task の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が渡される。
+5. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
 ## QCDS 状況を確認する
 
@@ -119,7 +130,7 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `Codex Starter: Invoke AI Agent with FirstPrompt`: 選択式に FirstPrompt を作り、そのまま `codex exec` に渡す。
 - `Codex Starter: Invoke AI Agent with Current Prompt`: 現在開いているプロンプト、または選択範囲だけを `codex exec` に渡す。
 
-初回は `Codex Starter: Check Codex CLI` で CLI が見えることを確認する。
+初回は `Codex Starter: Check Codex CLI` で CLI と補助ツールが見えることを確認する。この command は extension-launched Codex と同じ PATH 補強を使い、`codex --version`、`codex exec --help`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。VS Code 内 PowerShell で `rg.exe` や `gh.exe` が見つからない場合は、`codexFriendlyProjectStarter.codexToolPathPrepend` に追加の配置先を入れる。
 
 ## 設定
 
@@ -129,7 +140,11 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.codexSandboxMode`: `read-only`、`workspace-write`、`danger-full-access`。
 - `codexFriendlyProjectStarter.codexGitWritePolicy`: Work Item Start Prompt に入れる Git 書き込み方針。`preflight`、`defer`、`normal` を選べる。
 - `codexFriendlyProjectStarter.codexModel`: 任意の model。
+- `codexFriendlyProjectStarter.codexModelChoices`: Work Item Start 前に選べる model 候補。
+- `codexFriendlyProjectStarter.codexReasoningEffort`: Work Item Start の既定インテリジェンス。`minimal`、`low`、`medium`、`high`、`xhigh` を選べる。
+- `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前に model とインテリジェンスを選ぶか。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
+- `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションで PATH 先頭に追加するディレクトリ。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。

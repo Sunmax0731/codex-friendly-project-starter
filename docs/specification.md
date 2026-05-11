@@ -7,7 +7,7 @@
 - `codex-friendly-project-starter.copyFirstPrompt`: QuickPick と InputBox で FirstPrompt を生成し、VS Code Codex へ貼り付けるため clipboard にコピーする。
 - `codex-friendly-project-starter.invokeCodexWithFirstPrompt`: 選択式に FirstPrompt を生成し、`codex exec` へ渡す。
 - `codex-friendly-project-starter.invokeCodexWithCurrentPrompt`: 現在開いている文書または選択範囲を `codex exec` へ渡す。
-- `codex-friendly-project-starter.checkCodexCli`: 統合ターミナルで Codex CLI の version と `exec --help` を確認する。
+- `codex-friendly-project-starter.checkCodexCli`: 統合ターミナルで Codex CLI の version、`exec --help`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
 - `codex-friendly-project-starter.openCodexApp`: 統合ターミナルから `codex app` を実行する。
 - `codex-friendly-project-starter.refreshAgentDocs`: Agent Docs Tree を再スキャンする。
 - `codex-friendly-project-starter.refreshAll`: Agent Docs Tree と Work Items Tree をまとめて再スキャンする。
@@ -28,6 +28,7 @@
 - `codex-friendly-project-starter.createWorkItemFromNaturalLanguage`: 自然言語から Issue + Task を起票する Composer を Command Palette から直接開く。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 - `codex-friendly-project-starter.startWorkItemWithCodex`: 選択した TODO、Issue、Task と関連リンクを開始プロンプト化し、Codex CLI に渡して着手する。
+- `codex-friendly-project-starter.startSelectedWorkItemsWithCodex`: Dashboard checkbox または Command Palette の複数選択で選んだ TODO、Issue、Task だけを開始プロンプト化し、Codex CLI に渡して着手する。
 - `codex-friendly-project-starter.startAllWorkItemsWithCodex`: 未完了 TODO、Issue、Task を優先度順に連結した開始プロンプトを Codex CLI に渡して一括着手する。
 - `codex-friendly-project-starter.clearFirstPromptHistory`: workspace storage に保存した FirstPrompt 入力履歴を削除する。
 
@@ -81,11 +82,11 @@ Dashboard Webview は次を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
 - GUI action として、日常操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt 画面、QCDS Status、Codex App、現在Prompt実行、Dashboard refresh を提供する。
-- 日常操作には `全Work Itemを開始` も含め、未完了 TODO / Issue / Task 全体を一括開始できる。
+- 日常操作には `選択Work Itemを開始` と `全Work Itemを開始` も含め、選択した TODO / Issue / Task だけ、または未完了 TODO / Issue / Task 全体を開始できる。
 - 初回セットアップ / 環境確認には Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、Codex CLI 確認を折りたたみで提供する。
 - QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は折りたたみ可能な section にする。
 - TODO / Issue / Task は priority、status、type、phase、QCDS axes を tag として表示し、priority、blocked、bug、release、docs、test、feature、ux などを色分けする。
-- 未完了 TODO、Issue、Task、QCDS improvements の各行に `Start` と `Open` を表示する。`Start` は該当 work item を `startWorkItemWithCodex` に渡し、`Open` は Markdown WebView を開く。
+- 未完了 TODO、Issue、Task、QCDS improvements の各行に `Select`、`Start`、`Open` を表示する。`Select` は複数選択開始用 checkbox、`Start` は該当 work item を `startWorkItemWithCodex` に渡し、`Open` は Markdown WebView を開く。
 
 ## Work Item Composer
 
@@ -172,7 +173,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.codexCliPath`: `codex` または絶対パス。
 - `codexFriendlyProjectStarter.codexSandboxMode`: `read-only`、`workspace-write`、`danger-full-access`。
 - `codexFriendlyProjectStarter.codexModel`: 任意の `-m` 値。
+- `codexFriendlyProjectStarter.codexModelChoices`: Work Item Start 前の model picker に表示する候補。
+- `codexFriendlyProjectStarter.codexReasoningEffort`: Work Item Start の既定インテリジェンス。指定時は `-c model_reasoning_effort="..."` を渡す。
+- `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前にモデルとインテリジェンスを確認するかどうか。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の `-p` 値。
+- `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションの `PATH` に追加するディレクトリ。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を行う。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
@@ -180,10 +185,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 
 Work Item Composer の自然言語反映では、拡張が prompt file、JSON schema file、last-message output file、launcher file を extension storage に保存し、PowerShell 経由で `codex exec -C <workspaceRoot> -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を実行する。Codex にはファイル編集や追加調査を求めず、JSON オブジェクトのみを返すよう指示する。解析は last-message output file を優先し、空の場合だけ stdout / stderr から JSON を抽出する。
 
+extension-launched Codex PowerShell セッションは、PATH 補強前に `codexFriendlyProjectStarter.codexCliPath` を解決して Codex CLI 本体を固定する。その後、`codexFriendlyProjectStarter.codexToolPathPrepend`、Codex bundled ripgrep の既定候補、`E:\DevEnv\GitHubCLI`、`E:\DevEnv\ripgrep`、`C:\Program Files\GitHub CLI`、絶対指定された `codexCliPath` の親ディレクトリを重複排除して `PATH` の先頭へ追加する。候補の優先順が保たれるように PowerShell 側では逆順に処理してから prepend し、存在しない候補は `Test-Path` で無視する。これにより VS Code 内 PowerShell で `codex` が起動された場合でも、Codex CLI 本体の解決先を変えずに、Codex が内部で使う `rg.exe` と GitHub 操作用の `gh.exe` を見つけやすくする。
+
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。
 
 Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue / Task 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue / Task 更新条件、Git 書き込み方針を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、sandbox mode、model/profile 設定を使って `codex exec` に渡す。
 
+`Start Selected Work Items` では、Dashboard checkbox で選択された item、または Command Palette の QuickPick multi-select で選択された item だけを対象にする。選択 item と関連リンク文書を重複排除して prompt に含め、選択外の Work Item は参照に留めて勝手に完了扱いにしないよう指示する。
+
 `Start All Work Items` では、`TODO.md`、`Issues/*.md`、`Tasks/*.md` の未完了項目を P0 から P4 の優先度順に並べ、件数、QCDS tag、phase、release readiness を含む開始プロンプトを生成する。完了時は TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
+
+Work Item Start 系の 3 導線では、`promptForCodexRunOptions` が true の場合、実行確認前にモデルとインテリジェンスを QuickPick で選ぶ。モデルは `-m`、インテリジェンスは `-c model_reasoning_effort="..."` として `codex exec` に渡し、prompt の `Codex 実行設定` にも記録する。
 
 Work Item Start Prompt の Git 書き込み方針は `codexFriendlyProjectStarter.codexGitWritePolicy` に従う。`preflight` では Git 書き込み前の状態確認と Permission denied 時の停止を指示し、`defer` では `git add` / `git commit` / `git push` を実行しないように指示する。

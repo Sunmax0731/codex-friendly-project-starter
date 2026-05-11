@@ -10,6 +10,7 @@
 - FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
 - FirstPrompt の実行前提は VS Code 内の Codex 拡張 / Codex パネルです。`codex exec` 直接起動は補助導線として扱います。
 - Codex CLI 呼び出しを変更する場合は、`src/codex-cli.cjs`、`src/codex-work-item-draft.cjs`、`tests/codex-cli.test.cjs`、`tests/codex-work-item-draft.test.cjs`、`docs/vscode-verification-guide.md` を同時に更新します。
+- Codex CLI の PowerShell 起動を変更する場合は、`rg.exe` と `gh.exe` の PATH 補強、`Codex Starter: Check Codex CLI` の確認内容、`docs/manual-test.md`、`docs/user-guide.md` を同じ変更で同期します。
 - TODO / Issue 可視化を変更する場合は、`src/work-items.cjs`、`src/webview.cjs`、`tests/work-items.test.cjs`、`docs/vscode-verification-guide.md`、`Issues/README.md` を同時に確認します。
 - Markdown WebView を変更する場合は、`src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs`、`docs/manual-test.md` を同時に確認します。
 - `D:\AI` 既定 docs 生成を変更する場合は、`src/default-docs.cjs`、`tests/default-docs.test.cjs`、`docs/user-guide.md`、`docs/traceability-matrix.md` を同時に確認します。

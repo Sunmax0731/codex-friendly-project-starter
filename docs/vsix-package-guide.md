@@ -49,6 +49,9 @@ code
 - `Codex Starter: Scaffold D:\AI Default Docs` が実行できる。
 - `Codex Starter: Create Local Task` が実行できる。
 - `Codex Starter: Open Work Dashboard` と `Codex Starter: Open QCDS Status` が表示できる。
+- Dashboard で `選択Work Itemを開始` と `全Work Itemを開始` が表示される。
+- Work Item Start 前に model とインテリジェンスの選択が表示される。
+- `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 
 ## 記録
 

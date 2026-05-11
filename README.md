@@ -6,9 +6,10 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 
 - Agent Docs Tree: ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を一覧化します。
 - Agent Doc Highlight: Agent 向け文書を開いたとき、重要見出しと制約語をエディタ上でハイライトします。
-- Work Items Tree: `TODO.md` と `Issues/*.md` を読み取り、未完了 TODO、local Issue、release readiness を常設 Tree View で確認できます。
+- Work Items Tree: `TODO.md`、`Issues/*.md`、`Tasks/*.md` を読み取り、未完了 TODO、local Issue、local Task、release readiness を常設 Tree View で確認できます。
 - Work Dashboard: TODO、Issue、Task、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、日常操作と初回セットアップを分けた GUI ボタンから主要操作を実行できます。中段の QCDS、release readiness、Open TODO / Issues / Tasks は折りたためます。
 - Work Item Start: Dashboard または Work Items Tree の TODO / Issue / Task から `Start` を押すと、その作業単位を入口にした開始プロンプトを Codex CLI へ渡せます。
+- Start Selected Work Items: Dashboard の checkbox または Command Palette の複数選択から、選んだ TODO / Issues / Tasks だけを連結した作業範囲として Codex CLI へ渡せます。
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues / Tasks を優先度順の一括バックログとして Codex CLI へ渡せます。
 - QCDS Status: `docs/qcds-strict-metrics.json` の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。
@@ -22,6 +23,8 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Git書き込み方針: FirstPrompt で `事前確認してから Git 書き込み`、`Git 書き込みを保留`、`通常どおり Git 書き込み` を選択できます。`.git/index.lock Permission denied` を避けたい場合は `Git 書き込みを保留` を選び、commit / push は手動または権限のある環境で実施します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示、または VS Code 内の Codex パネルへ貼り付けるためにコピーできます。
 - VS Code Codex Handoff: 生成した FirstPrompt は VS Code の Codex 拡張 / Codex パネルで実行される前提を明記します。必要に応じて `codex exec` を VS Code 統合ターミナルから直接起動することもできます。
+- Codex Run Options: TODO / Issue / Task を Codex に渡す直前に、モデルとインテリジェンスを選択できます。選択値は `codex exec -m` と `-c model_reasoning_effort=...` として渡され、プロンプト本文にも記録されます。
+- Codex Tool PATH: VS Code 統合ターミナルの PowerShell から起動する Codex が `rg.exe` や `gh.exe` を見つけられるよう、extension-launched Codex セッションでは Codex bundled ripgrep と `E:\DevEnv\GitHubCLI` などの候補ディレクトリを `PATH` に先頭追加します。
 
 ## Codex CLI 連携
 
@@ -30,6 +33,10 @@ Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFri
 Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue / Task と関連リンクをまとめた Work Item Start Prompt を作り、通常の Codex CLI 実行確認を経て `codex exec` に渡します。Issue / Task / Issue + Task を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox が追加され、TODO を入口にして作業を進められます。
 
 Work Item Start Prompt は設定 `codexFriendlyProjectStarter.codexGitWritePolicy` を参照します。既定は `preflight` で、Permission denied が出たら Git 書き込みを繰り返さず未完了操作を報告します。`defer` にすると Start から渡す作業でも `git add` / `git commit` / `git push` を実行しない方針になります。
+
+`Start Work Item with Codex`、`Start Selected Work Items with Codex`、`Start All Work Items with Codex` は、起動前にモデルとインテリジェンスを選択します。候補は `codexFriendlyProjectStarter.codexModelChoices` で増減でき、既定値は Codex CLI default、`gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` です。`codexFriendlyProjectStarter.promptForCodexRunOptions` を `false` にすると、設定値 `codexFriendlyProjectStarter.codexModel` と `codexFriendlyProjectStarter.codexReasoningEffort` をそのまま使います。
+
+VS Code 内 PowerShell で `rg.exe` または `gh.exe` が見つからない場合は、`Codex Starter: Check Codex CLI` を実行してください。この確認コマンドは `codex --version`、`codex exec --help`、`Get-Command rg.exe`、`Get-Command gh.exe`、`gh.exe auth status` を同じ PATH 補強付きで実行します。追加の配置先がある場合は `codexFriendlyProjectStarter.codexToolPathPrepend` にディレクトリを追加します。
 
 ## 使い方
 
@@ -56,6 +63,7 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 - `Codex Starter: Open Work Item Composer`
 - `Codex Starter: Create Work Item from Natural Language`
 - `Codex Starter: Start Work Item with Codex`
+- `Codex Starter: Start Selected Work Items with Codex`
 - `Codex Starter: Start All Work Items with Codex`
 - `Codex Starter: Generate FirstPrompt`
 - `Codex Starter: Copy FirstPrompt for VS Code Codex`

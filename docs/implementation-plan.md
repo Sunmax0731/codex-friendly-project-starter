@@ -61,6 +61,14 @@
 - Issue / Task / Issue + Task の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
 - Unit test、manual test、platform runtime gate、traceability を更新する。
 
+## Phase 3.10: Codex 実行環境と複数選択
+
+- extension-launched Codex PowerShell launcher で `rg.exe` と `gh.exe` の PATH を補強する。
+- `Check Codex CLI` で `codex`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
+- Work Item Start 系の実行前に model とインテリジェンスを選択し、`codex exec` と prompt に反映する。
+- Dashboard checkbox と Command Palette multi-select から選択 Work Items だけを Codex に渡せるようにする。
+- README、manual test、user guide、VSIX readiness、QCDS / traceability を同期する。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

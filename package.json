@@ -45,6 +45,7 @@
     "onCommand:codex-friendly-project-starter.openAgentDoc",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
+    "onCommand:codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
     "onCommand:codex-friendly-project-starter.startAllWorkItemsWithCodex",
     "onCommand:codex-friendly-project-starter.copyFirstPrompt",
     "onCommand:codex-friendly-project-starter.clearFirstPromptHistory",
@@ -185,6 +186,11 @@
         "icon": "$(play)"
       },
       {
+        "command": "codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
+        "title": "Codex Starter: Start Selected Work Items with Codex",
+        "icon": "$(selection)"
+      },
+      {
         "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
         "title": "Codex Starter: Start All Work Items with Codex",
         "icon": "$(run-all)"
@@ -259,9 +265,14 @@
           "group": "navigation@4"
         },
         {
-          "command": "codex-friendly-project-starter.refreshAll",
+          "command": "codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@5"
+        },
+        {
+          "command": "codex-friendly-project-starter.refreshAll",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@6"
         }
       ],
       "view/item/context": [
@@ -309,7 +320,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {
@@ -355,10 +366,50 @@
           "default": "",
           "description": "Optional model name passed to `codex exec -m`. Leave blank to use Codex CLI defaults."
         },
+        "codexFriendlyProjectStarter.codexModelChoices": {
+          "type": "array",
+          "default": [
+            "gpt-5.5",
+            "gpt-5.4",
+            "gpt-5.4-mini",
+            "gpt-5.3-codex",
+            "gpt-5.3-codex-spark"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Model names shown in Work Item Codex run pickers. Values are passed through to `codex exec -m`."
+        },
+        "codexFriendlyProjectStarter.codexReasoningEffort": {
+          "type": "string",
+          "enum": [
+            "",
+            "minimal",
+            "low",
+            "medium",
+            "high",
+            "xhigh"
+          ],
+          "default": "",
+          "description": "Default Work Item intelligence level passed as `codex exec -c model_reasoning_effort=...`. Leave blank to use Codex CLI defaults."
+        },
+        "codexFriendlyProjectStarter.promptForCodexRunOptions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for model and intelligence before starting TODO / Issue / Task processing with Codex."
+        },
         "codexFriendlyProjectStarter.codexProfile": {
           "type": "string",
           "default": "",
           "description": "Optional Codex CLI profile passed to `codex exec -p`."
+        },
+        "codexFriendlyProjectStarter.codexToolPathPrepend": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional directories prepended to PATH for extension-launched Codex PowerShell sessions. The extension also adds the Codex bundled ripgrep bin and common E:\\DevEnv GitHub CLI locations automatically."
         },
         "codexFriendlyProjectStarter.useCodexForWorkItemInference": {
           "type": "boolean",

@@ -63,7 +63,7 @@
     {
       "id": "work-item-start-command",
       "pass": true,
-      "detail": "Single and all Work Item Start commands exist"
+      "detail": "Single, selected, and all Work Item Start commands exist"
     },
     {
       "id": "markdown-webview-command",
@@ -168,7 +168,12 @@
     {
       "id": "codex-exec-terminal",
       "pass": true,
-      "detail": "Codex exec UTF-8 launcher command exists"
+      "detail": "Codex exec UTF-8 launcher and tool PATH bootstrap command exists"
+    },
+    {
+      "id": "codex-run-options",
+      "pass": true,
+      "detail": "Work Item Codex model and intelligence selection exists"
     },
     {
       "id": "codex-target-root",

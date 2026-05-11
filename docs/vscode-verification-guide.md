@@ -45,9 +45,11 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
 8. Dashboard の `Task を作成` を押し、Work Item Composer で title、priority、phase、QCDS、acceptance criteria を入力して Task を作成する。
 9. Dashboard の `自然言語から作成` を押し、自然言語メモから Codex CLI 下書きを作って Issue + Task を作成する。
-10. 作成された TODO / Issue / Task の行にある `Start` を押し、確認ダイアログの内容を確認する。
-11. Dashboard の `全Work Itemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
-12. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
+10. 作成された TODO / Issue / Task の行にある `Start` を押し、model とインテリジェンスの QuickPick、確認ダイアログの内容を確認する。
+11. Dashboard の checkbox で複数 Work Item を選び、`選択Work Itemを開始` を実行する。
+12. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
+13. Dashboard の `全Work Itemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
+14. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 
@@ -55,7 +57,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
 - `Tasks/*.md` の open / in-progress / blocked Task が表示される。
 - Dashboard に TODO と Issue の progress bar が表示される。
-- Dashboard 上部に `Issue を作成`、`Task を作成`、`自然言語から作成`、`Issues 初期化`、`Tasks 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`全Work Itemを開始`、`Codex CLI 確認` が表示される。
+- Dashboard 上部に `Issue を作成`、`Task を作成`、`自然言語から作成`、`Issues 初期化`、`Tasks 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示される。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS に紐づいた TODO / Issue / Task がある場合、改善候補として表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
@@ -66,6 +68,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `Issue + Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
 - Issue / Task / Issue + Task 作成後、`TODO.md` にリンク付き checkbox が追加される。
 - Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の `codex exec` が統合ターミナルに起動する。
+- Work Item Start 系では model とインテリジェンスを選べ、prompt に `Codex 実行設定` が含まれる。
+- `Start Selected Work Items with Codex` を実行でき、選択した TODO / Issue / Task だけの開始 prompt が統合ターミナルに渡される。
 - `Start All Work Items with Codex` を実行でき、未完了 TODO / Issue / Task の一括開始 prompt が統合ターミナルに渡される。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 
@@ -134,10 +138,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - VS Code 統合ターミナルが開く。
 - `codex --version` と `codex exec --help` の先頭が表示される。
+- `rg.exe=...` と `gh.exe=...` が表示される。
+- `gh auth status` が表示される。
 
 うまくいかない場合:
 
 - Settings で `codexFriendlyProjectStarter.codexCliPath` に `codex` または `C:\Users\<user>\AppData\Roaming\npm\codex.ps1` などの実パスを設定する。
+- `rg.exe` または `gh.exe` が見つからない場合は、Settings の `codexFriendlyProjectStarter.codexToolPathPrepend` に配置ディレクトリを追加する。既定では Codex bundled ripgrep と `E:\DevEnv\GitHubCLI` が候補に含まれる。
 
 ## 6. 生成プロンプトを VS Code Codex へ渡す
 

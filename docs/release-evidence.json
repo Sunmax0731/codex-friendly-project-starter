@@ -15,10 +15,10 @@
     "command": "npx --yes @vscode/vsce package --out dist\\codex-friendly-project-starter-0.1.0.vsix",
     "npmCache": "E:\\DevEnv\\npm-cache",
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 66234,
-    "sha256": "CB2E675185D7491811E050C82C4B489B49D9DD43EEE444644DE126AD9501640A",
-    "packagedAt": "2026-05-12T03:52:33+09:00",
-    "note": ".vscodeignore を追加し、tests/tools/docs/dist などの開発用ファイルを VSIX から除外した。"
+    "sizeBytes": 70767,
+    "sha256": "4CF3BA4F690D04F2CEAF926146D4BAE588243B51B485454A49FC4B7DD9B87227",
+    "packagedAt": "2026-05-12T04:22:55+09:00",
+    "note": ".vscodeignore を維持し、tests/tools/docs/dist などの開発用ファイルを VSIX から除外した。Codex tool PATH、model / インテリジェンス選択、選択 Work Items 起動を含む。"
   },
   "evidence": {
     "automatedValidation": "npm test",
@@ -27,7 +27,7 @@
     "docsZip": "dist/codex-friendly-project-starter-docs.zip",
     "manualTest": "docs/manual-test.md",
     "vscodeVerificationGuide": "docs/vscode-verification-guide.md",
-    "workItems": "Issues/README.md and Work Dashboard manual steps",
+    "workItems": "Issues/README.md, Tasks/README.md, selected/all Work Dashboard manual steps",
     "qcdsStatus": "Open QCDS Status manual steps and docs/qcds-strict-metrics.json"
   }
 }

@@ -15,9 +15,14 @@ AI Agent 呼び出し機能を使う場合は、VS Code 統合ターミナルか
 ```powershell
 codex --version
 codex exec --help
+rg --version
+gh --version
+gh auth status
 ```
 
-PATH にない場合は VS Code Settings で `codexFriendlyProjectStarter.codexCliPath` に CLI の実パスを設定します。
+`codex` が PATH にない場合は VS Code Settings で `codexFriendlyProjectStarter.codexCliPath` に CLI の実パスを設定します。`rg.exe` または `gh.exe` が VS Code 内 PowerShell で見つからない場合でも、extension-launched Codex は Codex bundled ripgrep と `E:\DevEnv\GitHubCLI` などを PATH へ先頭追加します。追加の配置先は `codexFriendlyProjectStarter.codexToolPathPrepend` に設定します。
+
+導入後は `Codex Starter: Check Codex CLI` を実行し、`codex`、`rg.exe`、`gh.exe`、`gh auth status` が同じ統合ターミナルで確認できることを見ます。
 
 ## VSIX 化の手順
 

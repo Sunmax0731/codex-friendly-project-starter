@@ -22,7 +22,11 @@ const {
   isWorkItemDocPath
 } = require('../src/work-items.cjs');
 const { renderWorkDashboardWebview } = require('../src/webview.cjs');
-const { buildWorkItemStartPrompt, buildAllWorkItemsStartPrompt } = require('../src/work-item-start.cjs');
+const {
+  buildWorkItemStartPrompt,
+  buildAllWorkItemsStartPrompt,
+  buildSelectedWorkItemsStartPrompt
+} = require('../src/work-item-start.cjs');
 const {
   inferWorkItemDraft,
   renderWorkItemComposerWebview
@@ -163,9 +167,12 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /openQcdsStatus/);
   assert.match(html, /openCodexApp/);
   assert.match(html, /invokeCurrentPrompt/);
+  assert.match(html, /選択Work Itemを開始/);
+  assert.match(html, /startSelectedWorkItems/);
   assert.match(html, /全Work Itemを開始/);
   assert.match(html, /startAllWorkItems/);
   assert.match(html, /tag-priority-p1/);
+  assert.match(html, /data-select-file/);
   assert.match(html, /Start/);
   assert.match(html, /startWorkItem/);
   assert.match(html, /width:0%|width:50%|width:100%/);
@@ -191,7 +198,8 @@ test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and Tasks into one b
   const prompt = buildAllWorkItemsStartPrompt({
     workspaceRoot: root,
     dashboard,
-    gitWritePolicyId: 'preflight'
+    gitWritePolicyId: 'preflight',
+    runConfig: { model: 'gpt-5.4', modelLabel: 'gpt-5.4', modelReasoningEffort: 'high', intelligenceLabel: 'high' }
   });
   assert.match(prompt, /All Work Items Start Prompt/);
   assert.match(prompt, /TODO、Issues、Tasks/);
@@ -200,6 +208,55 @@ test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and Tasks into one b
   assert.match(prompt, /Open Tasks: 1/);
   assert.match(prompt, /Prompt history reuse/);
   assert.match(prompt, /Git 書き込み方針/);
+  assert.match(prompt, /Codex 実行設定/);
+  assert.match(prompt, /Model: gpt-5\.4/);
+  assert.match(prompt, /Intelligence: high/);
+});
+
+test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and Tasks', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-selected-work-items-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1] Tool PATH bootstrap [Issue](Issues/0001-tool-path.md)\n- [ ] [P3] Later backlog\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-tool-path.md'), createIssueMarkdown({
+    title: 'Tool PATH bootstrap',
+    priority: 'P1',
+    type: 'feature',
+    qcdsAxes: ['Quality']
+  }), 'utf8');
+  fs.writeFileSync(path.join(root, 'Tasks', '0001-tool-path.md'), createTaskMarkdown({
+    title: 'Tool PATH task',
+    priority: 'P1',
+    qcdsAxes: ['Quality']
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  const selected = [
+    dashboard.todos.find((item) => item.title.includes('Tool PATH')),
+    dashboard.issues[0],
+    dashboard.tasks[0]
+  ];
+  const prompt = buildSelectedWorkItemsStartPrompt({
+    workspaceRoot: root,
+    dashboard,
+    items: selected,
+    documents: [
+      {
+        relativePath: 'Issues/0001-tool-path.md',
+        content: '# Tool PATH bootstrap\n\n- Status: open\n'
+      }
+    ],
+    gitWritePolicyId: 'preflight',
+    runConfig: { model: 'gpt-5.5', modelLabel: 'gpt-5.5', modelReasoningEffort: 'xhigh', intelligenceLabel: 'xhigh' }
+  });
+  assert.match(prompt, /Selected Work Items Start Prompt/);
+  assert.match(prompt, /選択された TODO、Issues、Tasks だけ/);
+  assert.match(prompt, /Selected TODO: 1/);
+  assert.match(prompt, /Selected Issues: 1/);
+  assert.match(prompt, /Selected Tasks: 1/);
+  assert.match(prompt, /Tool PATH bootstrap/);
+  assert.match(prompt, /選択外の Work Item/);
+  assert.match(prompt, /Model: gpt-5\.5/);
+  assert.match(prompt, /Intelligence: xhigh/);
 });
 
 test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
@@ -217,6 +274,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
     },
     documentText: '# TODO\n\n- [ ] [P1] Release docs sync [Issue](Issues/0001-release.md)\n',
     gitWritePolicyId: 'defer',
+    runConfig: { modelLabel: 'Codex CLI default', intelligenceLabel: 'medium' },
     relatedDocuments: [
       {
         relativePath: 'Issues/0001-release.md',
@@ -230,6 +288,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
   assert.match(prompt, /QCDS: Delivery/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Git 書き込みを保留/);
+  assert.match(prompt, /Intelligence: medium/);
 });
 
 test('inferWorkItemDraft turns natural language into issue or task fields', () => {

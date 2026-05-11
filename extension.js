@@ -19,7 +19,11 @@ const {
   appendTodoWorkItemLink,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
-const { buildWorkItemStartPrompt, buildAllWorkItemsStartPrompt } = require('./src/work-item-start.cjs');
+const {
+  buildWorkItemStartPrompt,
+  buildAllWorkItemsStartPrompt,
+  buildSelectedWorkItemsStartPrompt
+} = require('./src/work-item-start.cjs');
 const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
 const {
   inferWorkItemDraft,
@@ -76,6 +80,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.startWorkItemWithCodex', (item) => startWorkItemWithCodexCommand(context, item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.startSelectedWorkItemsWithCodex', () => startSelectedWorkItemsWithCodexCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.startAllWorkItemsWithCodex', () => startAllWorkItemsWithCodexCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownWebview', (item) => openMarkdownCommand(context, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshMarkdownWebview', () => refreshMarkdownWebviewCommand(context)),
@@ -210,13 +215,16 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   const target = resolveInvocationTarget({ workspaceRoot, prompt, input: options.input });
   const cwd = target.cwd;
   const sandboxMode = config.get('codexSandboxMode', 'workspace-write');
+  const runOptions = resolveCodexRunOptions(config, options.runOptions);
   if (config.get('confirmBeforeCodexRun', true)) {
     const targetText = target.targetRepositoryPath && target.targetRepositoryPath !== cwd
       ? `\nTarget repo: ${target.targetRepositoryPath}`
       : '';
+    const modelText = runOptions.model ? `\nModel: ${runOptions.model}` : '';
+    const intelligenceText = runOptions.modelReasoningEffort ? `\nIntelligence: ${runOptions.modelReasoningEffort}` : '';
     const warning = sandboxMode === 'danger-full-access'
-      ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}\n続行しますか?`
-      : `Codex CLI を ${cwd} で実行します。${targetText}\n続行しますか?`;
+      ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}${modelText}${intelligenceText}\n続行しますか?`
+      : `Codex CLI を ${cwd} で実行します。${targetText}${modelText}${intelligenceText}\n続行しますか?`;
     const answer = await vscode.window.showWarningMessage(warning, { modal: false }, 'Run Codex', 'Cancel');
     if (answer !== 'Run Codex') return;
   }
@@ -226,8 +234,10 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
     cwd,
     promptFilePath,
     sandboxMode,
-    model: config.get('codexModel', ''),
-    profile: config.get('codexProfile', '')
+    model: runOptions.model,
+    modelReasoningEffort: runOptions.modelReasoningEffort,
+    profile: config.get('codexProfile', ''),
+    toolPaths: collectCodexToolPaths(config)
   });
   const launcherFilePath = await writeLauncherFile(context, launcherScript);
   const command = buildPowerShellFileTerminalCommand(launcherFilePath);
@@ -237,14 +247,163 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
 
 function checkCodexCliCommand() {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const command = buildCodexCheckTerminalCommand({ cliPath: config.get('codexCliPath', 'codex') });
+  const command = buildCodexCheckTerminalCommand({
+    cliPath: config.get('codexCliPath', 'codex'),
+    toolPaths: collectCodexToolPaths(config)
+  });
   runTerminalCommand('Codex CLI Check', command, pickWorkspaceRoot());
 }
 
 function openCodexAppCommand() {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const command = buildCodexAppTerminalCommand({ cliPath: config.get('codexCliPath', 'codex') });
+  const command = buildCodexAppTerminalCommand({
+    cliPath: config.get('codexCliPath', 'codex'),
+    toolPaths: collectCodexToolPaths(config)
+  });
   runTerminalCommand('Codex App', command, pickWorkspaceRoot());
+}
+
+async function pickCodexRunOptions(config) {
+  const configured = resolveCodexRunOptions(config);
+  if (!config.get('promptForCodexRunOptions', true)) return configured;
+  const model = await pickCodexModel(config, configured.model);
+  if (model === undefined) return undefined;
+  const modelReasoningEffort = await pickCodexReasoningEffort(config, configured.modelReasoningEffort);
+  if (modelReasoningEffort === undefined) return undefined;
+  return resolveCodexRunOptions(config, { model, modelReasoningEffort });
+}
+
+async function pickCodexModel(config, configuredModel) {
+  const choices = getCodexModelChoices(config, configuredModel);
+  const picked = await vscode.window.showQuickPick([
+    {
+      label: '設定値を使う',
+      description: configuredModel || 'Codex CLI default',
+      detail: 'codexFriendlyProjectStarter.codexModel',
+      value: configuredModel,
+      picked: true
+    },
+    {
+      label: 'Codex CLI default',
+      description: '-m を渡さない',
+      value: ''
+    },
+    ...choices.map((model) => ({
+      label: model,
+      description: 'codex exec -m',
+      value: model
+    })),
+    {
+      label: 'カスタム入力',
+      description: '任意のモデル名を入力',
+      custom: true
+    }
+  ], { placeHolder: 'Codex のモデルを選択' });
+  if (!picked) return undefined;
+  if (!picked.custom) return picked.value;
+  const input = await vscode.window.showInputBox({
+    prompt: 'codex exec -m に渡すモデル名',
+    value: configuredModel || ''
+  });
+  return input === undefined ? undefined : cleanString(input);
+}
+
+async function pickCodexReasoningEffort(config, configuredEffort) {
+  const effortLabels = {
+    minimal: '最小',
+    low: '低',
+    medium: '標準',
+    high: '高',
+    xhigh: '最高'
+  };
+  const picked = await vscode.window.showQuickPick([
+    {
+      label: '設定値を使う',
+      description: configuredEffort || 'Codex CLI default',
+      detail: 'codexFriendlyProjectStarter.codexReasoningEffort',
+      value: configuredEffort,
+      picked: true
+    },
+    {
+      label: 'Codex CLI default',
+      description: 'model_reasoning_effort を渡さない',
+      value: ''
+    },
+    ...Object.entries(effortLabels).map(([value, label]) => ({
+      label: `${label} (${value})`,
+      description: 'codex exec -c model_reasoning_effort',
+      value
+    }))
+  ], { placeHolder: 'Codex のインテリジェンスを選択' });
+  return picked ? picked.value : undefined;
+}
+
+function resolveCodexRunOptions(config, overrides = {}) {
+  const hasOwn = Object.prototype.hasOwnProperty;
+  const model = hasOwn.call(overrides, 'model')
+    ? cleanString(overrides.model)
+    : cleanString(config.get('codexModel', ''));
+  const modelReasoningEffort = hasOwn.call(overrides, 'modelReasoningEffort')
+    ? cleanString(overrides.modelReasoningEffort)
+    : cleanString(config.get('codexReasoningEffort', ''));
+  return {
+    model,
+    modelReasoningEffort,
+    modelLabel: model || 'Codex CLI default',
+    intelligenceLabel: modelReasoningEffort || 'Codex CLI default'
+  };
+}
+
+function getCodexModelChoices(config, configuredModel = '') {
+  const defaults = ['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.3-codex', 'gpt-5.3-codex-spark'];
+  return uniqueCleanStrings([
+    configuredModel,
+    ...normalizeConfiguredArray(config.get('codexModelChoices', defaults)),
+    ...defaults
+  ]);
+}
+
+function collectCodexToolPaths(config) {
+  const cliPath = cleanString(config.get('codexCliPath', ''));
+  return uniqueCleanStrings([
+    ...normalizeConfiguredArray(config.get('codexToolPathPrepend', [])),
+    path.join(os.homedir(), 'AppData', 'Local', 'OpenAI', 'Codex', 'bin'),
+    'E:\\DevEnv\\GitHubCLI',
+    'E:\\DevEnv\\ripgrep',
+    'C:\\Program Files\\GitHub CLI',
+    path.isAbsolute(cliPath) ? path.dirname(cliPath) : ''
+  ].map(expandToolPathVariables));
+}
+
+function expandToolPathVariables(value) {
+  const text = cleanString(value);
+  if (!text) return '';
+  const home = os.homedir();
+  return text
+    .replace(/\$\{userHome\}/gi, home)
+    .replace(/%USERPROFILE%/gi, home)
+    .replace(/^~(?=\\|\/|$)/, home);
+}
+
+function normalizeConfiguredArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function uniqueCleanStrings(values) {
+  const seen = new Set();
+  const result = [];
+  for (const value of values) {
+    const text = cleanString(value);
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    result.push(text);
+  }
+  return result;
+}
+
+function cleanString(value) {
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 function refreshAllCommand(treeProvider, workItemsProvider) {
@@ -382,6 +541,10 @@ async function handleDashboardMessage(args) {
   }
   if (message?.type === 'startAllWorkItems') {
     await startAllWorkItemsWithCodexCommand(context, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'startSelectedWorkItems') {
+    await startSelectedWorkItemsWithCodexCommand(context, workspaceRoot, message.items || []);
     return;
   }
   if (message?.type === 'openComposer') {
@@ -529,7 +692,9 @@ async function inferWorkItemDraftWithCodex(context, input) {
     promptFilePath,
     sandboxMode: 'read-only',
     model: config.get('codexModel', ''),
+    modelReasoningEffort: config.get('codexReasoningEffort', ''),
     profile: config.get('codexProfile', ''),
+    toolPaths: collectCodexToolPaths(config),
     outputSchemaPath: schemaFilePath,
     outputLastMessagePath: outputFilePath,
     color: 'never',
@@ -644,14 +809,42 @@ async function startWorkItemWithCodexCommand(context, item) {
   const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
   const relatedDocuments = await loadRelatedWorkItemDocuments(workspaceRoot, resolved);
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const runOptions = await pickCodexRunOptions(config);
+  if (!runOptions) return;
   const prompt = buildWorkItemStartPrompt({
     workspaceRoot,
     item: resolved,
     documentText,
     relatedDocuments,
-    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight')
+    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
+    runConfig: runOptions
   });
-  await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot });
+  await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot, runOptions });
+}
+
+async function startSelectedWorkItemsWithCodexCommand(context, workspaceRootOverride, references = []) {
+  const workspaceRoot = typeof workspaceRootOverride === 'string' ? workspaceRootOverride : pickWorkspaceRoot();
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const selectedItems = references.length
+    ? resolveWorkItemReferences(dashboard, references)
+    : await pickWorkItemsToStart(dashboard, workspaceRoot);
+  if (!selectedItems.length) {
+    vscode.window.showInformationMessage('Codex Starter: 選択された open TODO / Issue / Task はありません。');
+    return;
+  }
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const runOptions = await pickCodexRunOptions(config);
+  if (!runOptions) return;
+  const documents = await loadSelectedWorkItemDocuments(workspaceRoot, selectedItems);
+  const prompt = buildSelectedWorkItemsStartPrompt({
+    workspaceRoot,
+    dashboard,
+    items: selectedItems,
+    documents,
+    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
+    runConfig: runOptions
+  });
+  await invokeCodexAgent(context, prompt, `Selected Work Items (${selectedItems.length})`, { workspaceRoot, runOptions });
 }
 
 async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride) {
@@ -665,12 +858,15 @@ async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride)
     return;
   }
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const runOptions = await pickCodexRunOptions(config);
+  if (!runOptions) return;
   const prompt = buildAllWorkItemsStartPrompt({
     workspaceRoot,
     dashboard,
-    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight')
+    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
+    runConfig: runOptions
   });
-  await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot });
+  await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot, runOptions });
 }
 
 function resolveWorkItemReference(dashboard, reference = {}) {
@@ -687,6 +883,85 @@ function resolveWorkItemReference(dashboard, reference = {}) {
     if (reference.kind && item.kind !== reference.kind) return false;
     return true;
   }) || pools.find((item) => normalizePath(item.filePath) === targetPath);
+}
+
+function resolveWorkItemReferences(dashboard, references = []) {
+  const selected = [];
+  const seen = new Set();
+  for (const reference of references) {
+    const item = resolveWorkItemReference(dashboard, reference);
+    if (!item || isWorkItemClosed(item)) continue;
+    const key = workItemKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    selected.push(item);
+  }
+  return sortWorkItemsForSelection(selected);
+}
+
+async function pickWorkItemsToStart(dashboard, workspaceRoot) {
+  const items = sortWorkItemsForSelection(openWorkItemsFromDashboard(dashboard));
+  if (!items.length) return [];
+  const picked = await vscode.window.showQuickPick(items.map((item) => ({
+    label: `[${item.priority || 'P3'}] ${item.title || 'Untitled Work Item'}`,
+    description: `${item.kind || 'work-item'} / ${item.status || 'open'} / ${item.relativePath || toSlash(path.relative(workspaceRoot, item.filePath || workspaceRoot))}`,
+    detail: item.lineNumber ? `line ${item.lineNumber}` : '',
+    item
+  })), {
+    canPickMany: true,
+    placeHolder: 'Codex に処理させる TODO / Issue / Task を選択'
+  });
+  return (picked || []).map((entry) => entry.item);
+}
+
+function openWorkItemsFromDashboard(dashboard) {
+  return [
+    ...(dashboard.todos || []).filter((item) => !item.done),
+    ...(dashboard.issues || []).filter((item) => item.status !== 'closed'),
+    ...(dashboard.tasks || []).filter((item) => item.status !== 'closed')
+  ];
+}
+
+async function loadSelectedWorkItemDocuments(workspaceRoot, items) {
+  const docs = [];
+  const seen = new Set();
+  for (const item of items) {
+    for (const doc of [
+      { filePath: item.filePath, relativePath: item.relativePath || toSlash(path.relative(workspaceRoot, item.filePath || workspaceRoot)) },
+      ...(await loadRelatedWorkItemDocuments(workspaceRoot, item))
+    ]) {
+      if (!doc.filePath) continue;
+      const key = normalizePath(doc.filePath);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const content = doc.content || await fs.promises.readFile(doc.filePath, 'utf8').catch(() => '');
+      if (!content) continue;
+      docs.push({
+        filePath: doc.filePath,
+        relativePath: doc.relativePath || toSlash(path.relative(workspaceRoot, doc.filePath)),
+        content
+      });
+    }
+  }
+  return docs;
+}
+
+function isWorkItemClosed(item) {
+  return item?.done === true || item?.status === 'closed';
+}
+
+function workItemKey(item) {
+  return [normalizePath(item.filePath), item.kind || '', Number(item.lineNumber || 0), item.title || ''].join('|');
+}
+
+function sortWorkItemsForSelection(items) {
+  const rank = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+  return [...items].sort((a, b) =>
+    (rank[a.priority] ?? 99) - (rank[b.priority] ?? 99) ||
+    String(a.relativePath || '').localeCompare(String(b.relativePath || '')) ||
+    Number(a.lineNumber || 0) - Number(b.lineNumber || 0) ||
+    String(a.title || '').localeCompare(String(b.title || ''))
+  );
 }
 
 async function loadRelatedWorkItemDocuments(workspaceRoot, item) {

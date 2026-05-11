@@ -24,6 +24,8 @@
 - QCDS 改善は TODO の `[QCDS:Delivery]` tag または Issue metadata の `- QCDS: Delivery, Satisfaction` で可視化に紐づけます。
 - 具体作業は `Tasks/*.md` に分け、`TODO.md` と `Issues/*.md` から Markdown link で辿れるようにします。
 - Work Item Composer の自然言語反映は Codex CLI の read-only `codex exec` を優先し、JSON 解析失敗や timeout 時だけローカル heuristic にフォールバックします。
+- VS Code 内 PowerShell で起動する Codex は環境 PATH が不足することがあるため、`src/codex-cli.cjs` のランチャで Codex bundled `rg.exe` と `E:\DevEnv\GitHubCLI` などを先頭追加し、`Check Codex CLI` で `rg.exe` / `gh.exe` / `gh auth status` を確認します。
+- TODO / Issue / Task を Codex に渡す導線は、単一、複数選択、全件の 3 種を保ち、いずれもモデルとインテリジェンス選択を起動前に通します。
 - Markdown WebView は `source` を直接開く代替ではなく、work item と docs のリンク遷移を一画面で追える確認面として扱います。
 - 工程別 Skill 生成では、ルート `SKILL.md` に Phase Skills のリンクを置き、`skills/01-requirements` から `skills/06-release` までを読み込み先にします。
 

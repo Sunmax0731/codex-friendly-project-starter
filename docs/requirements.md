@@ -22,7 +22,10 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - GUI フォームに自然言語メモを入力し、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue / Task を作成できる。Codex CLI が利用できない場合はローカル補完で作業を止めない。
 - Issue / Task / Issue + Task 作成時に `TODO.md` へリンク付き checkbox を追加し、TODO を作業入口として維持できる。
 - TODO / Issue / Task の行から 1 click で Codex CLI に開始プロンプトを渡し、該当 work item の作業へ着手できる。
+- Dashboard の checkbox または Command Palette の複数選択から、選択した TODO / Issue / Task だけを Codex CLI に渡して着手できる。
 - Dashboard または Command Palette から、未完了 TODO / Issues / Tasks を優先度順に連結した一括開始プロンプトを Codex CLI に渡せる。
+- TODO / Issue / Task を Codex CLI に渡す前に、使用モデルとインテリジェンスを選択でき、選択値を `codex exec` と開始プロンプトに反映できる。
+- VS Code 内 PowerShell から拡張が起動する Codex セッションで、`rg.exe` と `gh.exe` の候補ディレクトリを `PATH` に追加し、`Codex Starter: Check Codex CLI` で検出と `gh auth status` を確認できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / Task を可視化する。
 - `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。
@@ -57,5 +60,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の中段セクションを折りたたみでき、Issue / Task / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
 - Work Item Composer が Codex CLI で自然言語から Issue / Task の下書きを作り、作成後に Tree View と Dashboard が更新される。
 - Work Item の `Start` が、選択 work item と関連 Issue / Task を含む開始プロンプトを `codex exec` に渡せる。
+- `Start Selected Work Items` が、選択した TODO / Issue / Task だけを含む開始プロンプトを `codex exec` に渡せる。
 - `Start All Work Items` が、未完了 TODO / Issue / Task の件数、優先度、QCDS、release readiness を含む一括開始プロンプトを `codex exec` に渡せる。
+- Work Item Start の起動前にモデルとインテリジェンスを選択でき、`rg.exe` と `gh.exe` が PATH 補強後に解決される。
 - FirstPrompt と Work Item Start Prompt に Git 書き込み方針が含まれる。

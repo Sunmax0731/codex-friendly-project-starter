@@ -23,7 +23,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 未完了 Task は priority と phase を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
 - 未完了 TODO / Issue / Task には inline action として Codex 着手ボタンを出す。
-- Tree title には Work Dashboard、Work Item Composer、Start All、refresh all を icon action として置く。
+- Tree title には Work Dashboard、Work Item Composer、Start Selected、Start All、refresh all を icon action として置く。
 - item context から Start、Markdown WebView、Markdown Source、Copy Path にアクセスできる。
 
 ### Work Dashboard
@@ -32,10 +32,10 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - TODO、Issue、Task の進捗は progress bar で表示する。
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
-- TODO / Issue / Task / QCDS improvements の行には `Start` と `Open` ボタンを置く。`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
+- TODO / Issue / Task / QCDS improvements の行には `Select` checkbox、`Start`、`Open` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
 - 進行中操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
-- 進行中操作には `全Work Itemを開始` も置き、未完了 TODO / Issue / Task 全体を Codex CLI へ渡せるようにする。
+- 進行中操作には `選択Work Itemを開始` と `全Work Itemを開始` も置き、選択した TODO / Issue / Task だけ、または未完了 TODO / Issue / Task 全体を Codex CLI へ渡せるようにする。
 - 初回セットアップには `D:\AI` docs 生成、Issues / Tasks 初期化、Codex CLI 確認を折りたたみ領域として置く。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は `<details>` で折りたためるようにする。
 - TODO / Issue / Task の priority、status、type、phase、QCDS は tag として表示し、priority や blocked / bug / release などが目視で分かる色にする。
@@ -89,7 +89,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 入力なし: `<repo-name>` と標準目的を補完する。
 - 設定変更: `includeQcdsChecklist` に従い QCDS ブロックを出し分ける。
 - 設定変更: `codexGitWritePolicy` に従い Work Item Start Prompt の Git 書き込み方針を出し分ける。
-- Codex CLI 実行前: workspace root と sandbox mode を表示して確認する。
+- Codex CLI 実行前: workspace root、sandbox mode、選択した model、インテリジェンスを表示して確認する。
+- Work Item Start 実行前: `promptForCodexRunOptions` が true の場合は model とインテリジェンスを QuickPick で選択する。
+- VS Code 内 PowerShell の PATH が不足する場合: extension-launched Codex の launcher で `rg.exe` と `gh.exe` の候補ディレクトリを PATH 先頭に追加し、`Check Codex CLI` で同じ環境を確認する。
 - Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。
 - Tasks directory なし: Dashboard の `Tasks 初期化`、Work Item Composer、または default docs scaffold で `Tasks/README.md` を作成する。

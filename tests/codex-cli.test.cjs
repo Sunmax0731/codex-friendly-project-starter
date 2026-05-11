@@ -5,6 +5,7 @@ const {
   buildCodexExecScript,
   buildCodexAppScript,
   buildCodexCheckScript,
+  buildToolPathBootstrap,
   buildPowerShellFileTerminalCommand,
   quotePowerShell
 } = require('../src/codex-cli.cjs');
@@ -26,7 +27,9 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     promptFilePath: 'D:\\tmp\\first prompt.md',
     sandboxMode: 'read-only',
     model: 'gpt-5.4',
+    modelReasoningEffort: 'high',
     profile: 'default',
+    toolPaths: ['E:\\DevEnv\\GitHubCLI', 'C:\\Users\\tester\\AppData\\Local\\OpenAI\\Codex\\bin'],
     outputSchemaPath: 'D:\\tmp\\schema.json',
     outputLastMessagePath: 'D:\\tmp\\last.json',
     color: 'never',
@@ -34,8 +37,15 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   });
   assert.match(script, /\$OutputEncoding = \$utf8NoBom/);
   assert.match(script, /chcp\.com 65001/);
+  assert.match(script, /\$codexCommand = 'codex'/);
+  assert.match(script, /try \{ \$codexExecutable = \(Get-Command \$codexCommand -ErrorAction Stop\)\.Source \} catch \{\}/);
+  assert.match(script, /\$codexToolPathCandidates = @\(/);
+  assert.match(script, /\[array\]::Reverse\(\$codexToolPathCandidates\)/);
+  assert.match(script, /E:\\DevEnv\\GitHubCLI/);
+  assert.match(script, /\$codexRemainingPathParts = @\(\$env:Path -split ';'/);
+  assert.match(script, /\$env:Path = \$codexToolPath \+ ';' \+ \$codexRemainingPath/);
   assert.match(script, /Get-Content -LiteralPath \$promptFile -Encoding UTF8 -Raw/);
-  assert.match(script, /& 'codex' @codexArgs/);
+  assert.match(script, /& \$codexExecutable @codexArgs/);
   assert.match(script, /'exec'/);
   assert.match(script, /'-C'/);
   assert.match(script, /'D:\\AI\\VSCodeExtension\\sample'/);
@@ -45,6 +55,8 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /'gpt-5\.4'/);
   assert.match(script, /'-p'/);
   assert.match(script, /'default'/);
+  assert.match(script, /'-c'/);
+  assert.match(script, /'model_reasoning_effort="high"'/);
   assert.match(script, /'--output-schema'/);
   assert.match(script, /'D:\\tmp\\schema\.json'/);
   assert.match(script, /'-o'/);
@@ -61,6 +73,20 @@ test('buildPowerShellFileTerminalCommand launches a visible script file', () => 
 });
 
 test('app and check scripts use the configured CLI command', () => {
-  assert.equal(buildCodexAppScript({ cliPath: 'E:\\DevEnv\\codex\\codex.exe' }), "& 'E:\\DevEnv\\codex\\codex.exe' app");
-  assert.match(buildCodexCheckScript({ cliPath: 'codex' }), /exec --help/);
+  const app = buildCodexAppScript({ cliPath: 'E:\\DevEnv\\codex\\codex.exe' });
+  assert.match(app, /\$codexCommand = 'E:\\DevEnv\\codex\\codex\.exe'/);
+  assert.match(app, /& \$codexExecutable app/);
+  const check = buildCodexCheckScript({ cliPath: 'codex', toolPaths: ['E:\\DevEnv\\GitHubCLI'] });
+  assert.match(check, /\$codexCommand = 'codex'/);
+  assert.match(check, /exec --help/);
+  assert.match(check, /Get-Command rg\.exe/);
+  assert.match(check, /Get-Command gh\.exe/);
+  assert.match(check, /gh\.exe auth status/);
+});
+
+test('buildToolPathBootstrap deduplicates usable path candidates', () => {
+  const lines = buildToolPathBootstrap(['E:\\DevEnv\\GitHubCLI', 'E:\\DevEnv\\GitHubCLI', '']);
+  const script = lines.join('\n');
+  assert.equal((script.match(/E:\\DevEnv\\GitHubCLI/g) || []).length, 1);
+  assert.match(script, /Test-Path -LiteralPath/);
 });
