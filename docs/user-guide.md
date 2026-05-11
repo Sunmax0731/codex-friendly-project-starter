@@ -15,7 +15,7 @@
 3. `Work Items` で `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` を確認する。
 4. 未完了 TODO、Issue、Task を選択すると、該当 Markdown が Markdown WebView で開く。
 5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks、QCDS の進捗を progress bar で確認できる。
-6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
+6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
 7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / Task / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
 8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
@@ -26,6 +26,13 @@
 3. 確認ダイアログで workspace root と sandbox mode を確認し、問題なければ `Run Codex` を選ぶ。
 4. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / Task、README / AGENTS / SKILL の確認順を含む開始プロンプトが渡される。
 5. Codex 側の作業完了後、TODO / Issue / Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+
+## TODO / Issue / Task を一括で Codex に渡す
+
+1. `Codex Work Dashboard` の `全Work Itemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
+2. 確認ダイアログで workspace root と sandbox mode を確認し、必要な場合だけ `Run Codex` を選ぶ。
+3. 統合ターミナルで `codex exec` が起動し、未完了 TODO、Issue、Task の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が渡される。
+4. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
 ## QCDS 状況を確認する
 
@@ -100,6 +107,10 @@ Permission denied を避けたい場合は、Git 書き込み方針で `Git 書�
 ## Webview で生成する
 
 Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
+
+`IDEAS 候補` は、選択中の分野に応じて `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>` の `created_idea_*` を確認し、文字化けを含む候補を除外して表示する。`候補を採用` を押した場合だけ Repo 名と目的に反映される。
+
+`FirstPrompt 履歴` は workspace storage に保存される入力値の履歴です。保存対象は分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針、Repo 名、目的で、prompt 本文は保存しない。`履歴を復元` で入力欄へ戻せる。`履歴を削除` または `Codex Starter: Clear FirstPrompt History` で削除できる。
 
 ## AI Agent を起動する
 

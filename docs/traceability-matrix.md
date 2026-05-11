@@ -13,6 +13,7 @@
 | Issue / Task 作成時に TODO へ同期する | `src/work-items.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
 | Issue / Task の分類を拡張する | `src/work-item-composer.cjs`, `src/work-items.cjs` | `tests/work-items.test.cjs` |
 | TODO / Issue / Task から Codex に着手する | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
+| TODO / Issue / Task を一括で Codex に渡す | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | TODO / Issue / Task link を解析する | `src/work-items.cjs` | `tests/work-items.test.cjs`, `Issues/0008-work-item-task-linking.md` |
 | Work Dashboard を表示する | `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Work Dashboard の日常操作 / 初回セットアップ / 折りたたみ / tag 表示を整える | `src/webview.cjs` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
@@ -21,6 +22,8 @@
 | Markdown WebView で docs を読む | `src/markdown-webview.cjs`, `extension.js` | `tests/markdown-webview.test.cjs`, `Issues/0007-markdown-webview.md` |
 | `D:\AI` 既定 docs を生成する | `src/default-docs.cjs`, `extension.js` | `tests/default-docs.test.cjs`, `Issues/0006-default-doc-scaffold.md` |
 | 分野を選んで FirstPrompt を作る | `src/domains.cjs`, `src/prompt-builder.cjs` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
+| FirstPrompt 履歴を保存して復元する | `src/prompt-history.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/prompt-history.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
+| IDEAS / domain 由来の project name 候補を補完する | `src/idea-candidates.cjs`, `src/webview.cjs`, `extension.js` | `tests/idea-candidates.test.cjs`, `tests/prompt-history.test.cjs`, `docs/manual-test.md` |
 | ガバナンス / 開発手法 / 工程 / 進行速度を選べる | `src/workflows.cjs`, `src/prompt-builder.cjs`, `src/webview.cjs`, `extension.js` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
 | Git 書き込み方針を FirstPrompt / Work Item Start に反映する | `src/workflows.cjs`, `src/prompt-builder.cjs`, `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/prompt-builder.test.cjs`, `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Webview から生成できる | `src/webview.cjs`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |

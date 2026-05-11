@@ -19,7 +19,7 @@ const {
   appendTodoWorkItemLink,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
-const { buildWorkItemStartPrompt } = require('./src/work-item-start.cjs');
+const { buildWorkItemStartPrompt, buildAllWorkItemsStartPrompt } = require('./src/work-item-start.cjs');
 const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
 const {
   inferWorkItemDraft,
@@ -32,6 +32,12 @@ const {
 } = require('./src/markdown-webview.cjs');
 const { ensureDefaultProjectDocs } = require('./src/default-docs.cjs');
 const { resolveInvocationTarget } = require('./src/invocation-target.cjs');
+const { collectIdeaCandidatesByDomain } = require('./src/idea-candidates.cjs');
+const {
+  readPromptHistory,
+  savePromptHistory,
+  clearPromptHistory
+} = require('./src/prompt-history.cjs');
 const {
   buildCodexExecScript,
   buildPowerShellFileTerminalCommand,
@@ -70,6 +76,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.startWorkItemWithCodex', (item) => startWorkItemWithCodexCommand(context, item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.startAllWorkItemsWithCodex', () => startAllWorkItemsWithCodexCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownWebview', (item) => openMarkdownCommand(context, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshMarkdownWebview', () => refreshMarkdownWebviewCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
@@ -83,8 +90,9 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
     vscode.commands.registerCommand('codex-friendly-project-starter.createWorkItemFromNaturalLanguage', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
-    vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
-    vscode.commands.registerCommand('codex-friendly-project-starter.copyFirstPrompt', () => copyFirstPromptCommand()),
+    vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.copyFirstPrompt', () => copyFirstPromptCommand(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.clearFirstPromptHistory', () => clearFirstPromptHistoryCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithFirstPrompt', () => invokeCodexWithFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithCurrentPrompt', () => invokeCodexWithCurrentPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.checkCodexCli', () => checkCodexCliCommand()),
@@ -106,13 +114,14 @@ function activate(context) {
 
 function deactivate() {}
 
-async function generateFirstPromptCommand() {
+async function generateFirstPromptCommand(context) {
   const input = await collectPromptInput();
   if (!input) return;
   await openPromptDocument(input);
+  await rememberFirstPrompt(context, input);
 }
 
-async function copyFirstPromptCommand() {
+async function copyFirstPromptCommand(context) {
   const input = await collectPromptInput();
   if (!input) return;
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
@@ -121,7 +130,13 @@ async function copyFirstPromptCommand() {
     includeQcdsChecklist: config.get('includeQcdsChecklist', true)
   });
   await vscode.env.clipboard.writeText(prompt);
+  await rememberFirstPrompt(context, input);
   vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
+}
+
+async function clearFirstPromptHistoryCommand(context) {
+  await clearPromptHistory(storageRootForContext(context));
+  vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt history cleared', 4000);
 }
 
 async function collectPromptInput() {
@@ -170,6 +185,7 @@ async function invokeCodexWithFirstPromptCommand(context) {
     ...input,
     includeQcdsChecklist: config.get('includeQcdsChecklist', true)
   });
+  await rememberFirstPrompt(context, input);
   await invokeCodexAgent(context, prompt, 'Generated FirstPrompt', { input });
 }
 
@@ -241,8 +257,16 @@ async function writePromptFile(context, prompt) {
   return writeStorageFile(context, 'first-prompt', '.md', prompt);
 }
 
+async function rememberFirstPrompt(context, input) {
+  await savePromptHistory(storageRootForContext(context), input);
+}
+
+function storageRootForContext(context) {
+  return context?.storageUri?.fsPath || path.join(os.tmpdir(), 'codex-friendly-project-starter');
+}
+
 async function writeStorageFile(context, prefix, extension, content) {
-  const storageRoot = context.storageUri?.fsPath || path.join(os.tmpdir(), 'codex-friendly-project-starter');
+  const storageRoot = storageRootForContext(context);
   await fs.promises.mkdir(storageRoot, { recursive: true });
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const filePath = path.join(storageRoot, `${prefix}-${stamp}${extension}`);
@@ -269,7 +293,7 @@ function pickWorkspaceRoot() {
   return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
 }
 
-function openStarterWebview(context) {
+async function openStarterWebview(context) {
   const panel = vscode.window.createWebviewPanel(
     'codexFriendlyProjectStarter',
     'Codex Friendly Project Starter',
@@ -277,21 +301,38 @@ function openStarterWebview(context) {
     { enableScripts: true, retainContextWhenHidden: true }
   );
   const nonce = String(Date.now()) + String(Math.random()).slice(2);
-  panel.webview.html = renderStarterWebview(nonce);
+  panel.webview.html = await renderStarterHtml(context, nonce);
   panel.webview.onDidReceiveMessage(async (message) => {
+    if (message?.type === 'clearHistory') {
+      await clearPromptHistory(storageRootForContext(context));
+      panel.webview.html = await renderStarterHtml(context, nonce);
+      vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt history cleared', 4000);
+      return;
+    }
     if (!message || !message.input) return;
     const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
     const input = { ...message.input, includeQcdsChecklist: config.get('includeQcdsChecklist', true) };
-    if (message.type === 'generate') await openPromptDocument(input);
+    if (message.type === 'generate') {
+      await openPromptDocument(input);
+      await rememberFirstPrompt(context, input);
+    }
     if (message.type === 'runCodex') {
       const prompt = buildFirstPrompt(input);
+      await rememberFirstPrompt(context, input);
       await invokeCodexAgent(context, prompt, 'Webview FirstPrompt', { input });
     }
     if (message.type === 'copy') {
       await vscode.env.clipboard.writeText(buildFirstPrompt(input));
+      await rememberFirstPrompt(context, input);
       vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
     }
   }, undefined, context.subscriptions);
+}
+
+async function renderStarterHtml(context, nonce) {
+  const promptHistory = await readPromptHistory(storageRootForContext(context));
+  const ideaCandidatesByDomain = collectIdeaCandidatesByDomain();
+  return renderStarterWebview(nonce, { promptHistory, ideaCandidatesByDomain });
 }
 
 async function openWorkDashboard(context, treeProvider, workItemsProvider) {
@@ -337,6 +378,10 @@ async function handleDashboardMessage(args) {
   }
   if (message?.type === 'startWorkItem' && message.filePath) {
     await startWorkItemWithCodexCommand(context, message);
+    return;
+  }
+  if (message?.type === 'startAllWorkItems') {
+    await startAllWorkItemsWithCodexCommand(context, workspaceRoot);
     return;
   }
   if (message?.type === 'openComposer') {
@@ -607,6 +652,25 @@ async function startWorkItemWithCodexCommand(context, item) {
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight')
   });
   await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot });
+}
+
+async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const openTodoCount = (dashboard.todos || []).filter((item) => !item.done).length;
+  const openIssueCount = (dashboard.issues || []).filter((item) => item.status !== 'closed').length;
+  const openTaskCount = (dashboard.tasks || []).filter((item) => item.status !== 'closed').length;
+  if (!openTodoCount && !openIssueCount && !openTaskCount) {
+    vscode.window.showInformationMessage('Codex Starter: open TODO / Issue / Task はありません。');
+    return;
+  }
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const prompt = buildAllWorkItemsStartPrompt({
+    workspaceRoot,
+    dashboard,
+    gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight')
+  });
+  await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot });
 }
 
 function resolveWorkItemReference(dashboard, reference = {}) {

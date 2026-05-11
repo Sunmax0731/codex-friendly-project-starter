@@ -15,6 +15,8 @@ function runVsCodeExtensionGate() {
   const workItems = readText('src/work-items.cjs');
   const workItemStart = readText('src/work-item-start.cjs');
   const workItemComposer = readText('src/work-item-composer.cjs');
+  const promptHistory = readText('src/prompt-history.cjs');
+  const ideaCandidates = readText('src/idea-candidates.cjs');
   const codexWorkItemDraft = readText('src/codex-work-item-draft.cjs');
   const markdownWebview = readText('src/markdown-webview.cjs');
   const defaultDocs = readText('src/default-docs.cjs');
@@ -31,7 +33,7 @@ function runVsCodeExtensionGate() {
     check('work-items-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyWorkItems'), 'Work Items Tree View contribution exists'),
     check('work-dashboard-command', commands.has('codex-friendly-project-starter.openWorkDashboard') && commands.has('codex-friendly-project-starter.openQcdsStatus') && commands.has('codex-friendly-project-starter.initializeIssuesDirectory') && commands.has('codex-friendly-project-starter.createLocalIssue'), 'Work dashboard, QCDS status, and local issue commands exist'),
     check('work-composer-command', commands.has('codex-friendly-project-starter.openWorkItemComposer') && commands.has('codex-friendly-project-starter.createWorkItemFromNaturalLanguage') && commands.has('codex-friendly-project-starter.initializeTasksDirectory'), 'Work Item Composer and Tasks init commands exist'),
-    check('work-item-start-command', commands.has('codex-friendly-project-starter.startWorkItemWithCodex') && extension.includes('startWorkItemWithCodexCommand') && workItemStart.includes('buildWorkItemStartPrompt'), 'Work Item Start command exists'),
+    check('work-item-start-command', commands.has('codex-friendly-project-starter.startWorkItemWithCodex') && commands.has('codex-friendly-project-starter.startAllWorkItemsWithCodex') && extension.includes('startWorkItemWithCodexCommand') && extension.includes('startAllWorkItemsWithCodexCommand') && workItemStart.includes('buildWorkItemStartPrompt') && workItemStart.includes('buildAllWorkItemsStartPrompt'), 'Single and all Work Item Start commands exist'),
     check('markdown-webview-command', commands.has('codex-friendly-project-starter.openMarkdownWebview') && commands.has('codex-friendly-project-starter.refreshMarkdownWebview') && commands.has('codex-friendly-project-starter.openMarkdownSource') && commands.has('codex-friendly-project-starter.copyMarkdownPath'), 'Markdown WebView commands exist'),
     check('command-gui-parity', commands.has('codex-friendly-project-starter.copyFirstPrompt') && commands.has('codex-friendly-project-starter.refreshMarkdownWebview') && commands.has('codex-friendly-project-starter.refreshAll') && webview.includes('openCodexApp') && webview.includes('invokeCurrentPrompt') && webview.includes('openQcdsStatus'), 'Command Palette and GUI expose shared operational actions'),
     check('default-docs-command', commands.has('codex-friendly-project-starter.scaffoldDefaultDocs') && commands.has('codex-friendly-project-starter.createLocalTask'), 'Default docs scaffold and local task commands exist'),
@@ -41,6 +43,8 @@ function runVsCodeExtensionGate() {
     check('work-dashboard-start-button', webview.includes('data-start-file') && webview.includes('startWorkItem'), 'work dashboard can start a work item'),
     check('work-item-composer-webview', workItemComposer.includes('renderWorkItemComposerWebview') && workItemComposer.includes('inferWorkItemDraft') && extension.includes('openWorkItemComposer'), 'work item composer webview contract exists'),
     check('first-prompt-development-method', readText('src/workflows.cjs').includes('DEVELOPMENT_METHODS') && readText('src/prompt-builder.cjs').includes('getDevelopmentMethodById') && webview.includes('developmentMethod'), 'FirstPrompt includes development method selection'),
+    check('first-prompt-history', commands.has('codex-friendly-project-starter.clearFirstPromptHistory') && promptHistory.includes('savePromptHistory') && webview.includes('restoreSelectedHistory') && extension.includes('rememberFirstPrompt'), 'FirstPrompt history save, restore, and clear contract exists'),
+    check('ideas-candidates', ideaCandidates.includes('collectIdeaCandidatesByDomain') && webview.includes('applySelectedIdea') && extension.includes('collectIdeaCandidatesByDomain'), 'IDEAS and domain candidate suggestion contract exists'),
     check('git-write-policy-prompts', readText('src/workflows.cjs').includes('GIT_WRITE_POLICIES') && readText('src/prompt-builder.cjs').includes('getGitWritePolicyById') && webview.includes('gitWritePolicy') && workItemStart.includes('Git 書き込み方針'), 'FirstPrompt and Work Item Start include Git write policy'),
     check('codex-work-item-draft', codexWorkItemDraft.includes('buildCodexWorkItemDraftPrompt') && codexWorkItemDraft.includes('WORK_ITEM_DRAFT_JSON_SCHEMA') && codexWorkItemDraft.includes('parseCodexWorkItemDraftOutput') && extension.includes('inferWorkItemDraftWithCodex') && extension.includes('outputSchemaPath'), 'Codex CLI work item draft inference exists'),
     check('markdown-webview', markdownWebview.includes('renderMarkdownDocumentWebview') && markdownWebview.includes('resolveMarkdownLink') && extension.includes('openMarkdownWebview'), 'Markdown WebView contract exists'),

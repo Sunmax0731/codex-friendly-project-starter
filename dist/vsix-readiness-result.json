@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "pass": true,
   "method": "static-vsix-readiness",
-  "manualPackage": "not-run-by-codex",
+  "manualPackage": "generated-by-codex",
+  "vsixArtifact": {
+    "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
+    "sizeBytes": 66234,
+    "sha256": "CB2E675185D7491811E050C82C4B489B49D9DD43EEE444644DE126AD9501640A"
+  },
   "checks": [
     {
       "id": "publisher",
@@ -38,7 +43,7 @@
     {
       "id": "user-guide",
       "pass": true,
-      "detail": "user guide covers docs scaffold and tasks"
+      "detail": "user guide covers docs scaffold, tasks, and history"
     },
     {
       "id": "commands",

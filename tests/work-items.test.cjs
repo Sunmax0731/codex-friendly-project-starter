@@ -22,7 +22,7 @@ const {
   isWorkItemDocPath
 } = require('../src/work-items.cjs');
 const { renderWorkDashboardWebview } = require('../src/webview.cjs');
-const { buildWorkItemStartPrompt } = require('../src/work-item-start.cjs');
+const { buildWorkItemStartPrompt, buildAllWorkItemsStartPrompt } = require('../src/work-item-start.cjs');
 const {
   inferWorkItemDraft,
   renderWorkItemComposerWebview
@@ -163,10 +163,43 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /openQcdsStatus/);
   assert.match(html, /openCodexApp/);
   assert.match(html, /invokeCurrentPrompt/);
+  assert.match(html, /全Work Itemを開始/);
+  assert.match(html, /startAllWorkItems/);
   assert.match(html, /tag-priority-p1/);
   assert.match(html, /Start/);
   assert.match(html, /startWorkItem/);
   assert.match(html, /width:0%|width:50%|width:100%/);
+});
+
+test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and Tasks into one backlog prompt', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-all-work-items-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P2][QCDS:Satisfaction] Prompt history reuse [Issue](Issues/0001-history.md)\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-history.md'), createIssueMarkdown({
+    title: 'Prompt history reuse',
+    priority: 'P2',
+    type: 'feature',
+    qcdsAxes: ['Satisfaction']
+  }), 'utf8');
+  fs.writeFileSync(path.join(root, 'Tasks', '0001-history.md'), createTaskMarkdown({
+    title: 'Prompt history reuse task',
+    priority: 'P2',
+    qcdsAxes: ['Satisfaction']
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  const prompt = buildAllWorkItemsStartPrompt({
+    workspaceRoot: root,
+    dashboard,
+    gitWritePolicyId: 'preflight'
+  });
+  assert.match(prompt, /All Work Items Start Prompt/);
+  assert.match(prompt, /TODO、Issues、Tasks/);
+  assert.match(prompt, /Open TODO: 1/);
+  assert.match(prompt, /Open Issues: 1/);
+  assert.match(prompt, /Open Tasks: 1/);
+  assert.match(prompt, /Prompt history reuse/);
+  assert.match(prompt, /Git 書き込み方針/);
 });
 
 test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {

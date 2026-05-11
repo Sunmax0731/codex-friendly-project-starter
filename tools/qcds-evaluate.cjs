@@ -24,7 +24,9 @@ const product = {
     'src/work-item-composer.cjs',
     'src/codex-work-item-draft.cjs',
     'src/codex-cli.cjs',
-    'src/invocation-target.cjs'
+    'src/invocation-target.cjs',
+    'src/prompt-history.cjs',
+    'src/idea-candidates.cjs'
   ],
   testFiles: [
     'tests/prompt-builder.test.cjs',
@@ -35,6 +37,8 @@ const product = {
     'tests/codex-work-item-draft.test.cjs',
     'tests/codex-cli.test.cjs',
     'tests/invocation-target.test.cjs',
+    'tests/prompt-history.test.cjs',
+    'tests/idea-candidates.test.cjs',
     'samples/representative-suite.json'
   ]
 };
@@ -184,7 +188,10 @@ function commandContract() {
     'codex-friendly-project-starter.createWorkItemFromNaturalLanguage',
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem',
+    'codex-friendly-project-starter.startWorkItemWithCodex',
+    'codex-friendly-project-starter.startAllWorkItemsWithCodex',
     'codex-friendly-project-starter.copyFirstPrompt',
+    'codex-friendly-project-starter.clearFirstPromptHistory',
     'codex-friendly-project-starter.refreshAll'
   ];
   return { pass: required.every((item) => commands.has(item)), detail: required.every((item) => commands.has(item)) ? 'commands ok' : 'commands missing' };

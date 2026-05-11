@@ -1,14 +1,16 @@
 const { DOMAINS } = require('./domains.cjs');
 const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./workflows.cjs');
 
-function renderStarterWebview(nonce) {
+function renderStarterWebview(nonce, options = {}) {
   const state = JSON.stringify({
     domains: DOMAINS,
     governanceModes: GOVERNANCE_MODES,
     developmentMethods: DEVELOPMENT_METHODS,
     workflows: WORKFLOWS,
     paces: PACES,
-    gitWritePolicies: GIT_WRITE_POLICIES
+    gitWritePolicies: GIT_WRITE_POLICIES,
+    promptHistory: options.promptHistory || [],
+    ideaCandidatesByDomain: options.ideaCandidatesByDomain || {}
   }).replace(/</g, '\\u003c');
 
   return `<!doctype html>
@@ -29,6 +31,8 @@ function renderStarterWebview(nonce) {
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
     button { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-background); color: var(--vscode-button-foreground); padding: 7px 10px; border-radius: 3px; cursor: pointer; }
     button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+    .utility { margin-top: 12px; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .utility-actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
     .summary { margin-top: 14px; padding: 10px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; white-space: pre-wrap; }
   </style>
 </head>
@@ -45,6 +49,15 @@ function renderStarterWebview(nonce) {
   </div>
   <label style="margin-top:12px;">Repo 名<input id="projectName" placeholder="my-new-project"></label>
   <label style="margin-top:12px;">目的<textarea id="goal" placeholder="何を作り、どこまで進めるか"></textarea></label>
+  <div class="utility">
+    <label>IDEAS 候補<select id="ideaCandidate"></select></label>
+    <label>Prompt 履歴<select id="historySelect"></select></label>
+  </div>
+  <div class="utility-actions">
+    <button id="applyIdea" class="secondary">候補を採用</button>
+    <button id="restoreHistory" class="secondary">履歴を復元</button>
+    <button id="clearHistory" class="secondary">履歴を削除</button>
+  </div>
   <div class="actions">
     <button id="generate">FirstPrompt を開く</button>
     <button id="runCodex">Codex CLI で実行</button>
@@ -79,6 +92,9 @@ function renderStarterWebview(nonce) {
   document.getElementById('generate').addEventListener('click', () => vscode.postMessage({ type: 'generate', input: currentInput() }));
   document.getElementById('runCodex').addEventListener('click', () => vscode.postMessage({ type: 'runCodex', input: currentInput() }));
   document.getElementById('copy').addEventListener('click', () => vscode.postMessage({ type: 'copy', input: currentInput() }));
+  document.getElementById('applyIdea').addEventListener('click', applySelectedIdea);
+  document.getElementById('restoreHistory').addEventListener('click', restoreSelectedHistory);
+  document.getElementById('clearHistory').addEventListener('click', () => vscode.postMessage({ type: 'clearHistory' }));
   function currentInput() {
     return {
       domainId: document.getElementById('domain').value,
@@ -90,6 +106,58 @@ function renderStarterWebview(nonce) {
       projectName: document.getElementById('projectName').value,
       goal: document.getElementById('goal').value
     };
+  }
+  function fillSelect(select, placeholder, items, labelOfItem) {
+    select.innerHTML = '';
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = placeholder;
+    select.append(empty);
+    for (const item of items) {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = labelOfItem(item);
+      select.append(option);
+    }
+  }
+  function selectedById(items, id) {
+    return items.find((item) => item.id === id);
+  }
+  function refreshIdeaCandidates() {
+    const domainId = document.getElementById('domain').value;
+    fillSelect(
+      document.getElementById('ideaCandidate'),
+      '候補なし',
+      state.ideaCandidatesByDomain[domainId] || [],
+      (item) => item.projectName + ' / ' + item.sourceKind
+    );
+  }
+  function applySelectedIdea() {
+    const domainId = document.getElementById('domain').value;
+    const item = selectedById(state.ideaCandidatesByDomain[domainId] || [], document.getElementById('ideaCandidate').value);
+    if (!item) return;
+    document.getElementById('projectName').value = item.projectName || '';
+    document.getElementById('goal').value = item.goal || item.title || '';
+    renderSummary();
+  }
+  function refreshHistory() {
+    fillSelect(
+      document.getElementById('historySelect'),
+      '履歴なし',
+      state.promptHistory || [],
+      (item) => item.label || item.updatedAt
+    );
+  }
+  function restoreSelectedHistory() {
+    const item = selectedById(state.promptHistory || [], document.getElementById('historySelect').value);
+    if (!item || !item.input) return;
+    for (const id of ids) {
+      if (item.input[id + 'Id']) document.getElementById(id).value = item.input[id + 'Id'];
+    }
+    document.getElementById('projectName').value = item.input.projectName || '';
+    document.getElementById('goal').value = item.input.goal || '';
+    refreshIdeaCandidates();
+    renderSummary();
   }
   function labelOf(list, id) {
     return (list.find((item) => item.id === id) || list[0]).label;
@@ -108,6 +176,9 @@ function renderStarterWebview(nonce) {
       'runtime gate: ' + domain.runtimeGate
     ].join('\\n');
   }
+  document.getElementById('domain').addEventListener('change', refreshIdeaCandidates);
+  refreshIdeaCandidates();
+  refreshHistory();
   renderSummary();
 </script>
 </body>
@@ -193,6 +264,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
       <button class="action secondary" data-action="openCodexApp">Codex App</button>
       <button class="action secondary" data-action="invokeCurrentPrompt">現在Promptを実行</button>
+      <button class="action secondary" data-action="startAllWorkItems">全Work Itemを開始</button>
       <button class="action subtle" data-action="refreshDashboard">Refresh</button>
     </div>
   </section>

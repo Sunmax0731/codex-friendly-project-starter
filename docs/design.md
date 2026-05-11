@@ -23,7 +23,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 未完了 Task は priority と phase を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
 - 未完了 TODO / Issue / Task には inline action として Codex 着手ボタンを出す。
-- Tree title には Work Dashboard、Work Item Composer、refresh all を icon action として置く。
+- Tree title には Work Dashboard、Work Item Composer、Start All、refresh all を icon action として置く。
 - item context から Start、Markdown WebView、Markdown Source、Copy Path にアクセスできる。
 
 ### Work Dashboard
@@ -35,6 +35,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - TODO / Issue / Task / QCDS improvements の行には `Start` と `Open` ボタンを置く。`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
 - 進行中操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
+- 進行中操作には `全Work Itemを開始` も置き、未完了 TODO / Issue / Task 全体を Codex CLI へ渡せるようにする。
 - 初回セットアップには `D:\AI` docs 生成、Issues / Tasks 初期化、Codex CLI 確認を折りたたみ領域として置く。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は `<details>` で折りたためるようにする。
 - TODO / Issue / Task の priority、status、type、phase、QCDS は tag として表示し、priority や blocked / bug / release などが目視で分かる色にする。
@@ -74,6 +75,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針の6つの select を配置する。
 - 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - Repo 名と目的を任意入力にする。
+- `IDEAS 候補` は domain 切り替えに追従し、`D:\AI\IDEAS\<Domain>` と正式ドメイン直下の `created_idea_*` から候補を表示する。採用ボタンを押すまで入力値は変更しない。
+- `Prompt 履歴` は workspace storage の入力履歴から復元する。履歴には prompt 本文を保存せず、削除ボタンと clear command を用意する。
 - `FirstPrompt を開く` と `VS Code Codexへコピー` を提供する。
 - Permission denied 回避のため、Git 書き込み方針で `Git 書き込みを保留` を選ぶと prompt は `git add` / `git commit` / `git push` を実行しないよう指示する。
 - 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。

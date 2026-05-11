@@ -18,6 +18,9 @@ npm test
 - Agent docs 判定とスキャンが `node_modules` を除外する。
 - Issue / Task 作成時に `TODO.md` へリンク付き checkbox を同期できる。
 - Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue / Task、QCDS、Git 書き込み方針が含まれる。
+- `Start All Work Items` が未完了 TODO / Issue / Task を一括開始 prompt に変換できる。
+- FirstPrompt 履歴が workspace storage に保存、復元、削除できる。
+- `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から project name 候補を補完し、文字化け候補を除外できる。
 - QCDS metrics の grade が定義済み値だけを使う。
 - VSCodeExtension manifest と `extension.js` が activation、commands、Tree View、webview、decoration を満たす。
 
@@ -33,6 +36,7 @@ npm test
 - `Codex Starter: Invoke AI Agent with FirstPrompt` が一時 prompt file を作り、`codex exec` を起動する。
 - `Codex Starter: Invoke AI Agent with Current Prompt` が選択範囲または開いている文書全体を `codex exec` に渡す。
 - `Codex Starter: Start Work Item with Codex` が選択 TODO / Issue / Task を開始プロンプトにして `codex exec` に渡す。
+- `Codex Starter: Start All Work Items with Codex` が未完了 TODO / Issue / Task を優先度順の一括開始プロンプトにして `codex exec` に渡す。
 
 ## 手動テスト
 

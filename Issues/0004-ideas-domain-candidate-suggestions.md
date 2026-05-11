@@ -1,11 +1,12 @@
 # IDEAS domain candidate suggestions
 
-- Status: open
+- Status: closed
 - Priority: P2
 - Type: feature
 - Source: local
 - Created: 2026-05-11
 - QCDS: Satisfaction, Delivery
+- Tasks: [Tasks/0011-ideas-candidate-suggestions.md](../Tasks/0011-ideas-candidate-suggestions.md)
 
 ## Context
 
@@ -13,10 +14,11 @@
 
 ## Acceptance Criteria
 
-- [ ] domain selection に応じて候補 idea を探索する。
-- [ ] `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>` の両方を確認する。
-- [ ] 候補の採用は明示操作にし、勝手に prompt に混ぜない。
+- [x] domain selection に応じて候補 idea を探索する。
+- [x] `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>` の両方を確認する。
+- [x] 候補の採用は明示操作にし、勝手に prompt に混ぜない。
 
 ## Notes
 
 - 文字化けした created_idea は候補から除外する。
+- 典型的な文字化け code point を含む候補は `src/idea-candidates.cjs` で除外する。

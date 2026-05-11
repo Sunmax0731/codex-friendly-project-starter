@@ -8,6 +8,7 @@
 - [ ] `docs/manual-test.md` にユーザー側手動確認手順がある。
 - [ ] `docs/vscode-verification-guide.md` に Codex CLI 呼び出し確認手順がある。
 - [ ] `docs/vsix-package-guide.md` に VSIX package と local install の確認手順がある。
+- [ ] `dist/codex-friendly-project-starter-0.1.0.vsix` の生成結果、size、SHA256 が `docs/release-evidence.json` に記録されている。
 - [ ] `tools/vsix-readiness.mjs` が package metadata、docs、必須 command を確認する。
 - [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / Task / release readiness を確認する。
 - [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。
@@ -19,4 +20,4 @@
 
 ## v0.1.0 の扱い
 
-GitHub prerelease はこの初期実装では作成しない。Public repo と `origin/main` の同期を完了条件にする。VSIX package は `docs/vsix-package-guide.md` の手順でユーザー環境の手動確認に残す。
+GitHub prerelease はこの初期実装では作成しない。Public repo と `origin/main` の同期を完了条件にする。VSIX package は `dist/codex-friendly-project-starter-0.1.0.vsix` として生成し、ローカルインストール確認は `docs/vsix-package-guide.md` の手順でユーザー環境の手動確認に残す。

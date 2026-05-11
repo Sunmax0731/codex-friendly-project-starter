@@ -28,6 +28,8 @@
 - `codex-friendly-project-starter.createWorkItemFromNaturalLanguage`: 自然言語から Issue + Task を起票する Composer を Command Palette から直接開く。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 - `codex-friendly-project-starter.startWorkItemWithCodex`: 選択した TODO、Issue、Task と関連リンクを開始プロンプト化し、Codex CLI に渡して着手する。
+- `codex-friendly-project-starter.startAllWorkItemsWithCodex`: 未完了 TODO、Issue、Task を優先度順に連結した開始プロンプトを Codex CLI に渡して一括着手する。
+- `codex-friendly-project-starter.clearFirstPromptHistory`: workspace storage に保存した FirstPrompt 入力履歴を削除する。
 
 ## Tree View
 
@@ -79,6 +81,7 @@ Dashboard Webview は次を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
 - GUI action として、日常操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt 画面、QCDS Status、Codex App、現在Prompt実行、Dashboard refresh を提供する。
+- 日常操作には `全Work Itemを開始` も含め、未完了 TODO / Issue / Task 全体を一括開始できる。
 - 初回セットアップ / 環境確認には Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、Codex CLI 確認を折りたたみで提供する。
 - QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は折りたたみ可能な section にする。
 - TODO / Issue / Task は priority、status、type、phase、QCDS axes を tag として表示し、priority、blocked、bug、release、docs、test、feature、ux などを色分けする。
@@ -137,6 +140,8 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 - 進行速度: ノンストップ、節目で確認、調査優先
 - Git 書き込み方針: 事前確認してから Git 書き込み、Git 書き込みを保留、通常どおり Git 書き込み
 
+Starter Webview は `IDEAS 候補` と `Prompt 履歴` を持つ。`IDEAS 候補` は選択中 domain の `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` を探索した候補だけを表示し、`候補を採用` を押すまで Repo 名や目的へ反映しない。`Prompt 履歴` は workspace storage に保存した入力値だけを表示し、`履歴を復元` で各 select と Repo 名、目的を戻す。prompt 本文は保存しない。`履歴を削除` と `Codex Starter: Clear FirstPrompt History` は同じ storage の履歴を消去する。
+
 生成プロンプトには次を含める。
 
 - `D:\AI` を共通ルートとする制約
@@ -178,5 +183,7 @@ Work Item Composer の自然言語反映では、拡張が prompt file、JSON sc
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。
 
 Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue / Task 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue / Task 更新条件、Git 書き込み方針を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、sandbox mode、model/profile 設定を使って `codex exec` に渡す。
+
+`Start All Work Items` では、`TODO.md`、`Issues/*.md`、`Tasks/*.md` の未完了項目を P0 から P4 の優先度順に並べ、件数、QCDS tag、phase、release readiness を含む開始プロンプトを生成する。完了時は TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
 Work Item Start Prompt の Git 書き込み方針は `codexFriendlyProjectStarter.codexGitWritePolicy` に従う。`preflight` では Git 書き込み前の状態確認と Permission denied 時の停止を指示し、`defer` では `git add` / `git commit` / `git push` を実行しないように指示する。

@@ -63,6 +63,95 @@ function buildWorkItemStartPrompt(input = {}) {
   ].filter((line) => line !== '').join('\n') + '\n';
 }
 
+function buildAllWorkItemsStartPrompt(input = {}) {
+  const workspaceRoot = input.workspaceRoot || process.cwd();
+  const dashboard = input.dashboard || {};
+  const gitWritePolicy = getGitWritePolicyById(input.gitWritePolicyId);
+  const todos = sortWorkItems(openDashboardItems(dashboard.todos, (item) => !item.done));
+  const issues = sortWorkItems(openDashboardItems(dashboard.issues, (item) => item.status !== 'closed'));
+  const tasks = sortWorkItems(openDashboardItems(dashboard.tasks, (item) => item.status !== 'closed'));
+  return [
+    '# All Work Items Start Prompt',
+    '',
+    'あなたは VS Code 内の Codex CLI / Codex App で動く実装エージェントです。',
+    `対象リポジトリは \`${workspaceRoot}\` です。`,
+    '',
+    '## 主指示',
+    '',
+    '- TODO、Issues、Tasks の未完了項目を一つの連結したバックログとして通しで処理してください。',
+    '- `TODO.md` を入口にし、リンクされた Issue / Task を同じ作業契約として扱ってください。',
+    '- 優先順位は P0 -> P1 -> P2 -> P3 -> P4、次にファイル上の順序です。',
+    '- Issue / Task が不足している TODO は `Issues/` または `Tasks/` に Markdown を追加し、`TODO.md` からリンクしてください。',
+    '- 完了した項目は TODO チェック、Issue / Task の Status、チェック項目、docs、tests、QCDS 証跡を同期してください。',
+    '- すべてを完了できない場合は、各 TODO / Issue / Task に blocked 理由と次アクションを残して報告してください。',
+    '',
+    '## 最初に読むもの',
+    '',
+    '- `README.md`',
+    '- `AGENTS.md`',
+    '- `SKILL.md`',
+    '- `TODO.md`',
+    '- `Issues/README.md`',
+    '- `Tasks/README.md`',
+    '',
+    '## Git 書き込み方針',
+    '',
+    `- ${gitWritePolicy.label}: ${gitWritePolicy.instruction}`,
+    '',
+    '## Backlog summary',
+    '',
+    `- Open TODO: ${todos.length}`,
+    `- Open Issues: ${issues.length}`,
+    `- Open Tasks: ${tasks.length}`,
+    '',
+    '## Open TODO',
+    '',
+    formatWorkItemList(todos, workspaceRoot, 'Open TODO はありません。'),
+    '',
+    '## Open Issues',
+    '',
+    formatWorkItemList(issues, workspaceRoot, 'Open Issue はありません。'),
+    '',
+    '## Open Tasks',
+    '',
+    formatWorkItemList(tasks, workspaceRoot, 'Open Task はありません。'),
+    '',
+    '## Release readiness',
+    '',
+    formatReleaseReadiness(dashboard.releaseReadiness || [])
+  ].join('\n') + '\n';
+}
+
+function openDashboardItems(items = [], predicate = () => true) {
+  return (Array.isArray(items) ? items : []).filter(predicate);
+}
+
+function sortWorkItems(items) {
+  const rank = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+  return [...items].sort((a, b) =>
+    (rank[a.priority] ?? 99) - (rank[b.priority] ?? 99) ||
+    String(a.relativePath || '').localeCompare(String(b.relativePath || '')) ||
+    Number(a.lineNumber || 0) - Number(b.lineNumber || 0) ||
+    String(a.title || '').localeCompare(String(b.title || ''))
+  );
+}
+
+function formatWorkItemList(items, workspaceRoot, emptyText) {
+  if (!items.length) return '- ' + emptyText;
+  return items.map((item, index) => {
+    const itemPath = item.relativePath || toSlash(path.relative(workspaceRoot, item.filePath || workspaceRoot));
+    const location = `${itemPath}${item.lineNumber ? ':' + item.lineNumber : ''}`;
+    const qcds = item.qcdsAxes?.length ? ` QCDS=${item.qcdsAxes.join(',')}` : '';
+    const phase = item.phase ? ` phase=${item.phase}` : '';
+    return `${index + 1}. [${item.priority || 'P3'}] ${item.title || 'Untitled Work Item'} (${item.kind || 'work-item'} / ${item.status || 'open'} / ${location}${phase}${qcds})`;
+  }).join('\n');
+}
+
+function formatReleaseReadiness(items) {
+  if (!Array.isArray(items) || !items.length) return '- release readiness data はありません。';
+  return items.map((item) => `- ${item.status || 'unknown'}: ${item.label || item.id || 'check'}${item.detail ? ` - ${item.detail}` : ''}`).join('\n');
+}
+
 function trimDocument(content) {
   const text = String(content || '').trim();
   if (text.length <= 12000) return text;
@@ -73,4 +162,4 @@ function toSlash(value) {
   return String(value || '').replace(/\\/g, '/');
 }
 
-module.exports = { buildWorkItemStartPrompt };
+module.exports = { buildWorkItemStartPrompt, buildAllWorkItemsStartPrompt };

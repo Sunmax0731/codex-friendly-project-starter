@@ -1,6 +1,6 @@
 # VSIX package and release verification
 
-- Status: open
+- Status: closed
 - Priority: P1
 - Type: release
 - Source: local
@@ -16,8 +16,9 @@
 
 - [x] VSIX package 生成手順を `docs/release-checklist.md` と `docs/vsix-package-guide.md` に追加する。
 - [x] ローカル VSIX インストール確認手順を `docs/manual-test.md` と `docs/vsix-package-guide.md` に追加する。
-- [ ] package artifact の生成結果を `dist/` または release docs に証跡として残す。
+- [x] package artifact の生成結果を `dist/` または release docs に証跡として残す。
 
 ## Notes
 
 - Marketplace 公開は別 Issue として扱う。
+- `dist/codex-friendly-project-starter-0.1.0.vsix` を生成し、size と SHA256 を `docs/release-evidence.json` に記録した。

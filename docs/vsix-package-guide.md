@@ -2,7 +2,7 @@
 
 ## 目的
 
-正式リリース前に VSIX package とローカルインストール確認を行うための手順です。Codex 側では `tools/vsix-readiness.mjs` で静的 readiness を確認し、実際の package / install はユーザー環境で実施します。
+正式リリース前に VSIX package とローカルインストール確認を行うための手順です。Codex 側では `tools/vsix-readiness.mjs` で静的 readiness を確認し、VSIX package 生成結果を `docs/release-evidence.json` に記録します。ローカルインストール確認はユーザー環境で実施します。
 
 ## 自動確認
 
@@ -20,21 +20,25 @@ npm run release:check
 
 ## VSIX 作成
 
-`vsce` がない場合は、ユーザー環境の方針に従って `E:\DevEnv` 以下または一時実行で準備します。
+`vsce` がない場合は、ユーザー環境の方針に従って `E:\DevEnv` 以下または一時実行で準備します。Codex で一時実行する場合は npm cache を `E:\DevEnv\npm-cache` に寄せます。
 
 ```powershell
 cd D:\AI\VSCodeExtension\codex-friendly-project-starter
-npx @vscode/vsce package
+$env:npm_config_cache='E:\DevEnv\npm-cache'
+npx --yes @vscode/vsce package --out dist\codex-friendly-project-starter-0.1.0.vsix
+Get-FileHash -Algorithm SHA256 dist\codex-friendly-project-starter-0.1.0.vsix
 ```
 
 期待結果:
 
-- `codex-friendly-project-starter-<version>.vsix` が生成される。
+- `dist/codex-friendly-project-starter-0.1.0.vsix` が生成される。
+- `.vscodeignore` により tests、tools、docs、dist などの開発用ファイルは VSIX に含まれない。
+- size と SHA256 が `docs/release-evidence.json` に記録される。
 
 ## ローカルインストール確認
 
 ```powershell
-code --install-extension .\codex-friendly-project-starter-<version>.vsix
+code --install-extension .\dist\codex-friendly-project-starter-0.1.0.vsix
 code
 ```
 

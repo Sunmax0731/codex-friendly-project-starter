@@ -63,7 +63,7 @@
     {
       "id": "work-item-start-command",
       "pass": true,
-      "detail": "Work Item Start command exists"
+      "detail": "Single and all Work Item Start commands exist"
     },
     {
       "id": "markdown-webview-command",
@@ -109,6 +109,16 @@
       "id": "first-prompt-development-method",
       "pass": true,
       "detail": "FirstPrompt includes development method selection"
+    },
+    {
+      "id": "first-prompt-history",
+      "pass": true,
+      "detail": "FirstPrompt history save, restore, and clear contract exists"
+    },
+    {
+      "id": "ideas-candidates",
+      "pass": true,
+      "detail": "IDEAS and domain candidate suggestion contract exists"
     },
     {
       "id": "git-write-policy-prompts",

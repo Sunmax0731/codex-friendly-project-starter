@@ -45,7 +45,9 @@
     "onCommand:codex-friendly-project-starter.openAgentDoc",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
+    "onCommand:codex-friendly-project-starter.startAllWorkItemsWithCodex",
     "onCommand:codex-friendly-project-starter.copyFirstPrompt",
+    "onCommand:codex-friendly-project-starter.clearFirstPromptHistory",
     "onCommand:codex-friendly-project-starter.refreshAll",
     "onView:codexFriendlyAgentDocs",
     "onView:codexFriendlyWorkItems"
@@ -181,6 +183,16 @@
         "command": "codex-friendly-project-starter.startWorkItemWithCodex",
         "title": "Codex Starter: Start Work Item with Codex",
         "icon": "$(play)"
+      },
+      {
+        "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
+        "title": "Codex Starter: Start All Work Items with Codex",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "codex-friendly-project-starter.clearFirstPromptHistory",
+        "title": "Codex Starter: Clear FirstPrompt History",
+        "icon": "$(clear-all)"
       }
     ],
     "viewsContainers": {
@@ -242,9 +254,14 @@
           "group": "navigation@3"
         },
         {
-          "command": "codex-friendly-project-starter.refreshAll",
+          "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@4"
+        },
+        {
+          "command": "codex-friendly-project-starter.refreshAll",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@5"
         }
       ],
       "view/item/context": [
@@ -292,7 +309,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {

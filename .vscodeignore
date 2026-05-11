@@ -1,0 +1,15 @@
+.git/**
+node_modules/**
+out/**
+coverage/**
+.vscode-test/**
+dist/**
+docs/**
+Issues/**
+Tasks/**
+samples/**
+tests/**
+tools/**
+AGENTS.md
+SKILL.md
+TODO.md
