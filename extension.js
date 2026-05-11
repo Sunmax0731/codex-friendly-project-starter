@@ -9,11 +9,20 @@ const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const {
   scanWorkItems,
   ensureIssuesDirectory,
+  ensureTasksDirectory,
   nextIssueFilePath,
+  nextTaskFilePath,
   createIssueMarkdown,
+  createTaskMarkdown,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
 const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
+const {
+  buildMarkdownDocumentModel,
+  renderMarkdownDocumentWebview,
+  resolveMarkdownLink
+} = require('./src/markdown-webview.cjs');
+const { ensureDefaultProjectDocs } = require('./src/default-docs.cjs');
 const { resolveInvocationTarget } = require('./src/invocation-target.cjs');
 const {
   buildCodexExecScript,
@@ -43,10 +52,14 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshWorkItems', () => workItemsProvider.refresh()),
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownWebview', (item) => openMarkdownCommand(context, item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', () => openQcdsStatus(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.scaffoldDefaultDocs', () => scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithFirstPrompt', () => invokeCodexWithFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithCurrentPrompt', () => invokeCodexWithCurrentPromptCommand(context)),
@@ -247,6 +260,11 @@ async function openWorkDashboard(context) {
   );
   const nonce = String(Date.now()) + String(Math.random()).slice(2);
   panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+  panel.webview.onDidReceiveMessage(async (message) => {
+    if (message?.type === 'openMarkdown' && message.filePath) {
+      await openMarkdownWebview(context, message.filePath, message.lineNumber);
+    }
+  }, undefined, context.subscriptions);
 }
 
 async function openQcdsStatus(context) {
@@ -260,12 +278,47 @@ async function openQcdsStatus(context) {
   );
   const nonce = String(Date.now()) + String(Math.random()).slice(2);
   panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+  panel.webview.onDidReceiveMessage(async (message) => {
+    if (message?.type === 'openMarkdown' && message.filePath) {
+      await openMarkdownWebview(context, message.filePath, message.lineNumber);
+    }
+  }, undefined, context.subscriptions);
+}
+
+async function scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const domain = await pick('既定docsを生成する分野を選択', DOMAINS, 'domain');
+  if (!domain) return;
+  const projectName = await vscode.window.showInputBox({
+    prompt: 'Repo 名またはプロジェクト名',
+    value: path.basename(workspaceRoot)
+  });
+  const goal = await vscode.window.showInputBox({
+    prompt: '目的を短く入力',
+    placeHolder: '何を作り、どこまで進めるか'
+  });
+  const overwriteAnswer = await vscode.window.showQuickPick([
+    { label: '既存ファイルは上書きしない', overwrite: false },
+    { label: '既存ファイルも上書きする', overwrite: true }
+  ], { placeHolder: '生成済みファイルの扱い' });
+  if (!overwriteAnswer) return;
+  const result = ensureDefaultProjectDocs(workspaceRoot, {
+    domainId: domain.id,
+    projectName,
+    goal
+  }, { overwrite: overwriteAnswer.overwrite });
+  treeProvider.refresh();
+  workItemsProvider.refresh();
+  const message = `Codex Starter: default docs ${result.written.length} files written, ${result.skipped.length} skipped`;
+  vscode.window.setStatusBarMessage(message, 6000);
+  const readmePath = path.join(workspaceRoot, 'README.md');
+  if (fs.existsSync(readmePath)) await openMarkdownWebview(context, readmePath);
 }
 
 async function initializeIssuesDirectoryCommand(workItemsProvider) {
   const workspaceRoot = pickWorkspaceRoot();
   const result = ensureIssuesDirectory(workspaceRoot);
-  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(result.readmePath)));
+  await openMarkdownWebview(undefined, result.readmePath);
   workItemsProvider.refresh();
   vscode.window.setStatusBarMessage('Codex Starter: Issues directory initialized', 4000);
 }
@@ -282,28 +335,119 @@ async function createLocalIssueCommand(workItemsProvider) {
   const issuePath = nextIssueFilePath(workspaceRoot, title);
   const markdown = createIssueMarkdown({ title, priority, type, acceptance });
   await fs.promises.writeFile(issuePath, markdown, 'utf8');
-  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(issuePath)));
+  await openMarkdownWebview(undefined, issuePath);
   workItemsProvider.refresh();
   vscode.window.setStatusBarMessage('Codex Starter: Local Issue created', 4000);
+}
+
+async function createLocalTaskCommand(workItemsProvider) {
+  const workspaceRoot = pickWorkspaceRoot();
+  const title = await vscode.window.showInputBox({ prompt: 'Task title', placeHolder: 'Add Markdown WebView navigation' });
+  if (!title) return;
+  const priority = await vscode.window.showQuickPick(['P0', 'P1', 'P2', 'P3', 'P4'], { placeHolder: 'Priority' });
+  if (!priority) return;
+  const phase = await vscode.window.showQuickPick([
+    '01-requirements',
+    '02-specification',
+    '03-design',
+    '04-implementation',
+    '05-test',
+    '06-release'
+  ], { placeHolder: 'Phase' });
+  if (!phase) return;
+  const qcds = await vscode.window.showInputBox({ prompt: 'QCDS axes', placeHolder: 'Quality, Delivery' });
+  const acceptance = await vscode.window.showInputBox({ prompt: 'Acceptance criteria', placeHolder: '完了条件を短く入力' });
+  const taskPath = nextTaskFilePath(workspaceRoot, title);
+  const markdown = createTaskMarkdown({ title, priority, phase, qcds, acceptance: acceptance ? [acceptance] : undefined });
+  await fs.promises.writeFile(taskPath, markdown, 'utf8');
+  await openMarkdownWebview(undefined, taskPath);
+  workItemsProvider.refresh();
+  vscode.window.setStatusBarMessage('Codex Starter: Local Task created', 4000);
 }
 
 async function openAgentDoc(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath;
   if (!filePath) return;
-  const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
-  await vscode.window.showTextDocument(doc);
+  await openMarkdownByMode(undefined, filePath);
 }
 
 async function openWorkItem(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath;
   if (!filePath) return;
+  await openMarkdownByMode(undefined, filePath, item.lineNumber);
+}
+
+async function openMarkdownCommand(context, item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (!filePath) return;
+  await openMarkdownWebview(context, filePath, item?.lineNumber);
+}
+
+async function openMarkdownSourceCommand(item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (!filePath) return;
+  await openMarkdownSource(filePath, item?.lineNumber);
+}
+
+async function openMarkdownByMode(context, filePath, lineNumber) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const mode = config.get('markdownOpenMode', 'webview');
+  if (mode === 'source') return openMarkdownSource(filePath, lineNumber);
+  if (mode === 'sideBySide') {
+    await openMarkdownSource(filePath, lineNumber, vscode.ViewColumn.Beside);
+    return openMarkdownWebview(context, filePath, lineNumber, vscode.ViewColumn.One);
+  }
+  return openMarkdownWebview(context, filePath, lineNumber);
+}
+
+async function openMarkdownSource(filePath, lineNumber, column = vscode.ViewColumn.One) {
   const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
-  const editor = await vscode.window.showTextDocument(doc);
-  if (item.lineNumber) {
-    const position = new vscode.Position(Math.max(0, item.lineNumber - 1), 0);
+  const editor = await vscode.window.showTextDocument(doc, column);
+  if (lineNumber) {
+    const position = new vscode.Position(Math.max(0, lineNumber - 1), 0);
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
   }
+}
+
+async function openMarkdownWebview(context, filePath, lineNumber, column = vscode.ViewColumn.One) {
+  const workspaceRoot = pickWorkspaceRootForPath(filePath);
+  const content = await fs.promises.readFile(filePath, 'utf8');
+  const model = buildMarkdownDocumentModel({ rootPath: workspaceRoot, filePath, content });
+  const panel = vscode.window.createWebviewPanel(
+    'codexFriendlyMarkdown',
+    model.title,
+    column,
+    { enableScripts: true, retainContextWhenHidden: false }
+  );
+  const render = async () => {
+    const latest = await fs.promises.readFile(filePath, 'utf8');
+    const latestModel = buildMarkdownDocumentModel({ rootPath: workspaceRoot, filePath, content: latest });
+    panel.title = latestModel.title;
+    panel.webview.html = renderMarkdownDocumentWebview(String(Date.now()) + String(Math.random()).slice(2), latestModel);
+  };
+  await render();
+  panel.webview.onDidReceiveMessage(async (message) => {
+    if (message?.type === 'openSource') return openMarkdownSource(message.filePath || filePath, lineNumber);
+    if (message?.type === 'copyPath') {
+      await vscode.env.clipboard.writeText(message.filePath || filePath);
+      vscode.window.setStatusBarMessage('Codex Starter: path copied', 3000);
+      return;
+    }
+    if (message?.type === 'refresh') return render();
+    if (message?.type === 'openLink') {
+      const resolution = resolveMarkdownLink({ href: message.href, rootPath: workspaceRoot, baseFilePath: message.filePath || filePath });
+      if (resolution.kind === 'workspace' && fs.existsSync(resolution.filePath)) return openMarkdownWebview(context, resolution.filePath);
+      if (resolution.kind === 'external') return vscode.env.openExternal(vscode.Uri.parse(resolution.href));
+      vscode.window.showWarningMessage('Codex Starter: リンク先を開けません: ' + message.href);
+    }
+  }, undefined, context?.subscriptions);
+}
+
+function pickWorkspaceRootForPath(filePath) {
+  const uri = vscode.Uri.file(filePath);
+  const folder = vscode.workspace.getWorkspaceFolder(uri);
+  return folder?.uri.fsPath || pickWorkspaceRoot();
 }
 
 class AgentDocsTreeProvider {
@@ -404,6 +548,13 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
     tooltip: item.relativePath,
     icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'issues')
   }));
+  const openTasks = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 20).map((item) => ({
+    ...item,
+    label: item.title,
+    description: item.priority + ' ' + (item.phase || item.status),
+    tooltip: item.relativePath,
+    icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'tasklist')
+  }));
   const readiness = dashboard.releaseReadiness.map((item) => ({
     label: item.label,
     description: item.status,
@@ -440,6 +591,12 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
       icon: new vscode.ThemeIcon('issues')
     },
     {
+      label: prefix + 'Tasks ' + (dashboard.stats.tasks?.closed || 0) + '/' + (dashboard.stats.tasks?.total || 0),
+      description: (dashboard.stats.tasks?.percent || 0) + '%',
+      children: openTasks,
+      icon: new vscode.ThemeIcon('tasklist')
+    },
+    {
       label: prefix + 'QCDS ' + (dashboard.qcds.available ? dashboard.qcds.overallGrade + ' ' + dashboard.qcds.overallScore : 'missing'),
       description: dashboard.qcds.summary.percent + '%',
       children: qcdsDimensions,
@@ -464,6 +621,7 @@ class AgentDocFileDecorationProvider {
 class WorkItemFileDecorationProvider {
   provideFileDecoration(uri) {
     if (isIssueFileDecoration(uri.fsPath)) return new vscode.FileDecoration('IS', 'Local Issue', new vscode.ThemeColor('charts.yellow'));
+    if (isTaskFileDecoration(uri.fsPath)) return new vscode.FileDecoration('TK', 'Local Task', new vscode.ThemeColor('charts.purple'));
     if (isTodoFileDecoration(uri.fsPath)) return new vscode.FileDecoration('TD', 'TODO document', new vscode.ThemeColor('charts.blue'));
     return undefined;
   }
@@ -475,6 +633,10 @@ function isIssueFileDecoration(filePath) {
 
 function isTodoFileDecoration(filePath) {
   return isWorkItemDocPath(filePath) && /TODO\.md$/i.test(filePath);
+}
+
+function isTaskFileDecoration(filePath) {
+  return isWorkItemDocPath(filePath) && /[\\/]Tasks[\\/]/i.test(filePath);
 }
 
 function updateEditorDecorations(editor, headingDecoration, keywordDecoration) {
@@ -489,7 +651,7 @@ function updateEditorDecorations(editor, headingDecoration, keywordDecoration) {
   const headingRanges = [];
   const keywordRanges = [];
   const headingPattern = /^#{1,3}\s.+$/gm;
-  const keywordPattern = /(完了条件|制約|参照順序|Start Order|QCDS|AGENTS|SKILL|TODO|Issue|Status|Priority|Acceptance Criteria|FirstPrompt|ファーストプロンプト)/g;
+  const keywordPattern = /(完了条件|制約|参照順序|Start Order|QCDS|AGENTS|SKILL|TODO|Issue|Task|Status|Priority|Acceptance Criteria|FirstPrompt|ファーストプロンプト)/g;
   collectRanges(editor.document, text, headingPattern, headingRanges);
   collectRanges(editor.document, text, keywordPattern, keywordRanges);
   editor.setDecorations(headingDecoration, headingRanges);

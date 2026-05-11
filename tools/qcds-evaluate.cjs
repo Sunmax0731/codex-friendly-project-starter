@@ -18,6 +18,8 @@ const product = {
     'src/prompt-builder.cjs',
     'src/workspace-docs.cjs',
     'src/work-items.cjs',
+    'src/default-docs.cjs',
+    'src/markdown-webview.cjs',
     'src/webview.cjs',
     'src/codex-cli.cjs',
     'src/invocation-target.cjs'
@@ -26,6 +28,8 @@ const product = {
     'tests/prompt-builder.test.cjs',
     'tests/workspace-docs.test.cjs',
     'tests/work-items.test.cjs',
+    'tests/default-docs.test.cjs',
+    'tests/markdown-webview.test.cjs',
     'tests/codex-cli.test.cjs',
     'tests/invocation-target.test.cjs',
     'samples/representative-suite.json'
@@ -164,8 +168,12 @@ function commandContract() {
     'codex-friendly-project-starter.refreshWorkItems',
     'codex-friendly-project-starter.openWorkDashboard',
     'codex-friendly-project-starter.openQcdsStatus',
+    'codex-friendly-project-starter.openMarkdownWebview',
+    'codex-friendly-project-starter.openMarkdownSource',
+    'codex-friendly-project-starter.scaffoldDefaultDocs',
     'codex-friendly-project-starter.initializeIssuesDirectory',
     'codex-friendly-project-starter.createLocalIssue',
+    'codex-friendly-project-starter.createLocalTask',
     'codex-friendly-project-starter.openAgentDoc',
     'codex-friendly-project-starter.openWorkItem'
   ];

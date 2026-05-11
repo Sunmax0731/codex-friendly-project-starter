@@ -13,6 +13,9 @@
 - [x] `TODO.md` を解析して進捗を Tree View / Webview で可視化する。
 - [x] `Issues` ディレクトリと各 `Issue.md` を管理するローカル Issue 駆動の仕組みを追加する。
 - [x] Issue も TODO と同じ Work Dashboard で可視化する。
-- [ ] [P1][QCDS:Delivery,Satisfaction] VSIX package とローカルインストール確認をリリース工程へ追加する。
+- [x] [P1][QCDS:Delivery,Satisfaction] [D:\AI 既定ドキュメント生成を追加する](Tasks/0006-dai-default-doc-scaffold.md)。
+- [x] [P1][QCDS:Quality,Satisfaction] [Markdown WebView とリンク遷移を追加する](Tasks/0007-markdown-webview-navigation.md)。
+- [x] [P1][QCDS:Quality,Delivery,Satisfaction] [TODO / Issue / Task / QCDS のリンク解析を追加する](Tasks/0008-work-item-task-linking.md)。
+- [x] [P1][QCDS:Delivery,Satisfaction] [VSIX readiness gate とローカルインストール確認手順をリリース工程へ追加する](Tasks/0009-release-readiness-hardening.md)。
 - [ ] [P2][QCDS:Satisfaction,Delivery] ワークスペース固有の `D:\AI\IDEAS\<Domain>` 情報から候補 project name を補完する。
 - [ ] [P2][QCDS:Satisfaction,Quality] 生成した FirstPrompt の履歴保存と再利用 UI を追加する。

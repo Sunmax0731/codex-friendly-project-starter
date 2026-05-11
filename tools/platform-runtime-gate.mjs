@@ -13,6 +13,8 @@ function runVsCodeExtensionGate() {
   const extension = readText('extension.js');
   const webview = readText('src/webview.cjs');
   const workItems = readText('src/work-items.cjs');
+  const markdownWebview = readText('src/markdown-webview.cjs');
+  const defaultDocs = readText('src/default-docs.cjs');
   const commands = new Set((pkg.contributes?.commands || []).map((item) => item.command));
   const checks = [
     check('engine', !!pkg.engines?.vscode, 'engines.vscode exists'),
@@ -25,13 +27,17 @@ function runVsCodeExtensionGate() {
     check('tree-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyAgentDocs'), 'Tree View contribution exists'),
     check('work-items-view', JSON.stringify(pkg.contributes?.views || {}).includes('codexFriendlyWorkItems'), 'Work Items Tree View contribution exists'),
     check('work-dashboard-command', commands.has('codex-friendly-project-starter.openWorkDashboard') && commands.has('codex-friendly-project-starter.openQcdsStatus') && commands.has('codex-friendly-project-starter.initializeIssuesDirectory') && commands.has('codex-friendly-project-starter.createLocalIssue'), 'Work dashboard, QCDS status, and local issue commands exist'),
+    check('markdown-webview-command', commands.has('codex-friendly-project-starter.openMarkdownWebview') && commands.has('codex-friendly-project-starter.openMarkdownSource'), 'Markdown WebView commands exist'),
+    check('default-docs-command', commands.has('codex-friendly-project-starter.scaffoldDefaultDocs') && commands.has('codex-friendly-project-starter.createLocalTask'), 'Default docs scaffold and local task commands exist'),
     check('webview-panel', extension.includes('createWebviewPanel') && webview.includes('acquireVsCodeApi'), 'webview contract exists'),
     check('work-dashboard-webview', webview.includes('renderWorkDashboardWebview') && webview.includes('Codex Work Dashboard'), 'work dashboard webview contract exists'),
+    check('markdown-webview', markdownWebview.includes('renderMarkdownDocumentWebview') && markdownWebview.includes('resolveMarkdownLink') && extension.includes('openMarkdownWebview'), 'Markdown WebView contract exists'),
+    check('default-docs', defaultDocs.includes('ensureDefaultProjectDocs') && defaultDocs.includes('PHASE_SKILLS') && extension.includes('scaffoldDefaultDocsCommand'), 'D:\\AI default docs scaffold exists'),
     check('webview-run-codex', webview.includes('runCodex') && extension.includes('invokeCodexAgent'), 'webview can invoke Codex agent'),
     check('file-decoration', extension.includes('registerFileDecorationProvider'), 'file decoration provider exists'),
     check('editor-decoration', extension.includes('createTextEditorDecorationType'), 'editor decoration exists'),
     check('agent-doc-scan', extension.includes('scanAgentDocs'), 'agent docs scan wired'),
-    check('work-item-scan', extension.includes('scanWorkItems') && workItems.includes('parseTodoMarkdown') && workItems.includes('parseIssueMarkdown') && workItems.includes('buildQcdsStatus'), 'work item and QCDS scan wired'),
+    check('work-item-scan', extension.includes('scanWorkItems') && workItems.includes('parseTodoMarkdown') && workItems.includes('parseIssueMarkdown') && workItems.includes('parseTaskMarkdown') && workItems.includes('buildQcdsStatus'), 'work item, task, and QCDS scan wired'),
     check('codex-exec-terminal', extension.includes('buildCodexExecScript') && extension.includes('writeLauncherFile') && readText('src/codex-cli.cjs').includes('@codexArgs') && readText('src/codex-cli.cjs').includes('$OutputEncoding'), 'Codex exec UTF-8 launcher command exists'),
     check('codex-target-root', extension.includes('resolveInvocationTarget') && readText('src/invocation-target.cjs').includes('nearestExistingDirectory'), 'Codex target root resolver exists')
   ];

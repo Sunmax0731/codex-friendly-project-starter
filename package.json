@@ -5,6 +5,14 @@
   "publisher": "sunmax0731",
   "private": false,
   "description": "VS Code extension for highlighting AI agent documents and generating Codex-friendly first prompts.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sunmax0731/codex-friendly-project-starter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sunmax0731/codex-friendly-project-starter/issues"
+  },
+  "homepage": "https://github.com/Sunmax0731/codex-friendly-project-starter#readme",
   "main": "./extension.js",
   "engines": {
     "vscode": "^1.90.0"
@@ -23,8 +31,12 @@
     "onCommand:codex-friendly-project-starter.refreshWorkItems",
     "onCommand:codex-friendly-project-starter.openWorkDashboard",
     "onCommand:codex-friendly-project-starter.openQcdsStatus",
+    "onCommand:codex-friendly-project-starter.openMarkdownWebview",
+    "onCommand:codex-friendly-project-starter.openMarkdownSource",
+    "onCommand:codex-friendly-project-starter.scaffoldDefaultDocs",
     "onCommand:codex-friendly-project-starter.initializeIssuesDirectory",
     "onCommand:codex-friendly-project-starter.createLocalIssue",
+    "onCommand:codex-friendly-project-starter.createLocalTask",
     "onCommand:codex-friendly-project-starter.openWorkItem",
     "onView:codexFriendlyAgentDocs",
     "onView:codexFriendlyWorkItems"
@@ -72,12 +84,28 @@
         "title": "Codex Starter: Open QCDS Status"
       },
       {
+        "command": "codex-friendly-project-starter.openMarkdownWebview",
+        "title": "Codex Starter: Open Markdown WebView"
+      },
+      {
+        "command": "codex-friendly-project-starter.openMarkdownSource",
+        "title": "Codex Starter: Open Markdown Source"
+      },
+      {
+        "command": "codex-friendly-project-starter.scaffoldDefaultDocs",
+        "title": "Codex Starter: Scaffold D:\\AI Default Docs"
+      },
+      {
         "command": "codex-friendly-project-starter.initializeIssuesDirectory",
         "title": "Codex Starter: Initialize Issues Directory"
       },
       {
         "command": "codex-friendly-project-starter.createLocalIssue",
         "title": "Codex Starter: Create Local Issue"
+      },
+      {
+        "command": "codex-friendly-project-starter.createLocalTask",
+        "title": "Codex Starter: Create Local Task"
       },
       {
         "command": "codex-friendly-project-starter.openAgentDoc",
@@ -151,15 +179,26 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for confirmation before starting `codex exec` from VS Code."
+        },
+        "codexFriendlyProjectStarter.markdownOpenMode": {
+          "type": "string",
+          "enum": [
+            "webview",
+            "source",
+            "sideBySide"
+          ],
+          "default": "webview",
+          "description": "How Agent Docs, TODO, Issues, and Tasks markdown files open from Codex Starter views."
         }
       }
     }
   },
   "scripts": {
-    "test": "node --test tests/*.test.cjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1 && node tools/qcds-evaluate.cjs && node tools/platform-runtime-gate.mjs && node tools/closed-alpha-guard.mjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1",
+    "test": "node --test tests/*.test.cjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1 && node tools/qcds-evaluate.cjs && node tools/platform-runtime-gate.mjs && node tools/vsix-readiness.mjs && node tools/closed-alpha-guard.mjs && powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1",
     "validate": "npm test",
     "docs:zip": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/package-docs.ps1",
     "platform:gate": "node tools/platform-runtime-gate.mjs",
+    "release:check": "node tools/vsix-readiness.mjs",
     "closed-alpha:guard": "node tools/closed-alpha-guard.mjs"
   },
   "devDependencies": {},

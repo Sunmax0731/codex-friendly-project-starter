@@ -33,6 +33,27 @@
 - `Issues` ディレクトリ初期化と local Issue 作成 command を追加する。
 - Issue 駆動の後続候補を `Issues/*.md` として記録する。
 
+## Phase 3.6: Markdown WebView と Task 管理
+
+- `src/markdown-webview.cjs` を追加し、Markdown を sanitize して WebView 表示する。
+- Agent Docs / Work Items / Dashboard / QCDS から Markdown WebView へ遷移できるようにする。
+- `Tasks/*.md` を具体作業単位として解析し、TODO / Issue / QCDS と紐づける。
+- `Create Local Task` command を追加する。
+- `tests/markdown-webview.test.cjs` と `tests/work-items.test.cjs` を更新する。
+
+## Phase 3.7: D:\AI 既定 docs scaffold
+
+- `src/default-docs.cjs` を追加し、`D:\AI` 共通 docs と領域別 docs を生成元として管理する。
+- root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、工程別 `skills/*/SKILL.md` を生成する。
+- 既存ファイルを既定では上書きしない command として提供する。
+- `tests/default-docs.test.cjs` を追加する。
+
+## Phase 3.8: Release readiness
+
+- `tools/vsix-readiness.mjs` を追加する。
+- `docs/vsix-package-guide.md` に VSIX package と local install 手順を残す。
+- `npm test` に readiness gate を含める。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

@@ -19,13 +19,13 @@ codex exec --help
 
 PATH にない場合は VS Code Settings で `codexFriendlyProjectStarter.codexCliPath` に CLI の実パスを設定します。
 
-## VSIX 化の後続手順
+## VSIX 化の手順
 
-MVP では Marketplace 公開と VSIX packaging は対象外です。後続で実施する場合は `@vscode/vsce` を `devDependencies` として導入し、次の手順を追加します。
+VSIX package と local install の詳細は `docs/vsix-package-guide.md` を参照します。最小手順は次の通りです。
 
 ```powershell
-npm install --save-dev @vscode/vsce
-npx vsce package
+npm run release:check
+npx @vscode/vsce package
 code --install-extension .\codex-friendly-project-starter-0.1.0.vsix
 ```
 

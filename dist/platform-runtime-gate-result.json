@@ -56,6 +56,16 @@
       "detail": "Work dashboard, QCDS status, and local issue commands exist"
     },
     {
+      "id": "markdown-webview-command",
+      "pass": true,
+      "detail": "Markdown WebView commands exist"
+    },
+    {
+      "id": "default-docs-command",
+      "pass": true,
+      "detail": "Default docs scaffold and local task commands exist"
+    },
+    {
       "id": "webview-panel",
       "pass": true,
       "detail": "webview contract exists"
@@ -64,6 +74,16 @@
       "id": "work-dashboard-webview",
       "pass": true,
       "detail": "work dashboard webview contract exists"
+    },
+    {
+      "id": "markdown-webview",
+      "pass": true,
+      "detail": "Markdown WebView contract exists"
+    },
+    {
+      "id": "default-docs",
+      "pass": true,
+      "detail": "D:\\AI default docs scaffold exists"
     },
     {
       "id": "webview-run-codex",
@@ -88,7 +108,7 @@
     {
       "id": "work-item-scan",
       "pass": true,
-      "detail": "work item and QCDS scan wired"
+      "detail": "work item, task, and QCDS scan wired"
     },
     {
       "id": "codex-exec-terminal",

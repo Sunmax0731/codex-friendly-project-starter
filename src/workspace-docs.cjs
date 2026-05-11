@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const ROOT_AGENT_DOCS = new Set(['AGENTS.md', 'SKILL.md', 'README.md', 'TODO.md']);
+const ROOT_AGENT_DOCS = new Set(['AGENTS.md', 'SKILL.md', 'README.md', 'TODO.md', 'Design.md', 'Architecture.md']);
 const DOC_PATTERNS = [
   /^docs\/requirements\.md$/i,
   /^docs\/specification\.md$/i,
@@ -43,6 +43,7 @@ function classifyAgentDoc(filePath) {
   if (base === 'SKILL.md') return { kind: 'agent-skill', label: 'Agent Skill', priority: 1 };
   if (base === 'README.md') return { kind: 'readme', label: 'README', priority: 2 };
   if (base === 'TODO.md') return { kind: 'todo', label: 'TODO', priority: 3 };
+  if (base === 'Design.md' || base === 'Architecture.md') return { kind: 'design', label: 'Design Docs', priority: 4 };
   if (/qcds/i.test(filePath)) return { kind: 'qcds', label: 'QCDS', priority: 10 };
   if (/manual-test|test-plan/i.test(filePath)) return { kind: 'test', label: 'Test Docs', priority: 8 };
   if (/design|architecture/i.test(filePath)) return { kind: 'design', label: 'Design Docs', priority: 6 };
@@ -90,4 +91,3 @@ function agentDocSortKey(filePath) {
 }
 
 module.exports = { ROOT_AGENT_DOCS, isAgentDocPath, classifyAgentDoc, scanAgentDocs, agentDocSortKey };
-

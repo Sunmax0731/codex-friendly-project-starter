@@ -108,6 +108,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   const safe = JSON.stringify(dashboard).replace(/</g, '\\u003c');
   const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
   const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
+  const taskItems = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 12);
   return `<!doctype html>
 <html lang="ja">
 <head>
@@ -136,6 +137,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     .status-pass { color: var(--vscode-charts-green); }
     .readiness { display: grid; grid-template-columns: 110px 1fr; gap: 10px; margin-bottom: 8px; }
     .empty { color: var(--vscode-descriptionForeground); border: 1px dashed var(--vscode-panel-border); padding: 12px; }
+    .open-doc { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); border: 1px solid var(--vscode-button-border, transparent); padding: 4px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -145,6 +147,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
+    ${metricHtml('Tasks', (dashboard.stats.tasks?.closed || 0) + ' / ' + (dashboard.stats.tasks?.total || 0), dashboard.stats.tasks?.percent || 0, (dashboard.stats.tasks?.open || 0) + (dashboard.stats.tasks?.active || 0) + (dashboard.stats.tasks?.blocked || 0) + ' active')}
     ${metricHtml('QCDS', dashboard.qcds.available ? dashboard.qcds.overallGrade + ' / ' + dashboard.qcds.overallScore : 'missing', dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
   </section>
   <h2>QCDS Current Status</h2>
@@ -157,9 +160,19 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <div class="list">${todoItems.length ? todoItems.map(todoHtml).join('') : '<div class="empty">Open TODO はありません。</div>'}</div>
   <h2>Open Issues</h2>
   <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
+  <h2>Open Tasks</h2>
+  <div class="list">${taskItems.length ? taskItems.map(taskHtml).join('') : '<div class="empty">Open Task はありません。</div>'}</div>
 </main>
 <script nonce="${nonce}">
   window.__codexWorkDashboard = ${safe};
+  const vscode = acquireVsCodeApi();
+  for (const button of document.querySelectorAll('button[data-file]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'openMarkdown',
+      filePath: button.getAttribute('data-file'),
+      lineNumber: Number(button.getAttribute('data-line') || '1')
+    }));
+  }
 </script>
 </body>
 </html>`;
@@ -179,11 +192,15 @@ function readinessHtml(item) {
 }
 
 function todoHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span></span><span class="status-open">${escapeHtml(item.status)}</span></div>`;
+  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span></span>${openButton(item)}</div>`;
 }
 
 function issueHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.type)} / ${item.progress.done}/${item.progress.total}</span></span><span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status)}</span></div>`;
+  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.type)} / ${item.progress.done}/${item.progress.total}</span></span>${openButton(item)}</div>`;
+}
+
+function taskHtml(item) {
+  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.phase || item.type)} / ${item.progress.done}/${item.progress.total}</span></span>${openButton(item)}</div>`;
 }
 
 function qcdsDimensionHtml(item) {
@@ -192,7 +209,12 @@ function qcdsDimensionHtml(item) {
 }
 
 function qcdsImprovementHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.qcdsAxis || item.qcdsAxes.join(','))}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.kind)} / ${escapeHtml(item.priority)}</span></span><span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status)}</span></div>`;
+  return `<div class="row"><span class="pill">${escapeHtml(item.qcdsAxis || item.qcdsAxes.join(','))}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.kind)} / ${escapeHtml(item.priority)}</span></span>${openButton(item)}</div>`;
+}
+
+function openButton(item) {
+  if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
+  return `<button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${Number(item.lineNumber || 1)}">Open</button>`;
 }
 
 function escapeHtml(value) {

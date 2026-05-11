@@ -28,6 +28,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 期待結果:
 
 - Tree View から文書を開ける。
+- 既定設定では Markdown WebView が開き、`Open Source` から編集元へ戻れる。
 - Explorer 上で AI Agent 文書に `AI` badge が見える。
 - Markdown 見出しと `QCDS`、`AGENTS`、`SKILL` などがハイライトされる。
 
@@ -37,22 +38,41 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. Activity Bar の `Codex Starter` を開く。
 2. `Work Items` を開く。
-3. `TODO`、`Issues`、`Release readiness` の group を確認する。
+3. `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` の group を確認する。
 4. `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行する。
 6. `Ctrl+Shift+P` から `Codex Starter: Initialize Issues Directory` を実行する。
 7. `Ctrl+Shift+P` から `Codex Starter: Create Local Issue` を実行し、title、priority、type、acceptance criteria を入力する。
-8. `Codex Starter: Refresh Work Items` を実行する。
+8. `Ctrl+Shift+P` から `Codex Starter: Create Local Task` を実行し、title、priority、phase、QCDS、acceptance criteria を入力する。
+9. `Codex Starter: Refresh Work Items` を実行する。
 
 期待結果:
 
 - `TODO.md` の未完了 task が `Work Items` に表示される。
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
+- `Tasks/*.md` の open / in-progress / blocked Task が表示される。
 - Dashboard に TODO と Issue の progress bar が表示される。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
-- QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。
+- QCDS に紐づいた TODO / Issue / Task がある場合、改善候補として表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
+- `Tasks/README.md` と `Tasks/000x-*.md` が UTF-8 Markdown として作成される。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
+
+## 2.5 Markdown WebView と D:\AI 既定 docs
+
+手順:
+
+1. `Ctrl+Shift+P` から `Codex Starter: Open Markdown WebView` を実行する。
+2. WebView の `Open Source`、`Copy Path`、`Refresh` を押す。
+3. `TODO.md` から `Tasks/*.md` への link、または `Issues/*.md` から `Tasks/*.md` への link をクリックする。
+4. 新しい検証用 workspace で `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
+
+期待結果:
+
+- Markdown が VS Code theme に追従した WebView として表示される。
+- Workspace 内の Markdown link は WebView 内で遷移する。
+- workspace 外への相対リンクは開かれない。
+- `D:\AI` の共通 docs と領域別 docs を参照した root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、`skills/*/SKILL.md` が生成される。
 
 ## 3. FirstPrompt 生成
 

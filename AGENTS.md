@@ -10,6 +10,9 @@
 - FirstPrompt テンプレートを増やす場合は、`src/domains.cjs`、`src/workflows.cjs`、`samples/representative-suite.json`、docs を同時に更新します。
 - Codex CLI 呼び出しを変更する場合は、`src/codex-cli.cjs`、`tests/codex-cli.test.cjs`、`docs/vscode-verification-guide.md` を同時に更新します。
 - TODO / Issue 可視化を変更する場合は、`src/work-items.cjs`、`src/webview.cjs`、`tests/work-items.test.cjs`、`docs/vscode-verification-guide.md`、`Issues/README.md` を同時に確認します。
+- Markdown WebView を変更する場合は、`src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs`、`docs/manual-test.md` を同時に確認します。
+- `D:\AI` 既定 docs 生成を変更する場合は、`src/default-docs.cjs`、`tests/default-docs.test.cjs`、`docs/user-guide.md`、`docs/traceability-matrix.md` を同時に確認します。
+- Task 管理を変更する場合は、`Tasks/*.md`、`Issues/*.md`、`TODO.md` のリンクを同じ変更でそろえます。
 - QCDS 可視化を変更する場合は、`docs/qcds-strict-metrics.json`、`docs/qcds-evaluation.md`、`TODO.md`、`Issues/*.md` の `QCDS:` 紐づけを同時に確認します。
 - 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
 - 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。
@@ -19,6 +22,7 @@
 - `npm test` は unit tests、docs ZIP、QCDS、VSCodeExtension platform runtime gate、closed alpha guard を実行します。
 - QCDS は Quality、Cost、Delivery、Satisfaction の全観点 A- 以上を最低条件にします。
 - VSCodeExtension gate は activation、commands、Tree View、webview、Agent Doc decoration の静的契約を確認します。
+- VSIX readiness gate は package metadata、README、manual test、user guide、必須 command、QCDS docs を確認します。
 
 ## Remote QCDS Benchmark Rules
 

@@ -1,0 +1,59 @@
+{
+  "product": "codex-friendly-project-starter",
+  "version": "0.1.0",
+  "pass": true,
+  "method": "static-vsix-readiness",
+  "manualPackage": "not-run-by-codex",
+  "checks": [
+    {
+      "id": "publisher",
+      "pass": true,
+      "detail": "publisher exists"
+    },
+    {
+      "id": "version",
+      "pass": true,
+      "detail": "semver version exists"
+    },
+    {
+      "id": "repository",
+      "pass": true,
+      "detail": "repository url exists"
+    },
+    {
+      "id": "license",
+      "pass": true,
+      "detail": "license exists"
+    },
+    {
+      "id": "readme",
+      "pass": true,
+      "detail": "README documents release-facing features"
+    },
+    {
+      "id": "manual-test",
+      "pass": true,
+      "detail": "manual test covers new commands"
+    },
+    {
+      "id": "user-guide",
+      "pass": true,
+      "detail": "user guide covers docs scaffold and tasks"
+    },
+    {
+      "id": "commands",
+      "pass": true,
+      "detail": "required commands exist"
+    },
+    {
+      "id": "qcds",
+      "pass": true,
+      "detail": "QCDS evidence docs exist"
+    },
+    {
+      "id": "icon",
+      "pass": true,
+      "detail": "activity bar icon exists"
+    }
+  ]
+}

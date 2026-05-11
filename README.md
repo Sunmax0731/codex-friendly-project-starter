@@ -9,7 +9,10 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Work Items Tree: `TODO.md` と `Issues/*.md` を読み取り、未完了 TODO、local Issue、release readiness を常設 Tree View で確認できます。
 - Work Dashboard: TODO と Issue の進捗を progress bar と未完了一覧でグラフィカルに表示します。
 - QCDS Status: `docs/qcds-strict-metrics.json` の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。
+- Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
+- Local Tasks: `Tasks/*.md` を具体作業の実施単位として作成し、TODO / Issue / QCDS と紐づけて管理できます。
+- D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。
 - FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行などの進め方から開始プロンプトを生成します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示またはクリップボードへコピーできます。
 - AI Agent Invocation: Codex CLI がある環境では、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡し、VS Code 統合ターミナルから AI Agent を起動できます。
@@ -27,8 +30,12 @@ VS Code 起動後、Command Palette から次を実行します。
 - `Codex Starter: Open Project Starter`
 - `Codex Starter: Open Work Dashboard`
 - `Codex Starter: Open QCDS Status`
+- `Codex Starter: Open Markdown WebView`
+- `Codex Starter: Open Markdown Source`
+- `Codex Starter: Scaffold D:\AI Default Docs`
 - `Codex Starter: Initialize Issues Directory`
 - `Codex Starter: Create Local Issue`
+- `Codex Starter: Create Local Task`
 - `Codex Starter: Generate FirstPrompt`
 - `Codex Starter: Invoke AI Agent with FirstPrompt`
 - `Codex Starter: Invoke AI Agent with Current Prompt`
@@ -51,8 +58,10 @@ VS Code 起動後、Command Palette から次を実行します。
 - docs/competitive-benchmark.md
 - docs/evaluation-criteria.md
 - docs/release-checklist.md
+- docs/vsix-package-guide.md
 - docs/qcds-evaluation.md
 - Issues/README.md
+- Tasks/README.md
 
 ## 厳格QCDS評価
 

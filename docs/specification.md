@@ -13,15 +13,20 @@
 - `codex-friendly-project-starter.refreshWorkItems`: Work Items Tree を再スキャンする。
 - `codex-friendly-project-starter.openWorkDashboard`: TODO / Issue / release readiness の dashboard Webview を開く。
 - `codex-friendly-project-starter.openQcdsStatus`: QCDS current status を含む dashboard Webview を開く。
+- `codex-friendly-project-starter.openMarkdownWebview`: 現在の Markdown または Tree node の Markdown を専用 WebView で開く。
+- `codex-friendly-project-starter.openMarkdownSource`: WebView ではなく編集元の Markdown を開く。
+- `codex-friendly-project-starter.scaffoldDefaultDocs`: `D:\AI` の共通 docs と領域別 docs から既定ドキュメント一式を生成する。
 - `codex-friendly-project-starter.initializeIssuesDirectory`: workspace root に `Issues/README.md` を作成または開く。
 - `codex-friendly-project-starter.createLocalIssue`: `Issues/0001-short-title.md` 形式の local Issue Markdown を作成する。
-- `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO または Issue を該当行で開く。
+- `codex-friendly-project-starter.createLocalTask`: `Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
+- `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
 
 ## Tree View
 
 `codexFriendlyAgentDocs` は現在のワークスペースから次を収集する。
 
 - ルート文書: `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`
+- ルート設計文書: `Design.md`、`Architecture.md`
 - 開発 docs: `docs/requirements.md`、`docs/specification.md`、`docs/design.md`、`docs/architecture.md`
 - 検証 docs: `docs/test-plan.md`、`docs/manual-test.md`、`docs/qcds-evaluation.md`
 - 運用 docs: `docs/installation-guide.md`、`docs/user-guide.md`、`docs/security-privacy-checklist.md`
@@ -34,7 +39,8 @@
 
 - `TODO.md`、`ToDo.md`、`Todo.md` の checkbox task。
 - `Issues/*.md` の Issue Markdown。ただし `Issues/README.md` は説明文として除外する。
-- release readiness の補助チェック。`README.md`、`AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/README.md`、QCDS docs、manual/user guide の存在を表示する。
+- `Tasks/*.md` の Task Markdown。ただし `Tasks/README.md` は説明文として除外する。
+- release readiness の補助チェック。`README.md`、`AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/README.md`、`Tasks/*.md`、QCDS docs、manual/user guide の存在を表示する。
 
 TODO の task は Markdown 見出しを section として保持し、`[P1]` または `P1` 形式の priority を読み取る。Issue は次の metadata を読み取る。
 
@@ -47,7 +53,7 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 - QCDS: Quality, Delivery
 ```
 
-`Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。
+`Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue / Task の進捗率として扱う。Markdown link は `Tasks/*.md`、`Issues/*.md`、`docs/*.md`、`TODO.md` を workspace root 基準でも解決できる。
 
 ## Work Dashboard
 
@@ -55,11 +61,25 @@ Dashboard Webview は次を表示する。
 
 - TODO 完了数 / 総数の progress bar。
 - Issue closed 数 / 総数の progress bar。
+- Task closed 数 / 総数の progress bar。
 - QCDS overall grade / score と check pass 数。
 - QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。
-- QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue を表示する。
+- QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue / Task を表示する。
 - release readiness の pass / missing。
-- 未完了 TODO と未完了 Issue の上位一覧。
+- 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
+
+## Markdown WebView
+
+- VS Code WebViewPanel で Markdown を HTML 表示する。
+- `Open Source`、`Copy Path`、`Refresh` を提供する。
+- Markdown link は workspace 内であれば WebView 内遷移し、workspace 外の相対リンクは拒否する。
+- HTML は escape し、script は実行しない。
+
+## D:\AI 既定 docs scaffold
+
+- `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common\*.md`、`D:\AI\IDEAS\<Domain>\AGENTS.md / SKILL.md / Design.md / Architecture.md` を参照元として列挙する。
+- root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、`skills/01-requirements` から `skills/06-release` の `SKILL.md` を生成する。
+- 既存ファイルは既定で上書きせず、ユーザー選択時だけ上書きする。
 
 Dashboard は読み取り専用とし、編集は Tree View から Markdown を開いて行う。
 

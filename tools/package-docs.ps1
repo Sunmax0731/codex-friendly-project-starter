@@ -16,6 +16,8 @@ $entries = @(
   "AGENTS.md",
   "SKILL.md",
   "TODO.md",
+  "Issues",
+  "Tasks",
   "package.json",
   "docs",
   "samples",
@@ -46,4 +48,3 @@ Compress-Archive -Path (Join-Path $tempRoot "*") -DestinationPath $zipPath -Forc
 Remove-Item -LiteralPath $tempRoot -Recurse -Force
 
 Write-Output $zipPath
-

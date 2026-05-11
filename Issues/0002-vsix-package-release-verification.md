@@ -6,6 +6,7 @@
 - Source: local
 - Created: 2026-05-11
 - QCDS: Delivery, Satisfaction
+- Tasks: [Tasks/0009-release-readiness-hardening.md](../Tasks/0009-release-readiness-hardening.md)
 
 ## Context
 
@@ -13,8 +14,8 @@
 
 ## Acceptance Criteria
 
-- [ ] VSIX package 生成手順を `docs/release-checklist.md` と `docs/installation-guide.md` に追加する。
-- [ ] ローカル VSIX インストール確認手順を `docs/manual-test.md` に追加する。
+- [x] VSIX package 生成手順を `docs/release-checklist.md` と `docs/vsix-package-guide.md` に追加する。
+- [x] ローカル VSIX インストール確認手順を `docs/manual-test.md` と `docs/vsix-package-guide.md` に追加する。
 - [ ] package artifact の生成結果を `dist/` または release docs に証跡として残す。
 
 ## Notes
