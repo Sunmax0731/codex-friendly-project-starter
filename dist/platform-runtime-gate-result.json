@@ -71,6 +71,11 @@
       "detail": "Markdown WebView commands exist"
     },
     {
+      "id": "command-gui-parity",
+      "pass": true,
+      "detail": "Command Palette and GUI expose shared operational actions"
+    },
+    {
       "id": "default-docs-command",
       "pass": true,
       "detail": "Default docs scaffold and local task commands exist"
@@ -86,6 +91,11 @@
       "detail": "work dashboard webview contract exists"
     },
     {
+      "id": "work-dashboard-polish",
+      "pass": true,
+      "detail": "dashboard has collapsible sections, tag classes, and setup grouping"
+    },
+    {
       "id": "work-dashboard-start-button",
       "pass": true,
       "detail": "work dashboard can start a work item"
@@ -94,6 +104,11 @@
       "id": "work-item-composer-webview",
       "pass": true,
       "detail": "work item composer webview contract exists"
+    },
+    {
+      "id": "first-prompt-development-method",
+      "pass": true,
+      "detail": "FirstPrompt includes development method selection"
     },
     {
       "id": "codex-work-item-draft",

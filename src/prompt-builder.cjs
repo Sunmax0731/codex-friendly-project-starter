@@ -1,9 +1,15 @@
 const { getDomainById } = require('./domains.cjs');
-const { getGovernanceById, getWorkflowById, getPaceById } = require('./workflows.cjs');
+const {
+  getGovernanceById,
+  getDevelopmentMethodById,
+  getWorkflowById,
+  getPaceById
+} = require('./workflows.cjs');
 
 function buildFirstPrompt(input = {}) {
   const domain = getDomainById(input.domainId);
   const governance = getGovernanceById(input.governanceId);
+  const developmentMethod = getDevelopmentMethodById(input.developmentMethodId);
   const workflow = getWorkflowById(input.workflowId);
   const pace = getPaceById(input.paceId);
   const projectName = clean(input.projectName) || '<repo-name>';
@@ -35,6 +41,7 @@ function buildFirstPrompt(input = {}) {
     '## 進め方',
     '',
     `- ガバナンス: ${governance.label}。${governance.instruction}`,
+    `- 開発手法: ${developmentMethod.label}。${developmentMethod.instruction}`,
     `- 工程: ${workflow.label}。${workflow.instruction}`,
     `- 進行速度: ${pace.label}。${pace.instruction}`,
     `- 分野重点: ${domain.focus}`,
@@ -79,9 +86,10 @@ function buildFirstPrompt(input = {}) {
 function buildPromptInputSummary(input = {}) {
   const domain = getDomainById(input.domainId);
   const governance = getGovernanceById(input.governanceId);
+  const developmentMethod = getDevelopmentMethodById(input.developmentMethodId);
   const workflow = getWorkflowById(input.workflowId);
   const pace = getPaceById(input.paceId);
-  return `${domain.label} / ${governance.label} / ${workflow.label} / ${pace.label}`;
+  return `${domain.label} / ${governance.label} / ${developmentMethod.label} / ${workflow.label} / ${pace.label}`;
 }
 
 function clean(value) {

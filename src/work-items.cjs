@@ -640,6 +640,7 @@ function createIssueMarkdown(input = {}) {
   const status = input.status || 'open';
   const source = input.source || 'local';
   const draftSource = input.draftSource || input.inferenceSource || '';
+  const phase = input.phase || '';
   const created = input.created || new Date().toISOString().slice(0, 10);
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const tasks = Array.isArray(input.tasks) ? input.tasks : [];
@@ -655,6 +656,7 @@ function createIssueMarkdown(input = {}) {
     '- Type: ' + type,
     '- Source: ' + source,
     draftSource ? '- Draft source: ' + draftSource : '',
+    phase ? '- Phase: ' + phase : '',
     '- Created: ' + created,
     qcds ? '- QCDS: ' + qcds : '',
     tasks.length ? '- Tasks: ' + tasks.map((item) => {
@@ -732,6 +734,7 @@ function defaultIssuesReadme() {
     '- Type: feature',
     '- Source: local',
     '- Draft source: codex-cli',
+    '- Phase: 04-implementation',
     '- Created: YYYY-MM-DD',
     '- QCDS: Quality, Delivery',
     '- Tasks: [Tasks/0001-example.md](../Tasks/0001-example.md)',

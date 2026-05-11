@@ -11,6 +11,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Activity Bar の `Codex Starter` に配置する。
 - 文書名、分類、相対パスを表示する。
 - 選択すると該当 Markdown を開く。
+- Tree title には Project Starter、D:\AI Docs 生成、refresh を icon action として置く。
+- item context から Markdown WebView、Markdown Source、Copy Path にアクセスできる。
 
 ### Work Items Tree
 
@@ -21,6 +23,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 未完了 Task は priority と phase を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
 - 未完了 TODO / Issue / Task には inline action として Codex 着手ボタンを出す。
+- Tree title には Work Dashboard、Work Item Composer、refresh all を icon action として置く。
+- item context から Start、Markdown WebView、Markdown Source、Copy Path にアクセスできる。
 
 ### Work Dashboard
 
@@ -29,7 +33,11 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
 - TODO / Issue / Task / QCDS improvements の行には `Start` と `Open` ボタンを置く。`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
-- 上部 action bar に Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、`D:\AI` docs 生成、FirstPrompt、Codex CLI 確認、refresh を置く。
+- 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
+- 進行中操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
+- 初回セットアップには `D:\AI` docs 生成、Issues / Tasks 初期化、Codex CLI 確認を折りたたみ領域として置く。
+- 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は `<details>` で折りたためるようにする。
+- TODO / Issue / Task の priority、status、type、phase、QCDS は tag として表示し、priority や blocked / bug / release などが目視で分かる色にする。
 - Dashboard は確認と操作入口にし、詳細編集は Markdown を直接開く。
 
 ### Work Item Composer
@@ -63,7 +71,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 ### FirstPrompt Webview
 
-- 分野、ガバナンス、工程、進行の4つの select を配置する。
+- 分野、ガバナンス、開発手法、工程、進行の5つの select を配置する。
+- 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - Repo 名と目的を任意入力にする。
 - `FirstPrompt を開く` と `VS Code Codexへコピー` を提供する。
 - 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。

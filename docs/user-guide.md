@@ -6,6 +6,7 @@
 2. Activity Bar の `Codex Starter` を開く。
 3. `Agent Docs` から `AGENTS.md`、`SKILL.md`、`README.md`、`Design.md`、`Architecture.md`、主要 docs を確認する。
 4. 既定設定では Markdown WebView が開く。必要に応じて `Open Source` で編集元を開く。
+5. `Agent Docs` の title action から Project Starter、`D:\AI` 既定 docs 生成、refresh を実行できる。各項目の context menu から Markdown WebView、source 表示、path copy を実行できる。
 
 ## TODO と Issue を可視化する
 
@@ -13,8 +14,10 @@
 2. Activity Bar の `Codex Starter` を開く。
 3. `Work Items` で `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` を確認する。
 4. 未完了 TODO、Issue、Task を選択すると、該当 Markdown が Markdown WebView で開く。
-5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks の進捗を progress bar で確認できる。
-6. Dashboard 上部の GUI ボタンから Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、FirstPrompt、Codex CLI 確認を実行できる。
+5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks、QCDS の進捗を progress bar で確認できる。
+6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
+7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / Task / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
+8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
 ## TODO / Issue / Task から Codex に着手してもらう
 
@@ -52,7 +55,7 @@
 
 ## 自然言語から Issue と Task を作る
 
-1. Dashboard の `自然言語から作成`、または `Codex Starter: Open Work Item Composer` を実行する。
+1. Dashboard の `自然言語から Issue + Task`、または `Codex Starter: Open Work Item Composer` を実行する。
 2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
@@ -65,7 +68,7 @@
 
 1. Markdown ファイルを開くか、Agent Docs / Work Items の node を選択する。
 2. `Codex Starter: Open Markdown WebView` を実行する。
-3. `Open Source` で編集元、`Copy Path` で絶対パス、`Refresh` で再読込を行う。
+3. `Open Source` で編集元、`Copy Path` で絶対パス、`Refresh` で再読込を行う。絶対パスのコピーは `Codex Starter: Copy Markdown Path` または Tree item context menu からも実行できる。再読込は `Codex Starter: Refresh Markdown WebView` からも実行できる。
 4. WebView 内の `Tasks/*.md`、`Issues/*.md`、`docs/*.md` のリンクをクリックして関連文書へ移動する。
 
 ## D:\AI 既定 docs を生成する
@@ -81,16 +84,17 @@ Command Palette から `Codex Starter: Generate FirstPrompt` を実行し、次�
 
 - 分野
 - ガバナンス
+- 開発手法
 - 工程
 - 進行速度
 
 生成された Markdown を Codex への最初の指示として使う。
 
-既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。FirstPrompt 本文には、作業実行が Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先することが明記される。
+既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。`Codex Starter: Copy FirstPrompt for VS Code Codex` を使うと、選択式に生成した FirstPrompt を直接 clipboard にコピーできる。FirstPrompt 本文には、作業実行が Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Terminal、Source Control、Codex panel の文脈を優先することが明記される。
 
 ## Webview で生成する
 
-Command Palette から `Codex Starter: Open Project Starter` を実行する。選択肢を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
+Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーできる。Codex CLI を直接使いたい場合は `Codex CLI で実行` から統合ターミナルで起動できる。
 
 ## AI Agent を起動する
 

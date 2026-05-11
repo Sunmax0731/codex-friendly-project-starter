@@ -172,7 +172,9 @@ function commandContract() {
     'codex-friendly-project-starter.openWorkDashboard',
     'codex-friendly-project-starter.openQcdsStatus',
     'codex-friendly-project-starter.openMarkdownWebview',
+    'codex-friendly-project-starter.refreshMarkdownWebview',
     'codex-friendly-project-starter.openMarkdownSource',
+    'codex-friendly-project-starter.copyMarkdownPath',
     'codex-friendly-project-starter.scaffoldDefaultDocs',
     'codex-friendly-project-starter.initializeIssuesDirectory',
     'codex-friendly-project-starter.initializeTasksDirectory',
@@ -180,7 +182,9 @@ function commandContract() {
     'codex-friendly-project-starter.createLocalTask',
     'codex-friendly-project-starter.openWorkItemComposer',
     'codex-friendly-project-starter.openAgentDoc',
-    'codex-friendly-project-starter.openWorkItem'
+    'codex-friendly-project-starter.openWorkItem',
+    'codex-friendly-project-starter.copyFirstPrompt',
+    'codex-friendly-project-starter.refreshAll'
   ];
   return { pass: required.every((item) => commands.has(item)), detail: required.every((item) => commands.has(item)) ? 'commands ok' : 'commands missing' };
 }

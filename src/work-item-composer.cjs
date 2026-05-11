@@ -5,8 +5,8 @@ const WORK_ITEM_FORM_OPTIONS = {
     { id: 'linked', label: 'Issue + Task' }
   ],
   priorities: ['P0', 'P1', 'P2', 'P3', 'P4'],
-  issueTypes: ['feature', 'bug', 'docs', 'release', 'test', 'task'],
-  phases: ['01-requirements', '02-specification', '03-design', '04-implementation', '05-test', '06-release'],
+  issueTypes: ['feature', 'bug', 'docs', 'release', 'test', 'task', 'ux', 'security', 'performance', 'refactor', 'chore'],
+  phases: ['00-inbox', '01-requirements', '02-specification', '03-design', '04-implementation', '05-test', '06-release', '07-maintenance'],
   qcdsAxes: ['Quality', 'Cost', 'Delivery', 'Satisfaction']
 };
 
@@ -72,6 +72,11 @@ function inferPriority(text, type) {
 function inferType(text, mode) {
   if (mode === 'task') return 'task';
   const value = String(text || '');
+  if (/(security|privacy|安全|脆弱|権限|認可|認証|漏洩)/i.test(value)) return 'security';
+  if (/(performance|perf|速度|遅い|重い|負荷|最適化)/i.test(value)) return 'performance';
+  if (/(UX|UI|使いやす|表示|導線|体験|アクセシビリティ|操作性)/i.test(value)) return 'ux';
+  if (/(refactor|リファクタ|責務|構成整理|分離|抽象化)/i.test(value)) return 'refactor';
+  if (/(chore|運用|整理|メンテナンス|依存更新|雑務)/i.test(value)) return 'chore';
   if (/(bug|不具合|エラー|失敗|例外|壊れ|修正|fix)/i.test(value)) return 'bug';
   if (/(release|publish|公開|配布|VSIX|Marketplace|リリース)/i.test(value)) return 'release';
   if (/(doc|docs|README|AGENTS|SKILL|文書|ドキュメント|手順)/i.test(value)) return 'docs';
@@ -87,6 +92,8 @@ function inferPhase(text, type) {
   if (/(design|設計|UI|UX|画面)/i.test(value)) return '03-design';
   if (/(release|publish|公開|配布|VSIX|Marketplace|リリース)/i.test(value) || type === 'release') return '06-release';
   if (/(test|検証|テスト|確認|QA)/i.test(value)) return '05-test';
+  if (/(maintenance|保守|運用|依存更新|メンテナンス)/i.test(value) || type === 'chore') return '07-maintenance';
+  if (/(inbox|未整理|あとで分類)/i.test(value)) return '00-inbox';
   return '04-implementation';
 }
 

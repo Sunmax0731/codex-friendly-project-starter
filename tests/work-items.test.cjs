@@ -129,7 +129,8 @@ test('appendTodoWorkItemLink creates TODO entry linked to issue and task files',
 test('createIssueMarkdown and createTaskMarkdown record Codex draft source when provided', () => {
   const issue = createIssueMarkdown({
     title: 'Codex draft issue',
-    draftSource: 'codex-cli'
+    draftSource: 'codex-cli',
+    phase: '03-design'
   });
   const task = createTaskMarkdown({
     title: 'Codex draft task',
@@ -137,6 +138,7 @@ test('createIssueMarkdown and createTaskMarkdown record Codex draft source when 
   });
   assert.match(issue, /- Source: local/);
   assert.match(issue, /- Draft source: codex-cli/);
+  assert.match(issue, /- Phase: 03-design/);
   assert.match(task, /- Source: local/);
   assert.match(task, /- Draft source: codex-cli/);
 });
@@ -152,9 +154,16 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /Release Readiness/);
   assert.match(html, /Open TODO/);
   assert.match(html, /Open Tasks/);
+  assert.match(html, /<details class="section" open>/);
+  assert.match(html, /プロジェクト進行中に使う操作/);
+  assert.match(html, /初回セットアップ/);
   assert.match(html, /Issue を作成/);
-  assert.match(html, /自然言語から作成/);
+  assert.match(html, /自然言語から Issue \+ Task/);
   assert.match(html, /D:\\AI Docs 生成/);
+  assert.match(html, /openQcdsStatus/);
+  assert.match(html, /openCodexApp/);
+  assert.match(html, /invokeCurrentPrompt/);
+  assert.match(html, /tag-priority-p1/);
   assert.match(html, /Start/);
   assert.match(html, /startWorkItem/);
   assert.match(html, /width:0%|width:50%|width:100%/);
@@ -210,6 +219,8 @@ test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
   assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
   assert.match(html, /Issue \+ Task/);
+  assert.match(html, /security/);
+  assert.match(html, /07-maintenance/);
   assert.match(html, /draftSource/);
 });
 

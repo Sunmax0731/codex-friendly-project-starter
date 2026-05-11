@@ -21,6 +21,34 @@ const GOVERNANCE_MODES = [
   }
 ];
 
+const DEVELOPMENT_METHODS = [
+  {
+    id: 'agile',
+    label: 'アジャイル',
+    instruction: '短いイテレーションで TODO / Issue / Task を更新し、動く単位を継続的に検証する。'
+  },
+  {
+    id: 'waterfall',
+    label: 'ウォーターフォール',
+    instruction: '要件、仕様、設計、実装、検証、リリース準備を順序立て、工程完了条件を満たしてから次工程へ進む。'
+  },
+  {
+    id: 'prototyping',
+    label: 'プロトタイピング',
+    instruction: '価値検証に必要な試作品を先に作り、学びを仕様、TODO、Issue、Task に反映してから本実装へ進む。'
+  },
+  {
+    id: 'kanban',
+    label: 'カンバン',
+    instruction: '未着手、進行中、blocked、完了を常に見える化し、WIP を増やしすぎず優先度順に処理する。'
+  },
+  {
+    id: 'spike-first',
+    label: 'スパイク先行',
+    instruction: '不確実性の高い技術要素を短い調査タスクで先に潰し、判断根拠を docs と Issue に残す。'
+  }
+];
+
 const WORKFLOWS = [
   {
     id: 'phase-by-phase',
@@ -68,10 +96,11 @@ function findById(items, id, fallbackId) {
 
 module.exports = {
   GOVERNANCE_MODES,
+  DEVELOPMENT_METHODS,
   WORKFLOWS,
   PACES,
   getGovernanceById: (id) => findById(GOVERNANCE_MODES, id, 'issue-driven'),
+  getDevelopmentMethodById: (id) => findById(DEVELOPMENT_METHODS, id, 'agile'),
   getWorkflowById: (id) => findById(WORKFLOWS, id, 'phase-by-phase'),
   getPaceById: (id) => findById(PACES, id, 'autonomous')
 };
-

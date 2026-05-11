@@ -7,6 +7,7 @@
       "input": {
         "domainId": "WebApp",
         "governanceId": "issue-driven",
+        "developmentMethodId": "agile",
         "workflowId": "release-run",
         "paceId": "autonomous",
         "projectName": "sample-webapp",
@@ -15,6 +16,7 @@
       "expectedContains": [
         "Web アプリ",
         "Issue駆動",
+        "アジャイル",
         "VS Code 内の Codex 拡張",
         "リリースまで一気に進める",
         "headless browser",
@@ -27,6 +29,7 @@
       "input": {
         "domainId": "VSCodeExtension",
         "governanceId": "tdd",
+        "developmentMethodId": "prototyping",
         "workflowId": "guided-decisions",
         "paceId": "checkpoint",
         "projectName": "sample-extension",
@@ -35,6 +38,7 @@
       "expectedContains": [
         "VS Code 拡張",
         "TDD",
+        "プロトタイピング",
         "技術判断を逐次確認する",
         "activation",
         "代表シナリオ"
@@ -46,6 +50,7 @@
       "input": {
         "domainId": "ChromeExtension",
         "governanceId": "todo-driven",
+        "developmentMethodId": "waterfall",
         "workflowId": "minimal-mvp",
         "paceId": "research-first",
         "projectName": "sample-chrome-extension",
@@ -54,6 +59,7 @@
       "expectedContains": [
         "Chrome 拡張",
         "TODO駆動",
+        "ウォーターフォール",
         "最短MVP",
         "MV3 manifest",
         "調査優先"

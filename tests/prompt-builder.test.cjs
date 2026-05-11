@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const { buildFirstPrompt, buildPromptInputSummary } = require('../src/prompt-builder.cjs');
 const { DOMAINS } = require('../src/domains.cjs');
-const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('../src/workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('../src/workflows.cjs');
 
 test('domain catalog covers the requested project families', () => {
   const ids = DOMAINS.map((domain) => domain.id);
@@ -13,11 +13,15 @@ test('domain catalog covers the requested project families', () => {
 
 test('workflow catalog supports issue, TODO, spec, TDD, guided, and release modes', () => {
   const governanceIds = GOVERNANCE_MODES.map((item) => item.id);
+  const developmentMethodIds = DEVELOPMENT_METHODS.map((item) => item.id);
   const workflowIds = WORKFLOWS.map((item) => item.id);
   assert.ok(governanceIds.includes('issue-driven'));
   assert.ok(governanceIds.includes('todo-driven'));
   assert.ok(governanceIds.includes('spec-driven'));
   assert.ok(governanceIds.includes('tdd'));
+  assert.ok(developmentMethodIds.includes('agile'));
+  assert.ok(developmentMethodIds.includes('waterfall'));
+  assert.ok(developmentMethodIds.includes('prototyping'));
   assert.ok(workflowIds.includes('guided-decisions'));
   assert.ok(workflowIds.includes('release-run'));
 });
@@ -26,6 +30,7 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
   const prompt = buildFirstPrompt({
     domainId: 'ChromeExtension',
     governanceId: 'issue-driven',
+    developmentMethodId: 'waterfall',
     workflowId: 'release-run',
     paceId: 'autonomous',
     projectName: 'domain-purpose-classifier',
@@ -33,6 +38,7 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
   });
   assert.match(prompt, /Chrome 拡張/);
   assert.match(prompt, /Issue駆動/);
+  assert.match(prompt, /ウォーターフォール/);
   assert.match(prompt, /リリースまで一気に進める/);
   assert.match(prompt, /MV3 manifest/);
   assert.match(prompt, /VS Code 内の Codex 拡張 \/ Codex パネル/);
@@ -60,5 +66,5 @@ test('summary is concise and user-facing', () => {
     workflowId: 'phase-by-phase',
     paceId: 'research-first'
   });
-  assert.equal(summary, 'VS Code 拡張 / TDD / 工程ごとに進める / 調査優先');
+  assert.equal(summary, 'VS Code 拡張 / TDD / アジャイル / 工程ごとに進める / 調査優先');
 });

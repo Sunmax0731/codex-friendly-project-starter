@@ -4,17 +4,21 @@
 
 - `codex-friendly-project-starter.openStarter`: 選択式 Webview を開く。
 - `codex-friendly-project-starter.generateFirstPrompt`: QuickPick と InputBox で FirstPrompt を生成する。
+- `codex-friendly-project-starter.copyFirstPrompt`: QuickPick と InputBox で FirstPrompt を生成し、VS Code Codex へ貼り付けるため clipboard にコピーする。
 - `codex-friendly-project-starter.invokeCodexWithFirstPrompt`: 選択式に FirstPrompt を生成し、`codex exec` へ渡す。
 - `codex-friendly-project-starter.invokeCodexWithCurrentPrompt`: 現在開いている文書または選択範囲を `codex exec` へ渡す。
 - `codex-friendly-project-starter.checkCodexCli`: 統合ターミナルで Codex CLI の version と `exec --help` を確認する。
 - `codex-friendly-project-starter.openCodexApp`: 統合ターミナルから `codex app` を実行する。
 - `codex-friendly-project-starter.refreshAgentDocs`: Agent Docs Tree を再スキャンする。
+- `codex-friendly-project-starter.refreshAll`: Agent Docs Tree と Work Items Tree をまとめて再スキャンする。
 - `codex-friendly-project-starter.openAgentDoc`: Tree View の文書を開く。
 - `codex-friendly-project-starter.refreshWorkItems`: Work Items Tree を再スキャンする。
 - `codex-friendly-project-starter.openWorkDashboard`: TODO / Issue / release readiness の dashboard Webview を開く。
 - `codex-friendly-project-starter.openQcdsStatus`: QCDS current status を含む dashboard Webview を開く。
 - `codex-friendly-project-starter.openMarkdownWebview`: 現在の Markdown または Tree node の Markdown を専用 WebView で開く。
+- `codex-friendly-project-starter.refreshMarkdownWebview`: 最後に開いた Markdown WebView、または現在の Markdown editor を再表示する。
 - `codex-friendly-project-starter.openMarkdownSource`: WebView ではなく編集元の Markdown を開く。
+- `codex-friendly-project-starter.copyMarkdownPath`: 現在の Markdown または Tree node の file path を clipboard にコピーする。
 - `codex-friendly-project-starter.scaffoldDefaultDocs`: `D:\AI` の共通 docs と領域別 docs から既定ドキュメント一式を生成する。
 - `codex-friendly-project-starter.initializeIssuesDirectory`: workspace root に `Issues/README.md` を作成または開く。
 - `codex-friendly-project-starter.initializeTasksDirectory`: workspace root に `Tasks/README.md` を作成または開く。
@@ -52,6 +56,7 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 - Priority: P2
 - Type: feature
 - Source: local
+- Phase: 04-implementation
 - Created: YYYY-MM-DD
 - QCDS: Quality, Delivery
 ```
@@ -72,7 +77,10 @@ Dashboard Webview は次を表示する。
 - QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue / Task を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
-- GUI action として Issue 作成、Task 作成、自然言語から作成、Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、FirstPrompt 画面、Codex CLI 確認、Dashboard refresh を提供する。
+- GUI action として、日常操作には自然言語から Issue + Task、Issue 作成、Task 作成、FirstPrompt 画面、QCDS Status、Codex App、現在Prompt実行、Dashboard refresh を提供する。
+- 初回セットアップ / 環境確認には Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、Codex CLI 確認を折りたたみで提供する。
+- QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Tasks は折りたたみ可能な section にする。
+- TODO / Issue / Task は priority、status、type、phase、QCDS axes を tag として表示し、priority、blocked、bug、release、docs、test、feature、ux などを色分けする。
 - 未完了 TODO、Issue、Task、QCDS improvements の各行に `Start` と `Open` を表示する。`Start` は該当 work item を `startWorkItemWithCodex` に渡し、`Open` は Markdown WebView を開く。
 
 ## Work Item Composer
@@ -82,6 +90,8 @@ Work Item Composer Webview は次を入力項目として持つ。
 - 作成先: `Issue`、`Task`、`Issue + Task`。
 - 自然言語メモ。
 - title、priority、issue type、task phase、context、acceptance criteria、QCDS axes。
+
+`issue type` は `feature`、`bug`、`docs`、`release`、`test`、`task`、`ux`、`security`、`performance`、`refactor`、`chore` を選択できる。`task phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` を選択できる。
 
 `Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。Codex CLI 由来の下書きは WebView 内で `draftSource` として保持し、`作成して開く` で生成する Markdown に `Draft source: codex-cli` を記録する。`作成して開く` は次のいずれかを実行する。
 
@@ -94,7 +104,7 @@ Work Item Composer Webview は次を入力項目として持つ。
 ## Markdown WebView
 
 - VS Code WebViewPanel で Markdown を HTML 表示する。
-- `Open Source`、`Copy Path`、`Refresh` を提供する。
+- `Open Source`、`Copy Path`、`Refresh` を提供する。`Copy Path` は Command Palette / Tree context からも利用できる。
 - Markdown link は workspace 内であれば WebView 内遷移し、workspace 外の相対リンクは拒否する。
 - HTML は escape し、script は実行しない。
 
@@ -117,10 +127,11 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 
 ## FirstPrompt
 
-入力軸は次の4つとする。
+入力軸は次の5つとする。
 
 - 分野: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension、UnityEditor、AdobePlugin、Game、IoT
 - ガバナンス: Issue駆動、TODO駆動、仕様駆動、TDD
+- 開発手法: アジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行
 - 工程: 工程ごと、逐次技術判断、リリースまで一括、最短MVP
 - 進行速度: ノンストップ、節目で確認、調査優先
 

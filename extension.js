@@ -5,7 +5,7 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const vscode = require('vscode');
 const { DOMAINS } = require('./src/domains.cjs');
-const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('./src/workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('./src/workflows.cjs');
 const { buildFirstPrompt } = require('./src/prompt-builder.cjs');
 const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const {
@@ -45,6 +45,7 @@ const {
 } = require('./src/codex-work-item-draft.cjs');
 
 const execFileAsync = promisify(execFile);
+let lastMarkdownWebview = null;
 
 function activate(context) {
   const treeProvider = new AgentDocsTreeProvider();
@@ -65,11 +66,14 @@ function activate(context) {
     vscode.window.registerFileDecorationProvider(new WorkItemFileDecorationProvider()),
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshAgentDocs', () => treeProvider.refresh()),
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshWorkItems', () => workItemsProvider.refresh()),
+    vscode.commands.registerCommand('codex-friendly-project-starter.refreshAll', () => refreshAllCommand(treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.startWorkItemWithCodex', (item) => startWorkItemWithCodexCommand(context, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownWebview', (item) => openMarkdownCommand(context, item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.refreshMarkdownWebview', () => refreshMarkdownWebviewCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.copyMarkdownPath', (item) => copyMarkdownPathCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', () => openQcdsStatus(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.scaffoldDefaultDocs', () => scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider)),
@@ -79,6 +83,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'linked')),
     vscode.commands.registerCommand('codex-friendly-project-starter.generateFirstPrompt', () => generateFirstPromptCommand()),
+    vscode.commands.registerCommand('codex-friendly-project-starter.copyFirstPrompt', () => copyFirstPromptCommand()),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithFirstPrompt', () => invokeCodexWithFirstPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.invokeCodexWithCurrentPrompt', () => invokeCodexWithCurrentPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.checkCodexCli', () => checkCodexCliCommand()),
@@ -106,18 +111,32 @@ async function generateFirstPromptCommand() {
   await openPromptDocument(input);
 }
 
+async function copyFirstPromptCommand() {
+  const input = await collectPromptInput();
+  if (!input) return;
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const prompt = buildFirstPrompt({
+    ...input,
+    includeQcdsChecklist: config.get('includeQcdsChecklist', true)
+  });
+  await vscode.env.clipboard.writeText(prompt);
+  vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
+}
+
 async function collectPromptInput() {
   const domain = await pick('分野を選択', DOMAINS, 'domain');
   if (!domain) return undefined;
   const governance = await pick('進め方の軸を選択', GOVERNANCE_MODES, 'governance');
   if (!governance) return undefined;
+  const developmentMethod = await pick('開発手法を選択', DEVELOPMENT_METHODS, 'developmentMethod');
+  if (!developmentMethod) return undefined;
   const workflow = await pick('工程の進め方を選択', WORKFLOWS, 'workflow');
   if (!workflow) return undefined;
   const pace = await pick('確認頻度を選択', PACES, 'pace');
   if (!pace) return undefined;
   const projectName = await vscode.window.showInputBox({ prompt: 'Repo 名またはプロジェクト名', placeHolder: 'my-new-project' });
   const goal = await vscode.window.showInputBox({ prompt: '目的を短く入力', placeHolder: '何を作り、どこまで進めるか' });
-  return { domainId: domain.id, governanceId: governance.id, workflowId: workflow.id, paceId: pace.id, projectName, goal };
+  return { domainId: domain.id, governanceId: governance.id, developmentMethodId: developmentMethod.id, workflowId: workflow.id, paceId: pace.id, projectName, goal };
 }
 
 async function pick(placeHolder, items, kind) {
@@ -207,6 +226,12 @@ function openCodexAppCommand() {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   const command = buildCodexAppTerminalCommand({ cliPath: config.get('codexCliPath', 'codex') });
   runTerminalCommand('Codex App', command, pickWorkspaceRoot());
+}
+
+function refreshAllCommand(treeProvider, workItemsProvider) {
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+  vscode.window.setStatusBarMessage('Codex Starter: Agent Docs and Work Items refreshed', 3000);
 }
 
 async function writePromptFile(context, prompt) {
@@ -315,6 +340,18 @@ async function handleDashboardMessage(args) {
     openWorkItemComposer(context, workItemsProvider, message.mode || 'linked');
     return;
   }
+  if (message?.type === 'openQcdsStatus') {
+    openQcdsStatus(context, treeProvider, workItemsProvider);
+    return;
+  }
+  if (message?.type === 'invokeCurrentPrompt') {
+    await invokeCodexWithCurrentPromptCommand(context);
+    return;
+  }
+  if (message?.type === 'openCodexApp') {
+    openCodexAppCommand();
+    return;
+  }
   if (message?.type === 'initializeIssues') {
     await initializeIssuesDirectoryCommand(workItemsProvider);
     await renderDashboardPanel(panel, nonce, workspaceRoot);
@@ -339,6 +376,7 @@ async function handleDashboardMessage(args) {
     return;
   }
   if (message?.type === 'refreshDashboard') {
+    treeProvider?.refresh();
     workItemsProvider?.refresh();
     await renderDashboardPanel(panel, nonce, workspaceRoot);
   }
@@ -615,10 +653,34 @@ async function openMarkdownCommand(context, item) {
   await openMarkdownWebview(context, filePath, item?.lineNumber);
 }
 
+async function refreshMarkdownWebviewCommand(context) {
+  const activePath = vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (activePath && /\.md$/i.test(activePath)) {
+    await openMarkdownWebview(context, activePath);
+    return;
+  }
+  if (lastMarkdownWebview?.render) {
+    await lastMarkdownWebview.render();
+    vscode.window.setStatusBarMessage('Codex Starter: Markdown WebView refreshed', 3000);
+    return;
+  }
+  vscode.window.showWarningMessage('Codex Starter: refresh する Markdown WebView または Markdown editor が見つかりません。');
+}
+
 async function openMarkdownSourceCommand(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
   if (!filePath) return;
   await openMarkdownSource(filePath, item?.lineNumber);
+}
+
+async function copyMarkdownPathCommand(item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (!filePath) {
+    vscode.window.showWarningMessage('Codex Starter: コピーする Markdown パスが見つかりません。');
+    return;
+  }
+  await vscode.env.clipboard.writeText(filePath);
+  vscode.window.setStatusBarMessage('Codex Starter: path copied', 3000);
 }
 
 async function openMarkdownByMode(context, filePath, lineNumber) {
@@ -659,6 +721,11 @@ async function openMarkdownWebview(context, filePath, lineNumber, column = vscod
     panel.webview.html = renderMarkdownDocumentWebview(String(Date.now()) + String(Math.random()).slice(2), latestModel);
   };
   await render();
+  const panelState = { filePath, render };
+  lastMarkdownWebview = panelState;
+  panel.onDidDispose(() => {
+    if (lastMarkdownWebview === panelState) lastMarkdownWebview = null;
+  });
   panel.webview.onDidReceiveMessage(async (message) => {
     if (message?.type === 'openSource') return openMarkdownSource(message.filePath || filePath, lineNumber);
     if (message?.type === 'copyPath') {
@@ -709,6 +776,7 @@ class AgentDocsTreeProvider {
     treeItem.description = item.label;
     treeItem.tooltip = item.filePath;
     treeItem.resourceUri = vscode.Uri.file(item.filePath);
+    treeItem.contextValue = 'codexAgentDoc';
     treeItem.command = {
       command: 'codex-friendly-project-starter.openAgentDoc',
       title: 'Open Agent Doc',

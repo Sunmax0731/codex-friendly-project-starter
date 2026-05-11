@@ -11,6 +11,7 @@
       "expectedContains": [
         "Web アプリ",
         "Issue駆動",
+        "アジャイル",
         "VS Code 内の Codex 拡張",
         "リリースまで一気に進める",
         "headless browser",
@@ -25,6 +26,7 @@
       "expectedContains": [
         "VS Code 拡張",
         "TDD",
+        "プロトタイピング",
         "技術判断を逐次確認する",
         "activation",
         "代表シナリオ"
@@ -38,6 +40,7 @@
       "expectedContains": [
         "Chrome 拡張",
         "TODO駆動",
+        "ウォーターフォール",
         "最短MVP",
         "MV3 manifest",
         "調査優先"

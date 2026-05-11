@@ -1,10 +1,11 @@
 const { DOMAINS } = require('./domains.cjs');
-const { GOVERNANCE_MODES, WORKFLOWS, PACES } = require('./workflows.cjs');
+const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES } = require('./workflows.cjs');
 
 function renderStarterWebview(nonce) {
   const state = JSON.stringify({
     domains: DOMAINS,
     governanceModes: GOVERNANCE_MODES,
+    developmentMethods: DEVELOPMENT_METHODS,
     workflows: WORKFLOWS,
     paces: PACES
   }).replace(/</g, '\\u003c');
@@ -36,6 +37,7 @@ function renderStarterWebview(nonce) {
   <div class="grid">
     <label>分野<select id="domain"></select></label>
     <label>ガバナンス<select id="governance"></select></label>
+    <label>開発手法<select id="developmentMethod"></select></label>
     <label>工程<select id="workflow"></select></label>
     <label>進行<select id="pace"></select></label>
   </div>
@@ -51,10 +53,11 @@ function renderStarterWebview(nonce) {
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const state = ${state};
-  const ids = ['domain', 'governance', 'workflow', 'pace'];
+  const ids = ['domain', 'governance', 'developmentMethod', 'workflow', 'pace'];
   const sources = {
     domain: state.domains,
     governance: state.governanceModes,
+    developmentMethod: state.developmentMethods,
     workflow: state.workflows,
     pace: state.paces
   };
@@ -77,6 +80,7 @@ function renderStarterWebview(nonce) {
     return {
       domainId: document.getElementById('domain').value,
       governanceId: document.getElementById('governance').value,
+      developmentMethodId: document.getElementById('developmentMethod').value,
       workflowId: document.getElementById('workflow').value,
       paceId: document.getElementById('pace').value,
       projectName: document.getElementById('projectName').value,
@@ -92,6 +96,7 @@ function renderStarterWebview(nonce) {
     document.getElementById('summary').textContent = [
       '分野: ' + domain.label,
       'ガバナンス: ' + labelOf(state.governanceModes, input.governanceId),
+      '開発手法: ' + labelOf(state.developmentMethods, input.developmentMethodId),
       '工程: ' + labelOf(state.workflows, input.workflowId),
       '進行: ' + labelOf(state.paces, input.paceId),
       '標準パス: ' + domain.domainPath,
@@ -109,6 +114,9 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
   const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
   const taskItems = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 12);
+  const qcdsStatus = dashboard.qcds.available
+    ? `${dashboard.qcds.overallGrade} / ${dashboard.qcds.overallScore}`
+    : 'missing';
   return `<!doctype html>
 <html lang="ja">
 <head>
@@ -118,13 +126,16 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <title>Codex Work Dashboard</title>
   <style>
     body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 18px; }
-    main { max-width: 960px; }
+    main { max-width: 1040px; }
     h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
-    h2 { font-size: 14px; margin: 20px 0 8px; font-weight: 600; }
     .root { color: var(--vscode-descriptionForeground); margin-bottom: 14px; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+    .action-panel { border: 1px solid var(--vscode-panel-border); border-radius: 5px; padding: 10px; margin-bottom: 12px; background: var(--vscode-sideBar-background); }
+    .action-panel summary { cursor: pointer; font-weight: 600; }
+    .action-heading { color: var(--vscode-descriptionForeground); font-size: 12px; margin: 0 0 8px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
     .action { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-background); color: var(--vscode-button-foreground); padding: 6px 9px; border-radius: 3px; cursor: pointer; }
     .action.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+    .action.subtle { background: transparent; color: var(--vscode-foreground); border-color: var(--vscode-panel-border); }
     .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
     .metric, .row, .readiness { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; background: var(--vscode-sideBar-background); }
     .metric-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
@@ -132,9 +143,29 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     .bar { height: 10px; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-panel-border); margin-top: 8px; overflow: hidden; }
     .fill { display: block; height: 100%; background: var(--vscode-charts-green); }
     .list { display: grid; gap: 8px; }
-    .row { display: grid; grid-template-columns: 72px 1fr auto auto; gap: 10px; align-items: center; }
+    details.section { border-top: 1px solid var(--vscode-panel-border); margin-top: 16px; padding-top: 10px; }
+    details.section > summary { cursor: pointer; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+    .row-main { min-width: 0; }
+    .row-title { display: block; margin: 5px 0 3px; overflow-wrap: anywhere; }
+    .row-actions { display: inline-flex; gap: 6px; justify-content: end; }
     .path { color: var(--vscode-descriptionForeground); font-size: 12px; }
-    .pill { border: 1px solid var(--vscode-panel-border); padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
+    .badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+    .tag { border: 1px solid var(--vscode-panel-border); padding: 1px 6px; border-radius: 999px; white-space: nowrap; font-size: 11px; line-height: 18px; background: var(--vscode-editorWidget-background); }
+    .tag-priority-p0 { color: var(--vscode-errorForeground); border-color: var(--vscode-errorForeground); }
+    .tag-priority-p1 { color: var(--vscode-charts-red); border-color: var(--vscode-charts-red); }
+    .tag-priority-p2 { color: var(--vscode-charts-yellow); border-color: var(--vscode-charts-yellow); }
+    .tag-priority-p3, .tag-priority-p4 { color: var(--vscode-descriptionForeground); }
+    .tag-status-open { color: var(--vscode-charts-yellow); }
+    .tag-status-in-progress { color: var(--vscode-charts-blue); }
+    .tag-status-blocked { color: var(--vscode-errorForeground); }
+    .tag-status-closed, .tag-status-done, .tag-status-pass { color: var(--vscode-charts-green); }
+    .tag-type-bug { color: var(--vscode-errorForeground); }
+    .tag-type-feature, .tag-type-ux { color: var(--vscode-charts-blue); }
+    .tag-type-docs { color: var(--vscode-charts-purple); }
+    .tag-type-release { color: var(--vscode-charts-orange); }
+    .tag-type-test { color: var(--vscode-charts-green); }
+    .tag-qcds { color: var(--vscode-charts-foreground); }
     .status-open { color: var(--vscode-charts-yellow); }
     .status-blocked { color: var(--vscode-errorForeground); }
     .status-pass { color: var(--vscode-charts-green); }
@@ -147,35 +178,58 @@ function renderWorkDashboardWebview(nonce, dashboard) {
 <main>
   <h1>Codex Work Dashboard</h1>
   <div class="root">${escapeHtml(dashboard.rootPath)}</div>
-  <section class="actions" aria-label="GUI actions">
-    <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
-    <button class="action" data-action="openComposer" data-mode="task">Task を作成</button>
-    <button class="action" data-action="openComposer" data-mode="linked">自然言語から作成</button>
-    <button class="action secondary" data-action="initializeIssues">Issues 初期化</button>
-    <button class="action secondary" data-action="initializeTasks">Tasks 初期化</button>
-    <button class="action secondary" data-action="scaffoldDocs">D:\\AI Docs 生成</button>
-    <button class="action secondary" data-action="openStarter">FirstPrompt</button>
-    <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
-    <button class="action secondary" data-action="refreshDashboard">Refresh</button>
+  <section class="action-panel" aria-label="Daily work actions">
+    <div class="action-heading">プロジェクト進行中に使う操作</div>
+    <div class="actions">
+      <button class="action" data-action="openComposer" data-mode="linked">自然言語から Issue + Task</button>
+      <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
+      <button class="action" data-action="openComposer" data-mode="task">Task を作成</button>
+      <button class="action secondary" data-action="openStarter">FirstPrompt</button>
+      <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
+      <button class="action secondary" data-action="openCodexApp">Codex App</button>
+      <button class="action secondary" data-action="invokeCurrentPrompt">現在Promptを実行</button>
+      <button class="action subtle" data-action="refreshDashboard">Refresh</button>
+    </div>
   </section>
+  <details class="action-panel">
+    <summary>初回セットアップ / 環境確認</summary>
+    <div class="actions">
+      <button class="action secondary" data-action="scaffoldDocs">D:\\AI Docs 生成</button>
+      <button class="action secondary" data-action="initializeIssues">Issues 初期化</button>
+      <button class="action secondary" data-action="initializeTasks">Tasks 初期化</button>
+      <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
+    </div>
+  </details>
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
     ${metricHtml('Tasks', (dashboard.stats.tasks?.closed || 0) + ' / ' + (dashboard.stats.tasks?.total || 0), dashboard.stats.tasks?.percent || 0, (dashboard.stats.tasks?.open || 0) + (dashboard.stats.tasks?.active || 0) + (dashboard.stats.tasks?.blocked || 0) + ' active')}
-    ${metricHtml('QCDS', dashboard.qcds.available ? dashboard.qcds.overallGrade + ' / ' + dashboard.qcds.overallScore : 'missing', dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
+    ${metricHtml('QCDS', qcdsStatus, dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
   </section>
-  <h2>QCDS Current Status</h2>
-  <div class="list">${dashboard.qcds.available ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
-  <h2>QCDS Improvements</h2>
-  <div class="list">${dashboard.qcds.improvements.length ? dashboard.qcds.improvements.slice(0, 12).map(qcdsImprovementHtml).join('') : '<div class="empty">QCDS に紐づく未完了 TODO / Issue はありません。</div>'}</div>
-  <h2>Release Readiness</h2>
-  ${dashboard.releaseReadiness.map(readinessHtml).join('')}
-  <h2>Open TODO</h2>
-  <div class="list">${todoItems.length ? todoItems.map(todoHtml).join('') : '<div class="empty">Open TODO はありません。</div>'}</div>
-  <h2>Open Issues</h2>
-  <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
-  <h2>Open Tasks</h2>
-  <div class="list">${taskItems.length ? taskItems.map(taskHtml).join('') : '<div class="empty">Open Task はありません。</div>'}</div>
+  <details class="section" open>
+    <summary>QCDS Current Status</summary>
+    <div class="list">${dashboard.qcds.available ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
+  </details>
+  <details class="section" open>
+    <summary>QCDS Improvements</summary>
+    <div class="list">${dashboard.qcds.improvements.length ? dashboard.qcds.improvements.slice(0, 12).map(qcdsImprovementHtml).join('') : '<div class="empty">QCDS に紐づく未完了 TODO / Issue はありません。</div>'}</div>
+  </details>
+  <details class="section" open>
+    <summary>Release Readiness</summary>
+    ${dashboard.releaseReadiness.map(readinessHtml).join('')}
+  </details>
+  <details class="section" open>
+    <summary>Open TODO</summary>
+    <div class="list">${todoItems.length ? todoItems.map(todoHtml).join('') : '<div class="empty">Open TODO はありません。</div>'}</div>
+  </details>
+  <details class="section" open>
+    <summary>Open Issues</summary>
+    <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
+  </details>
+  <details class="section" open>
+    <summary>Open Tasks</summary>
+    <div class="list">${taskItems.length ? taskItems.map(taskHtml).join('') : '<div class="empty">Open Task はありません。</div>'}</div>
+  </details>
 </main>
 <script nonce="${nonce}">
   window.__codexWorkDashboard = ${safe};
@@ -220,30 +274,95 @@ function readinessHtml(item) {
 }
 
 function todoHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span></span>${openButton(item)}</div>`;
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${qcdsBadges(item.qcdsAxes)}</div>
+      <span class="row-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span>
+    </div>
+    ${openButton(item)}
+  </div>`;
 }
 
 function issueHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.type)} / ${item.progress.done}/${item.progress.total}</span></span>${openButton(item)}</div>`;
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${typeBadge(item.type)}${phaseBadge(item.phase)}${qcdsBadges(item.qcdsAxes)}</div>
+      <span class="row-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(item.relativePath)} / task ${item.progress.done}/${item.progress.total}</span>
+    </div>
+    ${openButton(item)}
+  </div>`;
 }
 
 function taskHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.priority)}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)} / ${escapeHtml(item.phase || item.type)} / ${item.progress.done}/${item.progress.total}</span></span>${openButton(item)}</div>`;
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${typeBadge(item.type)}${phaseBadge(item.phase)}${qcdsBadges(item.qcdsAxes)}</div>
+      <span class="row-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(item.relativePath)} / check ${item.progress.done}/${item.progress.total}</span>
+    </div>
+    ${openButton(item)}
+  </div>`;
 }
 
 function qcdsDimensionHtml(item) {
   const cls = item.status === 'pass' ? 'status-pass' : 'status-blocked';
-  return `<div class="row"><span class="pill">${escapeHtml(item.grade)}</span><span>${escapeHtml(item.label)}<br><span class="path">${item.passed}/${item.expected} checks / ${item.linkedItems.length} linked work items</span></span><span class="${cls}">${item.score}</span></div>`;
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${badge(item.grade, 'tag-qcds')} ${badge(item.status, 'tag-status-' + item.status)}</div>
+      <span class="row-title">${escapeHtml(item.label)}</span>
+      <span class="path">${item.passed}/${item.expected} checks / ${item.linkedItems.length} linked work items</span>
+    </div>
+    <span class="${cls}">${item.score}</span>
+  </div>`;
 }
 
 function qcdsImprovementHtml(item) {
-  return `<div class="row"><span class="pill">${escapeHtml(item.qcdsAxis || item.qcdsAxes.join(','))}</span><span>${escapeHtml(item.title)}<br><span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.kind)} / ${escapeHtml(item.priority)}</span></span>${openButton(item)}</div>`;
+  const axes = item.qcdsAxis ? [item.qcdsAxis] : (item.qcdsAxes || []);
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${typeBadge(item.kind)}${qcdsBadges(axes)}</div>
+      <span class="row-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.kind)}</span>
+    </div>
+    ${openButton(item)}
+  </div>`;
 }
 
 function openButton(item) {
   if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
   const lineNumber = Number(item.lineNumber || 1);
-  return `<button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button>`;
+  return `<span class="row-actions"><button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
+}
+
+function badge(label, className = '') {
+  if (!label) return '';
+  return `<span class="tag ${className}">${escapeHtml(label)}</span>`;
+}
+
+function priorityBadge(priority) {
+  const value = priority || 'P3';
+  return badge(value, 'tag-priority-' + value.toLowerCase());
+}
+
+function statusBadge(status) {
+  const value = status || 'open';
+  return badge(value, 'tag-status-' + String(value).replace(/\s+/g, '-').toLowerCase());
+}
+
+function typeBadge(type) {
+  if (!type) return '';
+  return badge(type, 'tag-type-' + String(type).replace(/\s+/g, '-').toLowerCase());
+}
+
+function phaseBadge(phase) {
+  if (!phase) return '';
+  return badge(phase, 'tag-phase');
+}
+
+function qcdsBadges(axes = []) {
+  return (Array.isArray(axes) ? axes : []).map((axis) => badge(axis, 'tag-qcds')).join('');
 }
 
 function escapeHtml(value) {
