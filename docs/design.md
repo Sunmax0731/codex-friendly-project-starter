@@ -20,6 +20,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 未完了 Issue は priority と status を description に出す。
 - 未完了 Task は priority と phase を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
+- 未完了 TODO / Issue / Task には inline action として Codex 着手ボタンを出す。
 
 ### Work Dashboard
 
@@ -27,7 +28,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - TODO、Issue、Task の進捗は progress bar で表示する。
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
-- TODO / Issue / Task / QCDS の行には `Open` ボタンを置き、該当 Markdown WebView へ移動できる。
+- TODO / Issue / Task / QCDS improvements の行には `Start` と `Open` ボタンを置く。`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。
 - 上部 action bar に Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、`D:\AI` docs 生成、FirstPrompt、Codex CLI 確認、refresh を置く。
 - Dashboard は確認と操作入口にし、詳細編集は Markdown を直接開く。
 
@@ -39,6 +40,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Codex CLI 実行中はボタンを disable にし、完了時は Codex CLI 由来かローカル補完由来かを status text で表示する。
 - `作成して開く` で Markdown を作成し、作成結果を WebView で表示する。
 - `Issue + Task` では相互リンクを自動生成する。
+- `Issue`、`Task`、`Issue + Task` のどの作成でも `TODO.md` にリンク付き checkbox を追加し、TODO を入口にする。
 
 ### QCDS Status
 

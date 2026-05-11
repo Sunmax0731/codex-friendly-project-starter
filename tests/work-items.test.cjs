@@ -12,6 +12,7 @@ const {
   buildQcdsStatus,
   ensureIssuesDirectory,
   ensureTasksDirectory,
+  appendTodoWorkItemLink,
   nextIssueFilePath,
   nextTaskFilePath,
   createIssueMarkdown,
@@ -21,6 +22,7 @@ const {
   isWorkItemDocPath
 } = require('../src/work-items.cjs');
 const { renderWorkDashboardWebview } = require('../src/webview.cjs');
+const { buildWorkItemStartPrompt } = require('../src/work-item-start.cjs');
 const {
   inferWorkItemDraft,
   renderWorkItemComposerWebview
@@ -100,6 +102,30 @@ test('ensureIssuesDirectory and ensureTasksDirectory create README and next file
   assert.equal(isWorkItemDocPath(taskPath), true);
 });
 
+test('appendTodoWorkItemLink creates TODO entry linked to issue and task files', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-todo-link-'));
+  const result = appendTodoWorkItemLink(root, {
+    title: 'QCDS evaluation',
+    priority: 'P2',
+    qcdsAxes: ['Quality', 'Delivery'],
+    links: [
+      { label: 'Issue', href: 'Issues/0001-qcds.md' },
+      { label: 'Task', href: 'Tasks/0001-qcds.md' }
+    ]
+  });
+  const todo = fs.readFileSync(path.join(root, 'TODO.md'), 'utf8');
+  assert.equal(result.created, true);
+  assert.match(todo, /\[Issue\]\(Issues\/0001-qcds\.md\)/);
+  assert.match(todo, /\[Task\]\(Tasks\/0001-qcds\.md\)/);
+  assert.match(todo, /\[QCDS:Quality,Delivery\]/);
+  const duplicate = appendTodoWorkItemLink(root, {
+    title: 'QCDS evaluation',
+    priority: 'P2',
+    links: [{ label: 'Issue', href: 'Issues/0001-qcds.md' }]
+  });
+  assert.equal(duplicate.created, false);
+});
+
 test('createIssueMarkdown and createTaskMarkdown record Codex draft source when provided', () => {
   const issue = createIssueMarkdown({
     title: 'Codex draft issue',
@@ -129,7 +155,36 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /Issue を作成/);
   assert.match(html, /自然言語から作成/);
   assert.match(html, /D:\\AI Docs 生成/);
+  assert.match(html, /Start/);
+  assert.match(html, /startWorkItem/);
   assert.match(html, /width:0%|width:50%|width:100%/);
+});
+
+test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
+  const prompt = buildWorkItemStartPrompt({
+    workspaceRoot: 'D:/repo',
+    item: {
+      kind: 'todo',
+      title: 'Release docs sync',
+      status: 'open',
+      priority: 'P1',
+      qcdsAxes: ['Delivery'],
+      filePath: 'D:/repo/TODO.md',
+      relativePath: 'TODO.md',
+      lineNumber: 8
+    },
+    documentText: '# TODO\n\n- [ ] [P1] Release docs sync [Issue](Issues/0001-release.md)\n',
+    relatedDocuments: [
+      {
+        relativePath: 'Issues/0001-release.md',
+        content: '# Release docs sync\n\n- Status: open\n'
+      }
+    ]
+  });
+  assert.match(prompt, /TODO を入口/);
+  assert.match(prompt, /Release docs sync/);
+  assert.match(prompt, /Issues\/0001-release\.md/);
+  assert.match(prompt, /QCDS: Delivery/);
 });
 
 test('inferWorkItemDraft turns natural language into issue or task fields', () => {

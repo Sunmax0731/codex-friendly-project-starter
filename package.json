@@ -40,6 +40,7 @@
     "onCommand:codex-friendly-project-starter.createLocalTask",
     "onCommand:codex-friendly-project-starter.openWorkItemComposer",
     "onCommand:codex-friendly-project-starter.openWorkItem",
+    "onCommand:codex-friendly-project-starter.startWorkItemWithCodex",
     "onView:codexFriendlyAgentDocs",
     "onView:codexFriendlyWorkItems"
   ],
@@ -124,6 +125,11 @@
       {
         "command": "codex-friendly-project-starter.openWorkItem",
         "title": "Codex Starter: Open Work Item"
+      },
+      {
+        "command": "codex-friendly-project-starter.startWorkItemWithCodex",
+        "title": "Codex Starter: Start Work Item with Codex",
+        "icon": "$(play)"
       }
     ],
     "viewsContainers": {
@@ -178,6 +184,13 @@
           "command": "codex-friendly-project-starter.refreshWorkItems",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "codex-friendly-project-starter.startWorkItemWithCodex",
+          "when": "view == codexFriendlyWorkItems && viewItem == codexWorkItem",
+          "group": "inline@1"
         }
       ]
     },

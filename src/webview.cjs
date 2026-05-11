@@ -132,7 +132,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     .bar { height: 10px; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-panel-border); margin-top: 8px; overflow: hidden; }
     .fill { display: block; height: 100%; background: var(--vscode-charts-green); }
     .list { display: grid; gap: 8px; }
-    .row { display: grid; grid-template-columns: 72px 1fr auto; gap: 10px; align-items: center; }
+    .row { display: grid; grid-template-columns: 72px 1fr auto auto; gap: 10px; align-items: center; }
     .path { color: var(--vscode-descriptionForeground); font-size: 12px; }
     .pill { border: 1px solid var(--vscode-panel-border); padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
     .status-open { color: var(--vscode-charts-yellow); }
@@ -187,6 +187,14 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       lineNumber: Number(button.getAttribute('data-line') || '1')
     }));
   }
+  for (const button of document.querySelectorAll('button[data-start-file]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'startWorkItem',
+      filePath: button.getAttribute('data-start-file'),
+      lineNumber: Number(button.getAttribute('data-start-line') || '1'),
+      kind: button.getAttribute('data-kind') || ''
+    }));
+  }
   for (const button of document.querySelectorAll('button[data-action]')) {
     button.addEventListener('click', () => vscode.postMessage({
       type: button.getAttribute('data-action'),
@@ -234,7 +242,8 @@ function qcdsImprovementHtml(item) {
 
 function openButton(item) {
   if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
-  return `<button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${Number(item.lineNumber || 1)}">Open</button>`;
+  const lineNumber = Number(item.lineNumber || 1);
+  return `<button class="open-doc" data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button class="open-doc" data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button>`;
 }
 
 function escapeHtml(value) {

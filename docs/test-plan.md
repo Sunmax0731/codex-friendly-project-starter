@@ -16,6 +16,8 @@ npm test
 - Codex App と CLI check の command builder が設定された CLI path を使う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
 - Agent docs 判定とスキャンが `node_modules` を除外する。
+- Issue / Task 作成時に `TODO.md` へリンク付き checkbox を同期できる。
+- Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue / Task、QCDS が含まれる。
 - QCDS metrics の grade が定義済み値だけを使う。
 - VSCodeExtension manifest と `extension.js` が activation、commands、Tree View、webview、decoration を満たす。
 
@@ -30,6 +32,7 @@ npm test
 - `Codex Starter: Check Codex CLI` が terminal に version と help を表示する。
 - `Codex Starter: Invoke AI Agent with FirstPrompt` が一時 prompt file を作り、`codex exec` を起動する。
 - `Codex Starter: Invoke AI Agent with Current Prompt` が選択範囲または開いている文書全体を `codex exec` に渡す。
+- `Codex Starter: Start Work Item with Codex` が選択 TODO / Issue / Task を開始プロンプトにして `codex exec` に渡す。
 
 ## 手動テスト
 

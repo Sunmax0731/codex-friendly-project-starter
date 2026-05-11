@@ -16,8 +16,10 @@ const {
   nextTaskFilePath,
   createIssueMarkdown,
   createTaskMarkdown,
+  appendTodoWorkItemLink,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
+const { buildWorkItemStartPrompt } = require('./src/work-item-start.cjs');
 const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
 const {
   inferWorkItemDraft,
@@ -65,6 +67,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.refreshWorkItems', () => workItemsProvider.refresh()),
     vscode.commands.registerCommand('codex-friendly-project-starter.openAgentDoc', (item) => openAgentDoc(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItem', (item) => openWorkItem(item)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.startWorkItemWithCodex', (item) => startWorkItemWithCodexCommand(context, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownWebview', (item) => openMarkdownCommand(context, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context, treeProvider, workItemsProvider)),
@@ -165,7 +168,7 @@ async function invokeCodexWithCurrentPromptCommand(context) {
 
 async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const workspaceRoot = pickWorkspaceRoot();
+  const workspaceRoot = options.workspaceRoot || pickWorkspaceRoot();
   const target = resolveInvocationTarget({ workspaceRoot, prompt, input: options.input });
   const cwd = target.cwd;
   const sandboxMode = config.get('codexSandboxMode', 'workspace-write');
@@ -302,6 +305,10 @@ async function handleDashboardMessage(args) {
   const { context, panel, nonce, workspaceRoot, treeProvider, workItemsProvider, message } = args;
   if (message?.type === 'openMarkdown' && message.filePath) {
     await openMarkdownWebview(context, message.filePath, message.lineNumber);
+    return;
+  }
+  if (message?.type === 'startWorkItem' && message.filePath) {
+    await startWorkItemWithCodexCommand(context, message);
     return;
   }
   if (message?.type === 'openComposer') {
@@ -479,8 +486,15 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
   };
   if (draft.mode === 'task') {
     const taskPath = nextTaskFilePath(workspaceRoot, draft.title);
+    const taskRelative = toSlash(path.relative(workspaceRoot, taskPath));
     await fs.promises.writeFile(taskPath, createTaskMarkdown(draft), 'utf8');
-    return { openPath: taskPath, created: [taskPath] };
+    const todo = appendTodoWorkItemLink(workspaceRoot, {
+      title: draft.title,
+      priority: draft.priority,
+      qcdsAxes: draft.qcdsAxes,
+      links: [{ label: 'Task', href: taskRelative }]
+    });
+    return { openPath: taskPath, created: [taskPath, ...(todo.created ? [todo.todoPath] : [])] };
   }
   if (draft.mode === 'linked') {
     const taskPath = nextTaskFilePath(workspaceRoot, draft.title);
@@ -489,11 +503,27 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     const issueRelative = toSlash(path.relative(workspaceRoot, issuePath));
     await fs.promises.writeFile(taskPath, createTaskMarkdown({ ...draft, issue: issueRelative }), 'utf8');
     await fs.promises.writeFile(issuePath, createIssueMarkdown({ ...draft, tasks: [{ label: taskRelative, href: '../' + taskRelative }] }), 'utf8');
-    return { openPath: issuePath, created: [issuePath, taskPath] };
+    const todo = appendTodoWorkItemLink(workspaceRoot, {
+      title: draft.title,
+      priority: draft.priority,
+      qcdsAxes: draft.qcdsAxes,
+      links: [
+        { label: 'Issue', href: issueRelative },
+        { label: 'Task', href: taskRelative }
+      ]
+    });
+    return { openPath: issuePath, created: [issuePath, taskPath, ...(todo.created ? [todo.todoPath] : [])] };
   }
   const issuePath = nextIssueFilePath(workspaceRoot, draft.title);
+  const issueRelative = toSlash(path.relative(workspaceRoot, issuePath));
   await fs.promises.writeFile(issuePath, createIssueMarkdown(draft), 'utf8');
-  return { openPath: issuePath, created: [issuePath] };
+  const todo = appendTodoWorkItemLink(workspaceRoot, {
+    title: draft.title,
+    priority: draft.priority,
+    qcdsAxes: draft.qcdsAxes,
+    links: [{ label: 'Issue', href: issueRelative }]
+  });
+  return { openPath: issuePath, created: [issuePath, ...(todo.created ? [todo.todoPath] : [])] };
 }
 
 async function openAgentDoc(item) {
@@ -506,6 +536,77 @@ async function openWorkItem(item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath;
   if (!filePath) return;
   await openMarkdownByMode(undefined, filePath, item.lineNumber);
+}
+
+async function startWorkItemWithCodexCommand(context, item) {
+  const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
+  if (!filePath) {
+    vscode.window.showWarningMessage('Codex Starter: start target work item was not found.');
+    return;
+  }
+  const workspaceRoot = pickWorkspaceRootForPath(filePath);
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const resolved = resolveWorkItemReference(dashboard, {
+    filePath,
+    lineNumber: item?.lineNumber,
+    kind: item?.kind
+  });
+  if (!resolved) {
+    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues / Tasks.');
+    return;
+  }
+  const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
+  const relatedDocuments = await loadRelatedWorkItemDocuments(workspaceRoot, resolved);
+  const prompt = buildWorkItemStartPrompt({
+    workspaceRoot,
+    item: resolved,
+    documentText,
+    relatedDocuments
+  });
+  await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot });
+}
+
+function resolveWorkItemReference(dashboard, reference = {}) {
+  const targetPath = normalizePath(reference.filePath || '');
+  const targetLine = Number(reference.lineNumber || 0);
+  const pools = [
+    ...(dashboard.todos || []),
+    ...(dashboard.issues || []),
+    ...(dashboard.tasks || [])
+  ];
+  return pools.find((item) => {
+    if (normalizePath(item.filePath) !== targetPath) return false;
+    if (targetLine && item.kind === 'todo') return Number(item.lineNumber || 0) === targetLine;
+    if (reference.kind && item.kind !== reference.kind) return false;
+    return true;
+  }) || pools.find((item) => normalizePath(item.filePath) === targetPath);
+}
+
+async function loadRelatedWorkItemDocuments(workspaceRoot, item) {
+  const links = [
+    ...(item.links || []),
+    ...(item.linkedTasks || [])
+  ];
+  const seen = new Set([normalizePath(item.filePath)]);
+  const docs = [];
+  for (const link of links) {
+    if (!link.filePath || !['todo', 'issue', 'task'].includes(link.kind)) continue;
+    const key = normalizePath(link.filePath);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const content = await fs.promises.readFile(link.filePath, 'utf8').catch(() => '');
+    if (!content) continue;
+    docs.push({
+      filePath: link.filePath,
+      relativePath: toSlash(path.relative(workspaceRoot, link.filePath)),
+      content
+    });
+  }
+  return docs;
+}
+
+function normalizePath(filePath) {
+  return path.resolve(String(filePath || '')).toLowerCase();
 }
 
 async function openMarkdownCommand(context, item) {
@@ -649,6 +750,7 @@ class WorkItemsTreeProvider {
     treeItem.tooltip = item.tooltip || item.filePath;
     treeItem.iconPath = item.icon;
     if (item.filePath) treeItem.resourceUri = vscode.Uri.file(item.filePath);
+    if (item.filePath && ['todo', 'issue', 'task'].includes(item.kind)) treeItem.contextValue = 'codexWorkItem';
     if (item.filePath) {
       treeItem.command = {
         command: 'codex-friendly-project-starter.openWorkItem',

@@ -559,6 +559,56 @@ function ensureTasksDirectory(rootPath) {
   return { tasksDir, readmePath };
 }
 
+function ensureTodoFile(rootPath) {
+  const todoPath = path.join(rootPath, 'TODO.md');
+  if (!fs.existsSync(todoPath)) {
+    fs.writeFileSync(todoPath, ['# TODO', '', '## Work Items', ''].join('\n'), 'utf8');
+  }
+  return todoPath;
+}
+
+function createTodoWorkItemLine(input = {}) {
+  const title = input.title || 'Untitled Work Item';
+  const priority = input.priority || 'P3';
+  const links = Array.isArray(input.links) ? input.links.filter((item) => item?.href) : [];
+  const qcdsAxes = Array.isArray(input.qcdsAxes) ? input.qcdsAxes : detectQcdsAxes(input.qcds || '');
+  const linkText = links.length
+    ? ' ' + links.map((item) => `[${item.label || item.href}](${item.href})`).join(' ')
+    : '';
+  const qcdsText = qcdsAxes.length ? ' [QCDS:' + qcdsAxes.join(',') + ']' : '';
+  return `- [ ] [${priority}] ${title}${linkText}${qcdsText}`;
+}
+
+function appendTodoWorkItemLink(rootPath, input = {}) {
+  const todoPath = ensureTodoFile(rootPath);
+  const line = createTodoWorkItemLine(input);
+  const hrefs = (Array.isArray(input.links) ? input.links : [])
+    .map((item) => item?.href)
+    .filter(Boolean);
+  let content = fs.readFileSync(todoPath, 'utf8');
+  const existingLineNumber = findExistingTodoLineNumber(content, hrefs, input.title);
+  if (existingLineNumber) {
+    return { todoPath, lineNumber: existingLineNumber, line, created: false };
+  }
+  if (!/^##\s+Work Items\s*$/mi.test(content)) {
+    content = content.replace(/\s*$/, '') + '\n\n## Work Items\n';
+  }
+  if (!content.endsWith('\n')) content += '\n';
+  const lineNumber = content.replace(/\n$/, '').split(/\r?\n/).length + 1;
+  fs.writeFileSync(todoPath, content + line + '\n', 'utf8');
+  return { todoPath, lineNumber, line, created: true };
+}
+
+function findExistingTodoLineNumber(content, hrefs, title) {
+  const lines = content.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    if (hrefs.length && hrefs.some((href) => line.includes(`](${href})`))) return index + 1;
+    if (!hrefs.length && title && line.includes(title)) return index + 1;
+  }
+  return 0;
+}
+
 function nextIssueFilePath(rootPath, title) {
   const issuesDir = ensureIssuesDirectory(rootPath).issuesDir;
   const entries = fs.readdirSync(issuesDir, { withFileTypes: true })
@@ -739,6 +789,9 @@ module.exports = {
   buildQcdsStatus,
   ensureIssuesDirectory,
   ensureTasksDirectory,
+  ensureTodoFile,
+  createTodoWorkItemLine,
+  appendTodoWorkItemLink,
   nextIssueFilePath,
   nextTaskFilePath,
   createIssueMarkdown,

@@ -54,6 +54,13 @@
 - `docs/vsix-package-guide.md` に VSIX package と local install 手順を残す。
 - `npm test` に readiness gate を含める。
 
+## Phase 3.9: TODO 起点の Codex 着手導線
+
+- Dashboard と Work Items Tree から TODO / Issue / Task の `Start` を実行できる command を追加する。
+- 選択した Work Item と関連 Issue / Task を Work Item Start Prompt にまとめ、Codex CLI へ渡す。
+- Issue / Task / Issue + Task の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
+- Unit test、manual test、platform runtime gate、traceability を更新する。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

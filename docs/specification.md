@@ -22,6 +22,7 @@
 - `codex-friendly-project-starter.createLocalTask`: Task 作成用 Work Item Composer を開き、`Tasks/0001-short-title.md` 形式の local Task Markdown を作成する。
 - `codex-friendly-project-starter.openWorkItemComposer`: 自然言語または GUI フォームから Issue / Task / Issue + Task を作成する Webview を開く。
 - `codex-friendly-project-starter.openWorkItem`: Work Items Tree の TODO、Issue、Task を該当行で開く。
+- `codex-friendly-project-starter.startWorkItemWithCodex`: 選択した TODO、Issue、Task と関連リンクを開始プロンプト化し、Codex CLI に渡して着手する。
 
 ## Tree View
 
@@ -57,6 +58,8 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 
 `Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue / Task の進捗率として扱う。Markdown link は `Tasks/*.md`、`Issues/*.md`、`docs/*.md`、`TODO.md` を workspace root 基準でも解決できる。
 
+Issue / Task / Issue + Task を Work Item Composer から作成した場合は、`TODO.md` の `## Work Items` section に未完了 checkbox を追加し、作成した `Issues/*.md` と `Tasks/*.md` への Markdown link を残す。既に同じ link を持つ TODO がある場合は重複追加しない。
+
 ## Work Dashboard
 
 Dashboard Webview は次を表示する。
@@ -70,6 +73,7 @@ Dashboard Webview は次を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 Task の上位一覧。
 - GUI action として Issue 作成、Task 作成、自然言語から作成、Issues 初期化、Tasks 初期化、`D:\AI` docs 生成、FirstPrompt 画面、Codex CLI 確認、Dashboard refresh を提供する。
+- 未完了 TODO、Issue、Task、QCDS improvements の各行に `Start` と `Open` を表示する。`Start` は該当 work item を `startWorkItemWithCodex` に渡し、`Open` は Markdown WebView を開く。
 
 ## Work Item Composer
 
@@ -84,6 +88,8 @@ Work Item Composer Webview は次を入力項目として持つ。
 - Issue: `Issues/000x-slug.md` を作成する。
 - Task: `Tasks/000x-slug.md` を作成する。
 - Issue + Task: 両方を作成し、Issue から Task へ、Task から Issue へ Markdown link を張る。
+
+いずれの作成先でも、作成後に `TODO.md` へ linked TODO checkbox を同期する。これにより、Issue や Task を起点に起票しても、以後の着手入口は TODO に集約できる。
 
 ## Markdown WebView
 
@@ -153,3 +159,5 @@ powershell -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 Work Item Composer の自然言語反映では、拡張が prompt file、JSON schema file、last-message output file、launcher file を extension storage に保存し、PowerShell 経由で `codex exec -C <workspaceRoot> -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を実行する。Codex にはファイル編集や追加調査を求めず、JSON オブジェクトのみを返すよう指示する。解析は last-message output file を優先し、空の場合だけ stdout / stderr から JSON を抽出する。
 
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。
+
+Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue / Task 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue / Task 更新条件を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、sandbox mode、model/profile 設定を使って `codex exec` に渡す。

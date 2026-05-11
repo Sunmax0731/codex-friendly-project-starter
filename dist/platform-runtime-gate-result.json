@@ -61,6 +61,11 @@
       "detail": "Work Item Composer and Tasks init commands exist"
     },
     {
+      "id": "work-item-start-command",
+      "pass": true,
+      "detail": "Work Item Start command exists"
+    },
+    {
       "id": "markdown-webview-command",
       "pass": true,
       "detail": "Markdown WebView commands exist"
@@ -79,6 +84,11 @@
       "id": "work-dashboard-webview",
       "pass": true,
       "detail": "work dashboard webview contract exists"
+    },
+    {
+      "id": "work-dashboard-start-button",
+      "pass": true,
+      "detail": "work dashboard can start a work item"
     },
     {
       "id": "work-item-composer-webview",
@@ -123,7 +133,7 @@
     {
       "id": "work-item-scan",
       "pass": true,
-      "detail": "work item, task, and QCDS scan wired"
+      "detail": "work item, task, TODO sync, and QCDS scan wired"
     },
     {
       "id": "codex-exec-terminal",

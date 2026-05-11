@@ -45,7 +45,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
 8. Dashboard の `Task を作成` を押し、Work Item Composer で title、priority、phase、QCDS、acceptance criteria を入力して Task を作成する。
 9. Dashboard の `自然言語から作成` を押し、自然言語メモから Codex CLI 下書きを作って Issue + Task を作成する。
-10. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
+10. 作成された TODO / Issue / Task の行にある `Start` を押し、確認ダイアログの内容を確認する。
+11. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 
@@ -62,6 +63,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` と `Tasks/*.md` に `Draft source: codex-cli` が記録される。
 - Codex CLI が利用できない場合でもローカル補完へフォールバックし、Issue / Task 作成操作は継続できる。
 - `Issue + Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
+- Issue / Task / Issue + Task 作成後、`TODO.md` にリンク付き checkbox が追加される。
+- Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の `codex exec` が統合ターミナルに起動する。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 
 ## 2.5 Markdown WebView と D:\AI 既定 docs

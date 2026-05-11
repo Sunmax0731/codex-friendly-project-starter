@@ -9,6 +9,7 @@
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
 - `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
+- `src/work-item-start.cjs`: TODO / Issue / Task を Codex CLI へ渡す開始プロンプト生成。
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
 - `src/codex-cli.cjs`: Codex CLI に渡す PowerShell command と terminal command 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
@@ -21,6 +22,8 @@ VS Code API は `extension.js` に閉じ、生成ロジックとスキャンロ�
 Codex CLI 呼び出しも VS Code API から分離し、`src/codex-cli.cjs` で launcher script と command string を生成する。拡張本体は一時 prompt file と `.ps1` launcher の作成、実行前確認、terminal 起動または background 実行だけを担当する。launcher は Windows PowerShell 5 系でも日本語が壊れないように、console encoding と `$OutputEncoding` を UTF-8 にしてから prompt を stdin へ流す。
 
 Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` が JSON 専用 prompt と JSON schema を作り、拡張本体が `codex exec -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を background 実行して last-message file から JSON を取り出す。Codex CLI の失敗、timeout、JSON 不正時は `src/work-item-composer.cjs` のローカル補完に戻す。
+
+Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` の結果へ解決し、`src/work-item-start.cjs` が selected Markdown と関連 Issue / Task を含む開始プロンプトに変換する。実行は既存の `invokeCodexAgent` を再利用し、確認ダイアログ、sandbox mode、model/profile 設定を共通化する。
 
 FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code workspace 外を対象にする場合、`src/invocation-target.cjs` が対象 repo path を抽出し、まだ repo が存在しないときは `D:\AI\ChromeExtension` のような最も近い既存親ディレクトリを `codex exec -C` の root にする。これにより starter repo を誤って編集することと、対象 repo への書き込みが project 外として拒否されることを避ける。
 

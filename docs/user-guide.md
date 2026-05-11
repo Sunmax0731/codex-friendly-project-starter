@@ -16,6 +16,14 @@
 5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks の進捗を progress bar で確認できる。
 6. Dashboard 上部の GUI ボタンから Issue 作成、Task 作成、自然言語から作成、Issues / Tasks 初期化、FirstPrompt、Codex CLI 確認を実行できる。
 
+## TODO / Issue / Task から Codex に着手してもらう
+
+1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue、Task を選ぶ。
+2. Dashboard の対象行にある `Start`、または Work Items Tree の inline action `Start Work Item with Codex` を押す。
+3. 確認ダイアログで workspace root と sandbox mode を確認し、問題なければ `Run Codex` を選ぶ。
+4. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / Task、README / AGENTS / SKILL の確認順を含む開始プロンプトが渡される。
+5. Codex 側の作業完了後、TODO / Issue / Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+
 ## QCDS 状況を確認する
 
 1. Command Palette から `Codex Starter: Open QCDS Status` を実行する。
@@ -30,15 +38,16 @@
 3. Dashboard の `Issue を作成`、または `Codex Starter: Create Local Issue` を実行して Work Item Composer を開く。
 4. 自然言語メモを入力して `Codexで自然言語から反映` を押すか、title、priority、type、acceptance criteria を GUI で入力する。
 5. `作成して開く` で `Issues/0001-short-title.md` を作成する。
-6. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
-7. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` で Tree View を更新する。
+6. 同時に `TODO.md` へ Issue へのリンク付き checkbox が追加される。TODO を入口にして進捗を管理する。
+7. 作成された `Issues/0001-short-title.md` を編集し、`Status` と checkbox で進捗を管理する。
+8. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` で Tree View を更新する。
 
 ## Local Task を管理する
 
 1. Dashboard の `Task を作成`、または Command Palette から `Codex Starter: Create Local Task` を実行する。
 2. Work Item Composer で `Codexで自然言語から反映` を使って自然言語メモを下書きに変換するか、title、priority、phase、QCDS、acceptance criteria を入力する。
 3. `作成して開く` で `Tasks/*.md` を作成する。
-4. 作成された `Tasks/*.md` を `TODO.md` または `Issues/*.md` から Markdown link で参照する。
+4. 同時に `TODO.md` へ Task へのリンク付き checkbox が追加される。
 5. `Tasks/*.md` の checkbox と `Status` を更新すると、Work Items と QCDS Improvements に反映される。
 
 ## 自然言語から Issue と Task を作る
@@ -48,8 +57,9 @@
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
 5. `作成して開く` を押す。作成先が `Issue + Task` の場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
-6. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
-7. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
+6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue と Task へのリンクが記録される。
+7. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
+8. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
 ## Markdown WebView で読む
 
