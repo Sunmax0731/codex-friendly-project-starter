@@ -39,13 +39,15 @@ test('parseTodoMarkdown extracts status, section, priority, and line number', ()
 });
 
 test('parseIssueMarkdown reads local issue metadata and acceptance progress', () => {
-  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- QCDS: Quality, Satisfaction\n- Tasks: [Dashboard task](../Tasks/0001-dashboard.md)\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
+  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- Source: local\n- Draft source: codex-cli\n- QCDS: Quality, Satisfaction\n- Tasks: [Dashboard task](../Tasks/0001-dashboard.md)\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
     rootPath: 'D:/repo',
     filePath: 'D:/repo/Issues/0001-work-dashboard.md'
   });
   assert.equal(issue.title, 'Add work dashboard');
   assert.equal(issue.status, 'in-progress');
   assert.equal(issue.priority, 'P2');
+  assert.equal(issue.source, 'local');
+  assert.equal(issue.draftSource, 'codex-cli');
   assert.deepEqual(issue.qcdsAxes, ['Quality', 'Satisfaction']);
   assert.equal(issue.progress.done, 1);
   assert.equal(issue.progress.total, 2);
@@ -54,12 +56,13 @@ test('parseIssueMarkdown reads local issue metadata and acceptance progress', ()
 });
 
 test('parseTaskMarkdown reads task metadata, checks, links, and QCDS axes', () => {
-  const task = parseTaskMarkdown('# Add Markdown WebView\n\n- Status: open\n- Priority: P1\n- Phase: 04-implementation\n- QCDS: Quality, Satisfaction\n\n## Acceptance Criteria\n\n- [ ] Render [docs](../docs/design.md)\n', {
+  const task = parseTaskMarkdown('# Add Markdown WebView\n\n- Status: open\n- Priority: P1\n- Source: local\n- Draft source: codex-cli\n- Phase: 04-implementation\n- QCDS: Quality, Satisfaction\n\n## Acceptance Criteria\n\n- [ ] Render [docs](../docs/design.md)\n', {
     rootPath: 'D:/repo',
     filePath: 'D:/repo/Tasks/0001-markdown-webview.md'
   });
   assert.equal(task.kind, 'task');
   assert.equal(task.priority, 'P1');
+  assert.equal(task.draftSource, 'codex-cli');
   assert.equal(task.phase, '04-implementation');
   assert.deepEqual(task.qcdsAxes, ['Quality', 'Satisfaction']);
   assert.equal(task.progress.total, 1);
@@ -95,6 +98,21 @@ test('ensureIssuesDirectory and ensureTasksDirectory create README and next file
   assert.equal(path.basename(taskPath), '0001-markdown-webview-links.md');
   assert.equal(isTaskFilePath(taskPath), true);
   assert.equal(isWorkItemDocPath(taskPath), true);
+});
+
+test('createIssueMarkdown and createTaskMarkdown record Codex draft source when provided', () => {
+  const issue = createIssueMarkdown({
+    title: 'Codex draft issue',
+    draftSource: 'codex-cli'
+  });
+  const task = createTaskMarkdown({
+    title: 'Codex draft task',
+    draftSource: 'codex-cli'
+  });
+  assert.match(issue, /- Source: local/);
+  assert.match(issue, /- Draft source: codex-cli/);
+  assert.match(task, /- Source: local/);
+  assert.match(task, /- Draft source: codex-cli/);
 });
 
 test('renderWorkDashboardWebview includes graphical summary and open work sections', async () => {
@@ -137,6 +155,7 @@ test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
   assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
   assert.match(html, /Issue \+ Task/);
+  assert.match(html, /draftSource/);
 });
 
 test('buildQcdsStatus reads strict metrics and links QCDS-tagged TODO and Issue work', async () => {

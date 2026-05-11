@@ -20,7 +20,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 
 ## Codex CLI 連携
 
-Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。
+Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。Codex CLI 由来の下書きから作成した Issue / Task には `Draft source: codex-cli` を記録します。
 
 ## 使い方
 

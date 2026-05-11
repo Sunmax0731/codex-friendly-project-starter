@@ -79,7 +79,7 @@ Work Item Composer Webview は次を入力項目として持つ。
 - 自然言語メモ。
 - title、priority、issue type、task phase、context、acceptance criteria、QCDS axes。
 
-`Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。`作成して開く` は次のいずれかを実行する。
+`Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。Codex CLI 由来の下書きは WebView 内で `draftSource` として保持し、`作成して開く` で生成する Markdown に `Draft source: codex-cli` を記録する。`作成して開く` は次のいずれかを実行する。
 
 - Issue: `Issues/000x-slug.md` を作成する。
 - Task: `Tasks/000x-slug.md` を作成する。

@@ -59,6 +59,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
 - `Tasks/README.md` と `Tasks/000x-*.md` が UTF-8 Markdown として作成される。
 - Work Item Composer の `Codexで自然言語から反映` で Codex CLI が priority、type、phase、QCDS、acceptance criteria を補完し、完了後に `Codex CLI の下書き` 由来であることが status text に表示される。
+- Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` と `Tasks/*.md` に `Draft source: codex-cli` が記録される。
 - Codex CLI が利用できない場合でもローカル補完へフォールバックし、Issue / Task 作成操作は継続できる。
 - `Issue + Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。

@@ -226,6 +226,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + axis + '">' + axis;
     document.getElementById('qcds').append(label);
   }
+  let draftSource = state.initial.inferenceSource || state.initial.draftSource || '';
   applyDraft(state.initial);
   for (const id of fields) document.getElementById(id).addEventListener('input', renderSummary);
   for (const box of document.querySelectorAll('#qcds input')) box.addEventListener('change', renderSummary);
@@ -263,11 +264,13 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
       phase: document.getElementById('phase').value,
       context: document.getElementById('context').value,
       acceptance: document.getElementById('acceptance').value,
-      qcdsAxes: Array.from(document.querySelectorAll('#qcds input:checked')).map((box) => box.value)
+      qcdsAxes: Array.from(document.querySelectorAll('#qcds input:checked')).map((box) => box.value),
+      draftSource
     };
   }
   function applyDraft(draft) {
     if (!draft) return;
+    draftSource = draft.inferenceSource || draft.draftSource || draftSource;
     for (const id of fields) {
       if (id === 'acceptance') document.getElementById(id).value = Array.isArray(draft[id]) ? draft[id].join('\\n') : (draft[id] || '');
       else if (draft[id] !== undefined) document.getElementById(id).value = draft[id] || '';

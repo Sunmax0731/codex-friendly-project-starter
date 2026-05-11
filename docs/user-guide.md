@@ -48,7 +48,8 @@
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
 5. `作成して開く` を押す。作成先が `Issue + Task` の場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
-6. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
+6. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
+7. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
 ## Markdown WebView で読む
 

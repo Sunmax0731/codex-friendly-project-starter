@@ -473,7 +473,10 @@ async function inferWorkItemDraftWithCodex(context, input) {
 }
 
 async function createWorkItemFromComposerInput(workspaceRoot, input) {
-  const draft = inferWorkItemDraft(input);
+  const draft = {
+    ...inferWorkItemDraft(input),
+    draftSource: input.draftSource || input.inferenceSource || ''
+  };
   if (draft.mode === 'task') {
     const taskPath = nextTaskFilePath(workspaceRoot, draft.title);
     await fs.promises.writeFile(taskPath, createTaskMarkdown(draft), 'utf8');

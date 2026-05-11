@@ -154,6 +154,7 @@ function parseIssueMarkdown(content, context = {}) {
     qcdsAxes: detectQcdsAxes(metadata.qcds || title),
     type: metadata.type || 'task',
     source: metadata.source || 'local',
+    draftSource: metadata.draftsource || '',
     created: metadata.created || '',
     phase: metadata.phase || '',
     links,
@@ -186,6 +187,7 @@ function parseTaskMarkdown(content, context = {}) {
     qcdsAxes: detectQcdsAxes(metadata.qcds || title),
     type: metadata.type || 'task',
     source: metadata.source || '',
+    draftSource: metadata.draftsource || '',
     phase: metadata.phase || '',
     filePath,
     relativePath,
@@ -209,7 +211,7 @@ function parseIssueMetadata(lines) {
     const match = bullet || colon;
     if (!match) continue;
     const key = match[1].toLowerCase().replace(/\s+/g, '');
-    if (['id', 'status', 'priority', 'type', 'source', 'created', 'qcds', 'phase', 'tasks', 'evidence'].includes(key)) metadata[key] = match[2].trim();
+    if (['id', 'status', 'priority', 'type', 'source', 'draftsource', 'created', 'qcds', 'phase', 'tasks', 'evidence'].includes(key)) metadata[key] = match[2].trim();
   }
   return metadata;
 }
@@ -587,6 +589,7 @@ function createIssueMarkdown(input = {}) {
   const type = input.type || 'task';
   const status = input.status || 'open';
   const source = input.source || 'local';
+  const draftSource = input.draftSource || input.inferenceSource || '';
   const created = input.created || new Date().toISOString().slice(0, 10);
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const tasks = Array.isArray(input.tasks) ? input.tasks : [];
@@ -601,6 +604,7 @@ function createIssueMarkdown(input = {}) {
     '- Priority: ' + priority,
     '- Type: ' + type,
     '- Source: ' + source,
+    draftSource ? '- Draft source: ' + draftSource : '',
     '- Created: ' + created,
     qcds ? '- QCDS: ' + qcds : '',
     tasks.length ? '- Tasks: ' + tasks.map((item) => {
@@ -629,6 +633,7 @@ function createTaskMarkdown(input = {}) {
   const phase = input.phase || '04-implementation';
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const source = input.source || 'local';
+  const draftSource = input.draftSource || input.inferenceSource || '';
   const acceptance = Array.isArray(input.acceptance) && input.acceptance.length ? input.acceptance : ['完了条件をここに記録します。'];
   const issue = input.issue || '';
   return [
@@ -638,6 +643,7 @@ function createTaskMarkdown(input = {}) {
     '- Priority: ' + priority,
     '- Type: task',
     '- Source: ' + source,
+    draftSource ? '- Draft source: ' + draftSource : '',
     '- Phase: ' + phase,
     issue ? '- Issue: [' + issue + '](' + issue + ')' : '',
     qcds ? '- QCDS: ' + qcds : '',
@@ -675,6 +681,7 @@ function defaultIssuesReadme() {
     '- Priority: P2',
     '- Type: feature',
     '- Source: local',
+    '- Draft source: codex-cli',
     '- Created: YYYY-MM-DD',
     '- QCDS: Quality, Delivery',
     '- Tasks: [Tasks/0001-example.md](../Tasks/0001-example.md)',
