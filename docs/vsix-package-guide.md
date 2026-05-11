@@ -47,11 +47,12 @@ code
 - Activity Bar に `Codex Starter` が表示される。
 - `Codex Starter: Open Markdown WebView` が実行できる。
 - `Codex Starter: Scaffold D:\AI Default Docs` が実行できる。
-- `Codex Starter: Create Local Task` が実行できる。
+- `Codex Starter: Create Legacy Local Task` が実行できる。
 - `Codex Starter: Open Work Dashboard` と `Codex Starter: Open QCDS Status` が表示できる。
 - Dashboard で `選択Work Itemを開始` と `全Work Itemを開始` が表示される。
-- Work Item Start 前に model とインテリジェンスの選択が表示される。
-- Dashboard または Command Palette で `GitHub Issues 取込` が表示され、public GitHub Issue を local TODO / Issue / Task へ取り込める。
+- Work Item Start 前に model、インテリジェンス、アクセス権限の選択が表示される。
+- Dashboard または Command Palette で `GitHub Issues 取込` が表示され、public GitHub Issue を既定では local TODO / Issue へ取り込める。設定時だけ legacy Task も作成できる。
+- `docs/codex-sessions.md` / `.jsonl` に起動履歴が記録され、blocked work item から follow-up Issue を作成できる。
 - `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 
 ## 記録

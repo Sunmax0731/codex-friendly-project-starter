@@ -12,45 +12,45 @@
 
 1. 対象 workspace を VS Code で開く。
 2. Activity Bar の `Codex Starter` を開く。
-3. `Work Items` で `TODO`、`Issues`、`Tasks`、`QCDS`、`Release readiness` を確認する。
-4. 未完了 TODO、Issue、Task を選択すると、該当 Markdown が Markdown WebView で開く。
-5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、Tasks、QCDS の進捗を progress bar で確認できる。
-6. Dashboard 上部は、日常的に使う `Issue を作成`、`Task を作成`、`自然言語から Issue + Task`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`選択Work Itemを開始`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
-7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / Task / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
+3. `Work Items` で `TODO`、`Issues`、legacy `Tasks`、`QCDS`、`Release readiness` を確認する。
+4. 未完了 TODO、Issue、legacy Task を選択すると、該当 Markdown が Markdown WebView で開く。
+5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、legacy Tasks、QCDS の進捗を progress bar で確認できる。
+6. Dashboard 上部は、日常的に使う `Issue を作成`、`Legacy Task を作成`、`自然言語から Issue`、`FirstPrompt`、`QCDS Status`、`Codex App`、`現在Promptを実行`、`選択Work Itemを開始`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Tasks 初期化`、`Codex CLI 確認` に分かれている。
+7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / legacy Task / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
 8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
-## TODO / Issue / Task から Codex に着手してもらう
+## TODO / Issue / legacy Task から Codex に着手してもらう
 
-1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue、Task を選ぶ。
+1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue、legacy Task を選ぶ。
 2. Dashboard の対象行にある `Start`、または Work Items Tree の inline action `Start Work Item with Codex` を押す。
-3. 起動前にモデルとインテリジェンスを選ぶ。設定値を使う、Codex CLI default、候補モデル、カスタムモデルを選択できる。
-4. 確認ダイアログで workspace root、sandbox mode、model、インテリジェンスを確認し、問題なければ `Run Codex` を選ぶ。
-5. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / Task、README / AGENTS / SKILL の確認順、`Codex 実行設定` を含む開始プロンプトが渡される。
-6. Codex 側の作業完了後、TODO / Issue / Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+3. 起動前にモデル、インテリジェンス、アクセス権限を選ぶ。設定値、Codex CLI default、候補モデル、カスタムモデル、`workspace-write` / `read-only` / `danger-full-access` を選択できる。
+4. 確認ダイアログで workspace root、access、model、インテリジェンスを確認し、問題なければ `Run Codex` を選ぶ。
+5. 統合ターミナルで `codex exec` が起動し、選択した Work Item、リンクされた Issue / legacy Task、README / AGENTS / SKILL の確認順、`Codex 実行設定` を含む開始プロンプトが渡される。
+6. Codex 側の作業完了後、TODO / Issue / legacy Task の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
 
-## TODO / Issue / Task を選択して Codex に渡す
+## TODO / Issue / legacy Task を選択して Codex に渡す
 
-1. `Codex Work Dashboard` の Open TODO / Open Issues / Open Tasks で、処理したい行の `Select` checkbox をオンにする。
+1. `Codex Work Dashboard` の Open TODO / Open Issues / Open Legacy Tasks で、処理したい行の `Select` checkbox をオンにする。
 2. Dashboard 上部の `選択Work Itemを開始` を押す。
-3. モデルとインテリジェンスを選び、確認ダイアログで実行条件を確認する。
-4. 統合ターミナルで `codex exec` が起動し、選択した TODO / Issue / Task だけを含む開始 prompt が渡される。
+3. モデル、インテリジェンス、アクセス権限を選び、確認ダイアログで実行条件を確認する。
+4. 統合ターミナルで `codex exec` が起動し、選択した TODO / Issue / legacy Task だけを含む開始 prompt が渡される。
 5. Command Palette の `Codex Starter: Start Selected Work Items with Codex` から実行する場合は、QuickPick の複数選択で対象を選ぶ。
 6. prompt は選択外の Work Item を勝手に完了扱いにしないよう指示する。
 
-## TODO / Issue / Task を一括で Codex に渡す
+## TODO / Issue / legacy Task を一括で Codex に渡す
 
 1. `Codex Work Dashboard` の `全Work Itemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
-2. モデルとインテリジェンスを選び、確認ダイアログで workspace root、sandbox mode、model、インテリジェンスを確認する。
+2. モデル、インテリジェンス、アクセス権限を選び、確認ダイアログで workspace root、access、model、インテリジェンスを確認する。
 3. 必要な場合だけ `Run Codex` を選ぶ。
-4. 統合ターミナルで `codex exec` が起動し、未完了 TODO、Issue、Task の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が渡される。
-5. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue / Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
+4. 統合ターミナルで `codex exec` が起動し、未完了 TODO、Issue、legacy Task の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が渡される。
+5. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue / legacy Task の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
 ## QCDS 状況を確認する
 
 1. Command Palette から `Codex Starter: Open QCDS Status` を実行する。
-2. `QCDS Current Status` で Quality、Cost、Delivery、Satisfaction の grade と score を確認する。
-3. `QCDS Improvements` で QCDS 観点に紐づく未完了 TODO / Issue / Task を確認する。
-4. TODO、Issue、Task に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
+2. `QCDS Current Status` で Quality、Cost、Delivery、Satisfaction の grade と score を確認する。`docs/qcds-strict-metrics.json` が未生成の場合も4観点が D- fallback として表示される。
+3. `QCDS Improvements` で QCDS 観点に紐づく未完了 TODO / Issue / legacy Task を確認する。
+4. TODO、Issue、legacy Task に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
 
 ## Local Issue を管理する
 
@@ -68,30 +68,38 @@
 1. public GitHub repository を指定できる workspace を開く。
 2. Dashboard の `GitHub Issues 取込`、Work Items title action、または Command Palette の `Codex Starter: Import GitHub Issues` を実行する。
 3. `owner/repo` または GitHub URL を入力する。現在の Git remote が GitHub の場合は repository 名が既定値として入る。
-4. QuickPick で取り込む GitHub Issue を複数選択する。既に同じ URL が local TODO / Issue / Task にある item は `imported` として表示される。
-5. 選択した issue は Codex CLI read-only inference で title、priority、type、phase、QCDS、acceptance criteria に整理され、`Issues/*.md` と `Tasks/*.md`、`TODO.md` に作成される。
-6. 取り込まれた local Issue / Task / TODO には GitHub Issue の個別リンクが残る。GitHub 側の issue は作成、編集、close されない。
+4. QuickPick で取り込む GitHub Issue を複数選択する。既に同じ URL が local TODO / Issue / legacy Task にある item は `imported` として表示される。
+5. 選択した issue は Codex CLI read-only inference で title、priority、type、phase、QCDS、acceptance criteria に整理され、既定では `Issues/*.md` と `TODO.md` に作成される。`codexFriendlyProjectStarter.workItemDetailMode` が `issues-and-tasks` の場合だけ legacy `Tasks/*.md` も作成される。
+6. 取り込まれた local Issue / TODO には GitHub Issue の個別リンクが残る。GitHub 側の issue は作成、編集、close されない。
 
-## Local Task を管理する
+## Legacy Task を管理する
 
-1. Dashboard の `Task を作成`、または Command Palette から `Codex Starter: Create Local Task` を実行する。
+1. Dashboard の `Legacy Task を作成`、または Command Palette から `Codex Starter: Create Legacy Local Task` を実行する。
 2. Work Item Composer で `Codexで自然言語から反映` を使って自然言語メモを下書きに変換するか、title、priority、phase、QCDS、acceptance criteria を入力する。
 3. `作成して開く` で `Tasks/*.md` を作成する。
 4. 同時に `TODO.md` へ Task へのリンク付き checkbox が追加される。
 5. `Tasks/*.md` の checkbox と `Status` を更新すると、Work Items と QCDS Improvements に反映される。
 
-## 自然言語から Issue と Task を作る
+## 自然言語から Issue を作る
 
-1. Dashboard の `自然言語から Issue + Task`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` を実行する。
+1. Dashboard の `自然言語から Issue`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` を実行する。
 2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
-5. `作成して開く` を押す。作成先が `Issue + Task` の場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
-6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue と Task へのリンクが記録される。
+5. `作成して開く` を押す。既定では `Issues/*.md` が作成される。作成先を `Issue + Legacy Task` に変えた場合は `Issues/*.md` と `Tasks/*.md` が同時に作成され、相互リンクされる。
+6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue と必要な legacy Task へのリンクが記録される。
 7. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
 8. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
 Work Item の `Start` で Permission denied を避けたい場合は、Settings の `codexFriendlyProjectStarter.codexGitWritePolicy` を `defer` にしておく。開始プロンプトは `git add` / `git commit` / `git push` を保留し、未コミット差分、実行済み検証、ユーザーが実行すべき Git コマンドを報告する方針になる。
+
+## Codex session と blocked follow-up を確認する
+
+1. Work Item の `Start`、`選択Work Itemを開始`、`全Work Itemを開始`、または current prompt 実行で Codex CLI を起動する。
+2. 対象 project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に起動時刻、session id、prompt file、model、intelligence、access、対象 Work Item が追記される。
+3. Issue / legacy Task から起動した場合は、その Markdown の `Codex Sessions` セクションにも同じ session 参照が追記される。
+4. Codex 実行後に対象 Work Item が `closed` にならず `blocked` として残った場合は、Dashboard の `Follow-up`、または context menu の `Codex Starter: Create Blocked Follow-up Issue` を実行する。
+5. 新しい `Issues/*.md` が作成され、元 Work Item、検出した blocker、evidence、解消条件が記録される。GitHub 認証、Git index lock / ACL、Chrome runtime gate、CLI PATH 不足は優先的に分類される。
 
 ## Markdown WebView で読む
 
@@ -151,11 +159,13 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.codexModel`: 任意の model。
 - `codexFriendlyProjectStarter.codexModelChoices`: Work Item Start 前に選べる model 候補。
 - `codexFriendlyProjectStarter.codexReasoningEffort`: Work Item Start の既定インテリジェンス。`minimal`、`low`、`medium`、`high`、`xhigh` を選べる。
-- `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前に model とインテリジェンスを選ぶか。
+- `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前に model、インテリジェンス、アクセス権限を選ぶか。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
 - `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションで PATH 先頭に追加するディレクトリ。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
 - `codexFriendlyProjectStarter.githubIssueImportLimit`: GitHub Issues 取込で一度に取得する open issue 件数。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
+- `codexFriendlyProjectStarter.workItemDetailMode`: 新規取込・作成を `issues-only` にするか、legacy Task も作る `issues-and-tasks` にするか。
+- `codexFriendlyProjectStarter.recordCodexSessions`: Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` に記録するか。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。

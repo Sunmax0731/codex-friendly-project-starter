@@ -231,7 +231,7 @@ function renderReadme(plan, sourceList) {
     '',
     '- TODO: `TODO.md`',
     '- Issues: `Issues/*.md`',
-    '- Tasks: `Tasks/*.md`',
+    '- Legacy Tasks: `Tasks/*.md` (optional compatibility)',
     '- QCDS: `docs/qcds-evaluation.md` / `docs/qcds-strict-metrics.json`'
   ].join('\n') + '\n';
 }
@@ -246,14 +246,14 @@ function renderAgents(plan, sourceList) {
     '',
     '1. `README.md` を確認する。',
     '2. `AGENTS.md` と `SKILL.md` を確認する。',
-    '3. `TODO.md`、`Issues/*.md`、`Tasks/*.md` の work item を確認する。',
+    '3. `TODO.md`、`Issues/*.md`、legacy `Tasks/*.md` の work item を確認する。',
     '4. `docs/requirements.md`、`docs/specification.md`、`Design.md`、`Architecture.md` を確認する。',
     '5. 現在の工程に対応する `skills/<phase>/SKILL.md` を確認する。',
     '',
     '## Rules',
     '',
     '- 作業ブランチは `codex/<task-summary>` を1本だけ使います。',
-    '- TODO / Issue には具体タスクファイルへのリンクを置きます。',
+    '- 新規作業の詳細は原則 `Issues/*.md` に集約し、`Tasks/*.md` は legacy compatibility が必要な場合だけ使います。',
     '- QCDS は Quality、Cost、Delivery、Satisfaction を `S+ / S- / A+ / A- / B+ / B- / C+ / C- / D+ / D-` で記録します。',
     `- ${plan.domain.label} の platform runtime gate: ${plan.domain.runtimeGate}`,
     '- 手動確認を Codex が実施したとは書かず、未実施の場合は未実施として記録します。',
@@ -272,7 +272,7 @@ function renderRootSkill(plan, sourceList) {
     '## Start Order',
     '',
     '1. `README.md`、`AGENTS.md`、`TODO.md` を確認します。',
-    '2. 現在の作業が Issue / TODO / Task のどれに紐づくか確認します。',
+    '2. 現在の作業が Issue / TODO / legacy Task のどれに紐づくか確認します。',
     '3. 下記の Phase Skills から該当工程を読み込みます。',
     '4. 実装後に自動検証、manual test 手順、QCDS、release checklist を更新します。',
     '',
@@ -307,17 +307,17 @@ function renderPhaseSkill(plan, phase) {
     '- `SKILL.md`',
     '- `TODO.md`',
     '- `Issues/*.md`',
-    '- `Tasks/*.md`',
+    '- legacy `Tasks/*.md`',
     '',
     '## Output',
     '',
     `- Primary: \`${phase.output}\``,
-    '- 関連 TODO / Issue / Task の status と acceptance criteria を更新します。',
+    '- 関連 TODO / Issue / legacy Task の status と acceptance criteria を更新します。',
     '',
     '## Checks',
     '',
     `- ${plan.domain.label} の制約と runtime gate に反していないこと。`,
-    '- QCDS の該当観点に紐づく改善が残る場合、Task として明示されていること。'
+    '- QCDS の該当観点に紐づく改善が残る場合、Issue として明示されていること。'
   ].join('\n') + '\n';
 }
 
@@ -349,7 +349,7 @@ function renderArchitecture(plan, sourceList) {
     '',
     '- domain logic と platform integration を分けます。',
     '- docs / validation / release evidence を実装と同じ作業単位で更新します。',
-    '- TODO / Issue / Task / QCDS の traceability を保ちます。',
+    '- TODO / Issue / legacy Task / QCDS の traceability を保ちます。',
     '',
     '## Source Docs',
     '',
@@ -363,9 +363,9 @@ function renderTodo(plan) {
     '',
     '## Work Items',
     '',
-    '- [ ] [P1][QCDS:Delivery,Satisfaction] [初期ドキュメントとスコープを確定する](Tasks/0001-initial-docs-and-scope.md)',
-    '- [ ] [P1][QCDS:Quality,Satisfaction] [platform runtime gate を確認する](Tasks/0002-platform-runtime-gate.md)',
-    '- [ ] [P1][QCDS:Quality,Cost,Delivery,Satisfaction] [QCDS とリリース準備をそろえる](Tasks/0003-qcds-release-readiness.md)',
+    '- [ ] [P1][QCDS:Delivery,Satisfaction] [初期ドキュメントとスコープを確定する](Issues/0001-initial-docs-and-scope.md)',
+    '- [ ] [P1][QCDS:Quality,Satisfaction] [platform runtime gate を確認する](Issues/0002-platform-runtime-gate.md)',
+    '- [ ] [P1][QCDS:Quality,Cost,Delivery,Satisfaction] [QCDS とリリース準備をそろえる](Issues/0003-qcds-release-readiness.md)',
     '',
     '## Domain',
     '',
@@ -381,8 +381,8 @@ function renderIssuesReadme() {
     '',
     '## Rules',
     '',
-    '- Issue には `Tasks:` として具体タスク Markdown へのリンクを置きます。',
-    '- Task の実施内容、受け入れ条件、検証結果は `Tasks/*.md` に記録します。',
+    '- Issue の Acceptance Criteria に具体作業、受け入れ条件、検証結果を集約します。',
+    '- 既存互換が必要な場合だけ `Tasks:` として legacy Task Markdown へのリンクを置きます。',
     '- QCDS に関係する Issue は `- QCDS: Quality, Delivery` のように記録します。'
   ].join('\n') + '\n';
 }
@@ -392,7 +392,7 @@ function renderRequirements(plan) {
     `目的: ${plan.goal}`,
     `対象分野: ${plan.domain.label}`,
     `runtime gate: ${plan.domain.runtimeGate}`,
-    'TODO / Issue / Task を使って作業単位を追跡する。'
+    'TODO / Issue と必要な legacy Task を使って作業単位を追跡する。'
   ]);
 }
 
@@ -400,7 +400,7 @@ function renderSpecification(plan) {
   return headingDoc('Specification', [
     '主要機能、入力、出力、エラー、完了条件をここに記録する。',
     `分野重点: ${plan.domain.focus}`,
-    'TODO / Issue / Task / QCDS のリンクを維持する。'
+    'TODO / Issue / legacy Task / QCDS のリンクを維持する。'
   ]);
 }
 
@@ -467,7 +467,7 @@ function renderQcdsMetrics(plan) {
     dimensions: {
       quality: { label: 'Quality', score: 75, grade: 'B+', passed: 0, expected: 1, checks: [{ id: 'runtime-gate', description: plan.domain.runtimeGate, pass: false, detail: 'not-run' }] },
       cost: { label: 'Cost', score: 80, grade: 'A-', passed: 1, expected: 1, checks: [{ id: 'lean-start', description: '初期 docs scaffold', pass: true, detail: 'generated' }] },
-      delivery: { label: 'Delivery', score: 80, grade: 'A-', passed: 1, expected: 1, checks: [{ id: 'work-items', description: 'TODO / Issue / Task links', pass: true, detail: 'generated' }] },
+      delivery: { label: 'Delivery', score: 80, grade: 'A-', passed: 1, expected: 1, checks: [{ id: 'work-items', description: 'TODO / Issue / legacy Task links', pass: true, detail: 'generated' }] },
       satisfaction: { label: 'Satisfaction', score: 75, grade: 'B+', passed: 0, expected: 1, checks: [{ id: 'manual-test', description: 'manual test evidence', pass: false, detail: 'not-run' }] }
     }
   }, null, 2) + '\n';
@@ -494,7 +494,7 @@ function renderTraceability() {
 
 function renderPostMvpRoadmap() {
   return headingDoc('Post MVP Roadmap', [
-    'ユーザー確認後に見つかった改善を Issue と Task に分けて追記する。',
+    'ユーザー確認後に見つかった改善は Issue に集約し、legacy Task は既存互換が必要な場合だけ追記する。',
     '正式リリース前に QCDS A- 以上、manual test、release evidence をそろえる。'
   ]);
 }

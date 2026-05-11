@@ -33,12 +33,12 @@
 - `Issues` ディレクトリ初期化と local Issue 作成 command を追加する。
 - Issue 駆動の後続候補を `Issues/*.md` として記録する。
 
-## Phase 3.6: Markdown WebView と Task 管理
+## Phase 3.6: Markdown WebView と legacy Task 互換
 
 - `src/markdown-webview.cjs` を追加し、Markdown を sanitize して WebView 表示する。
 - Agent Docs / Work Items / Dashboard / QCDS から Markdown WebView へ遷移できるようにする。
-- `Tasks/*.md` を具体作業単位として解析し、TODO / Issue / QCDS と紐づける。
-- `Create Local Task` command を追加する。
+- `Tasks/*.md` を legacy 互換の作業単位として解析し、TODO / Issue / QCDS と紐づける。
+- `Create Legacy Local Task` command を追加する。
 - `tests/markdown-webview.test.cjs` と `tests/work-items.test.cjs` を更新する。
 
 ## Phase 3.7: D:\AI 既定 docs scaffold
@@ -56,16 +56,16 @@
 
 ## Phase 3.9: TODO 起点の Codex 着手導線
 
-- Dashboard と Work Items Tree から TODO / Issue / Task の `Start` を実行できる command を追加する。
-- 選択した Work Item と関連 Issue / Task を Work Item Start Prompt にまとめ、Codex CLI へ渡す。
-- Issue / Task / Issue + Task の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
+- Dashboard と Work Items Tree から TODO / Issue / legacy Task の `Start` を実行できる command を追加する。
+- 選択した Work Item と関連 Issue / legacy Task を Work Item Start Prompt にまとめ、Codex CLI へ渡す。
+- Issue / legacy Task / Issue + Legacy Task の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
 - Unit test、manual test、platform runtime gate、traceability を更新する。
 
 ## Phase 3.10: Codex 実行環境と複数選択
 
 - extension-launched Codex PowerShell launcher で `rg.exe` と `gh.exe` の PATH を補強する。
 - `Check Codex CLI` で `codex`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
-- Work Item Start 系の実行前に model とインテリジェンスを選択し、`codex exec` と prompt に反映する。
+- Work Item Start 系の実行前に model、インテリジェンス、アクセス権限を選択し、`codex exec` と prompt に反映する。
 - Dashboard checkbox と Command Palette multi-select から選択 Work Items だけを Codex に渡せるようにする。
 - README、manual test、user guide、VSIX readiness、QCDS / traceability を同期する。
 
@@ -73,8 +73,10 @@
 
 - `src/github-issues.cjs` を追加し、public GitHub repository 入力、remote URL 解析、Issues API 取得、PR 除外、GitHub Issue 正規化を担当させる。
 - Dashboard と Command Palette に `GitHub Issues 取込` を追加し、GitHub Issue を複数選択して取り込めるようにする。
-- 選択 issue は Codex CLI read-only inference に渡し、local Issue + Task の下書きに整えて `TODO.md` に linked checkbox を追加する。
+- 選択 issue は Codex CLI read-only inference に渡し、既定では local Issue の下書きに整えて `TODO.md` に linked checkbox を追加する。
+- `codexFriendlyProjectStarter.workItemDetailMode=issues-and-tasks` の場合だけ legacy Task も作成する。
 - GitHub Issue URL が既に `TODO.md` / `Issues` / `Tasks` にある場合は import 済みとして重複作成しない。
+- Codex 実行 session の project-local index と blocked follow-up Issue 作成導線を追加する。
 - tests、platform runtime gate、VSIX readiness gate、manual/user/release docs を更新する。
 
 ## Phase 4: 終了処理

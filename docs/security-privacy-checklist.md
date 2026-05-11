@@ -11,10 +11,11 @@
 - [x] Codex CLI へ渡す prompt file と launcher script は extension storage または temp directory に保存する。
 - [x] launcher は prompt file を `-Encoding UTF8` で読み、PowerShell から native process へ渡す stdin の encoding も UTF-8 にする。
 - [x] FirstPrompt の対象 repo path を解決し、`codex exec -C` は現在の starter repo ではなく対象 domain の既存 parent directory を使う。
-- [x] `codex exec` 起動前に workspace root と sandbox mode を確認する。
-- [x] Work Item Start 系では起動前に model とインテリジェンスを表示し、選択値を prompt に記録する。
+- [x] `codex exec` 起動前に workspace root とアクセス権限を確認する。
+- [x] Work Item Start 系では起動前に model、インテリジェンス、アクセス権限を表示し、選択値を prompt に記録する。
 - [x] `rg.exe` / `gh.exe` 用 PATH 補強はディレクトリ追加だけを行い、token や認証情報を保存しない。
 - [x] GitHub Issues 取込は public GitHub Issues API の読み取りだけを行い、GitHub token を保存せず、issue 作成、更新、close、コメント投稿を行わない。
 - [x] GitHub Issues 取込で保存する情報は issue title、body 由来の local work item、labels などの公開 metadata、GitHub Issue 個別 URL に限定する。
+- [x] Codex session 記録は prompt file path、run option、対象 work item だけを project-local docs に残し、token や認証情報は保存しない。
 - [x] `danger-full-access` を選んだ場合は確認文言で明示する。
 - [ ] Marketplace 公開前に VSIX 内容と extension permissions を再確認する。

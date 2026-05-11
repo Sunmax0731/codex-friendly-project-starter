@@ -9,6 +9,7 @@ const {
   parseTaskMarkdown,
   parseMarkdownLinks,
   scanWorkItems,
+  buildWorkItemDashboard,
   buildQcdsStatus,
   ensureIssuesDirectory,
   ensureTasksDirectory,
@@ -17,6 +18,7 @@ const {
   nextTaskFilePath,
   createIssueMarkdown,
   createTaskMarkdown,
+  createBlockedFollowUpIssue,
   isIssueFilePath,
   isTaskFilePath,
   isWorkItemDocPath
@@ -163,12 +165,13 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /QCDS Improvements/);
   assert.match(html, /Release Readiness/);
   assert.match(html, /Open TODO/);
-  assert.match(html, /Open Tasks/);
+  assert.match(html, /Open Legacy Tasks/);
   assert.match(html, /<details class="section" open>/);
   assert.match(html, /プロジェクト進行中に使う操作/);
   assert.match(html, /初回セットアップ/);
   assert.match(html, /Issue を作成/);
-  assert.match(html, /自然言語から Issue \+ Task/);
+  assert.match(html, /自然言語から Issue/);
+  assert.match(html, /Legacy Task を作成/);
   assert.match(html, /D:\\AI Docs 生成/);
   assert.match(html, /openQcdsStatus/);
   assert.match(html, /openCodexApp/);
@@ -186,7 +189,7 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /width:0%|width:50%|width:100%/);
 });
 
-test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and Tasks into one backlog prompt', async () => {
+test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and legacy Tasks into one backlog prompt', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-all-work-items-'));
   fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
   fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
@@ -207,21 +210,23 @@ test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and Tasks into one b
     workspaceRoot: root,
     dashboard,
     gitWritePolicyId: 'preflight',
-    runConfig: { model: 'gpt-5.4', modelLabel: 'gpt-5.4', modelReasoningEffort: 'high', intelligenceLabel: 'high' }
+    runConfig: { model: 'gpt-5.4', modelLabel: 'gpt-5.4', modelReasoningEffort: 'high', intelligenceLabel: 'high', sandboxMode: 'danger-full-access' }
   });
   assert.match(prompt, /All Work Items Start Prompt/);
-  assert.match(prompt, /TODO、Issues、Tasks/);
+  assert.match(prompt, /TODO、Issues、legacy Tasks/);
   assert.match(prompt, /Open TODO: 1/);
   assert.match(prompt, /Open Issues: 1/);
-  assert.match(prompt, /Open Tasks: 1/);
+  assert.match(prompt, /Open Legacy Tasks: 1/);
   assert.match(prompt, /Prompt history reuse/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Codex 実行設定/);
   assert.match(prompt, /Model: gpt-5\.4/);
   assert.match(prompt, /Intelligence: high/);
+  assert.match(prompt, /Access: danger-full-access/);
+  assert.match(prompt, /Blocked handling:/);
 });
 
-test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and Tasks', async () => {
+test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and legacy Tasks', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-selected-work-items-'));
   fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
   fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
@@ -254,17 +259,18 @@ test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and
       }
     ],
     gitWritePolicyId: 'preflight',
-    runConfig: { model: 'gpt-5.5', modelLabel: 'gpt-5.5', modelReasoningEffort: 'xhigh', intelligenceLabel: 'xhigh' }
+    runConfig: { model: 'gpt-5.5', modelLabel: 'gpt-5.5', modelReasoningEffort: 'xhigh', intelligenceLabel: 'xhigh', sandboxMode: 'workspace-write' }
   });
   assert.match(prompt, /Selected Work Items Start Prompt/);
-  assert.match(prompt, /選択された TODO、Issues、Tasks だけ/);
+  assert.match(prompt, /選択された TODO、Issues、legacy Tasks だけ/);
   assert.match(prompt, /Selected TODO: 1/);
   assert.match(prompt, /Selected Issues: 1/);
-  assert.match(prompt, /Selected Tasks: 1/);
+  assert.match(prompt, /Selected Legacy Tasks: 1/);
   assert.match(prompt, /Tool PATH bootstrap/);
   assert.match(prompt, /選択外の Work Item/);
   assert.match(prompt, /Model: gpt-5\.5/);
   assert.match(prompt, /Intelligence: xhigh/);
+  assert.match(prompt, /Access: workspace-write/);
 });
 
 test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
@@ -282,7 +288,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
     },
     documentText: '# TODO\n\n- [ ] [P1] Release docs sync [Issue](Issues/0001-release.md)\n',
     gitWritePolicyId: 'defer',
-    runConfig: { modelLabel: 'Codex CLI default', intelligenceLabel: 'medium' },
+    runConfig: { modelLabel: 'Codex CLI default', intelligenceLabel: 'medium', sandboxMode: 'read-only' },
     relatedDocuments: [
       {
         relativePath: 'Issues/0001-release.md',
@@ -297,6 +303,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Git 書き込みを保留/);
   assert.match(prompt, /Intelligence: medium/);
+  assert.match(prompt, /Access: read-only/);
 });
 
 test('inferWorkItemDraft turns natural language into issue or task fields', () => {
@@ -321,7 +328,7 @@ test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
   assert.match(html, /Codexで自然言語から反映/);
   assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
-  assert.match(html, /Issue \+ Task/);
+  assert.match(html, /Issue \+ Legacy Task/);
   assert.match(html, /security/);
   assert.match(html, /07-maintenance/);
   assert.match(html, /draftSource/);
@@ -383,6 +390,54 @@ test('buildQcdsStatus reads strict metrics and links QCDS-tagged TODO and Issue 
   assert.equal(dashboard.qcds.improvements.some((item) => item.title.includes('Markdown WebView')), true);
   const direct = buildQcdsStatus(root, { todos: dashboard.todos, issues: dashboard.issues, tasks: dashboard.tasks });
   assert.equal(direct.summary.totalChecks, 3);
+});
+
+test('buildQcdsStatus exposes fallback dimensions when strict metrics are missing', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-qcds-missing-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1][QCDS:Delivery] Add release evidence\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-release.md'), createIssueMarkdown({
+    title: 'Release evidence',
+    priority: 'P1',
+    qcdsAxes: ['Delivery']
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  assert.equal(dashboard.qcds.available, false);
+  assert.equal(dashboard.qcds.overallGrade, 'D-');
+  assert.equal(dashboard.qcds.dimensions.length, 4);
+  assert.equal(dashboard.qcds.summary.totalChecks, 4);
+  assert.equal(dashboard.qcds.dimensions.some((item) => item.label === 'Delivery' && item.linkedItems.length > 0), true);
+});
+
+test('createBlockedFollowUpIssue creates an Issue-only blocker task from a non-closed item', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-blocked-followup-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  const issuePath = path.join(root, 'Issues', '0001-release.md');
+  fs.writeFileSync(issuePath, createIssueMarkdown({
+    title: 'Release prep',
+    status: 'blocked',
+    priority: 'P1',
+    qcdsAxes: ['Delivery'],
+    context: 'gh auth status failed because token invalid.'
+  }), 'utf8');
+  const dashboard = buildWorkItemDashboard({
+    rootPath: root,
+    todos: [],
+    issues: [parseIssueMarkdown(fs.readFileSync(issuePath, 'utf8'), { rootPath: root, filePath: issuePath })],
+    tasks: []
+  });
+  const result = createBlockedFollowUpIssue(root, dashboard.issues[0], {
+    documentText: fs.readFileSync(issuePath, 'utf8')
+  });
+  assert.equal(result.created, true);
+  assert.equal(result.blocker.id, 'github-auth');
+  const followUp = fs.readFileSync(result.issuePath, 'utf8');
+  const todo = fs.readFileSync(path.join(root, 'TODO.md'), 'utf8');
+  const original = fs.readFileSync(issuePath, 'utf8');
+  assert.match(followUp, /- Source: blocked-follow-up/);
+  assert.match(followUp, /Detected blocker: GitHub CLI authentication/);
+  assert.match(todo, /\[Original\]\(Issues\/0001-release\.md\)/);
+  assert.match(original, /Blocked Follow-up/);
 });
 
 test('parseMarkdownLinks treats top-level Tasks links as workspace-root relative', () => {
