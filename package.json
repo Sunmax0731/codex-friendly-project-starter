@@ -323,6 +323,16 @@
           "default": "workspace-write",
           "description": "Sandbox mode passed to `codex exec`."
         },
+        "codexFriendlyProjectStarter.codexGitWritePolicy": {
+          "type": "string",
+          "enum": [
+            "preflight",
+            "defer",
+            "normal"
+          ],
+          "default": "preflight",
+          "description": "Git write policy inserted into generated FirstPrompt and Work Item Start prompts. Use defer to avoid git add/commit/push when Codex cannot write .git/index.lock."
+        },
         "codexFriendlyProjectStarter.codexModel": {
           "type": "string",
           "default": "",

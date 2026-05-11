@@ -3,7 +3,8 @@ const {
   getGovernanceById,
   getDevelopmentMethodById,
   getWorkflowById,
-  getPaceById
+  getPaceById,
+  getGitWritePolicyById
 } = require('./workflows.cjs');
 
 function buildFirstPrompt(input = {}) {
@@ -12,6 +13,7 @@ function buildFirstPrompt(input = {}) {
   const developmentMethod = getDevelopmentMethodById(input.developmentMethodId);
   const workflow = getWorkflowById(input.workflowId);
   const pace = getPaceById(input.paceId);
+  const gitWritePolicy = getGitWritePolicyById(input.gitWritePolicyId);
   const projectName = clean(input.projectName) || '<repo-name>';
   const goal = clean(input.goal) || 'この分野の新規プロジェクトを Codex フレンドリーに開始し、実装と検証を進める。';
   const repoPath = clean(input.repositoryPath) || `${domain.domainPath}\\${projectName}`;
@@ -44,6 +46,7 @@ function buildFirstPrompt(input = {}) {
     `- 開発手法: ${developmentMethod.label}。${developmentMethod.instruction}`,
     `- 工程: ${workflow.label}。${workflow.instruction}`,
     `- 進行速度: ${pace.label}。${pace.instruction}`,
+    `- Git 書き込み方針: ${gitWritePolicy.label}。${gitWritePolicy.instruction}`,
     `- 分野重点: ${domain.focus}`,
     '',
     '## 実装ルール',
@@ -73,7 +76,8 @@ function buildFirstPrompt(input = {}) {
     '- 主要機能が動作し、代表シナリオまたは自動テストが通っている。',
     '- README、AGENTS.md、SKILL.md、docs が現在の実装と一致している。',
     '- platform runtime gate と QCDS の結果が文書化されている。',
-    '- `git status --short --branch` が clean で、必要な場合は `main` と `origin/main` が同期している。',
+    '- Git 書き込み方針で commit / push を保留する場合は、未コミット差分、実行済み検証、ユーザーが実行すべき Git コマンドを報告している。',
+    '- Git 書き込みが可能な場合は `git status --short --branch` が clean で、必要な場合は `main` と `origin/main` が同期している。',
     '',
     '## 報告形式',
     '',
@@ -89,7 +93,8 @@ function buildPromptInputSummary(input = {}) {
   const developmentMethod = getDevelopmentMethodById(input.developmentMethodId);
   const workflow = getWorkflowById(input.workflowId);
   const pace = getPaceById(input.paceId);
-  return `${domain.label} / ${governance.label} / ${developmentMethod.label} / ${workflow.label} / ${pace.label}`;
+  const gitWritePolicy = getGitWritePolicyById(input.gitWritePolicyId);
+  return `${domain.label} / ${governance.label} / ${developmentMethod.label} / ${workflow.label} / ${pace.label} / ${gitWritePolicy.label}`;
 }
 
 function clean(value) {

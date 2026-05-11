@@ -22,6 +22,7 @@
 | `D:\AI` 既定 docs を生成する | `src/default-docs.cjs`, `extension.js` | `tests/default-docs.test.cjs`, `Issues/0006-default-doc-scaffold.md` |
 | 分野を選んで FirstPrompt を作る | `src/domains.cjs`, `src/prompt-builder.cjs` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
 | ガバナンス / 開発手法 / 工程 / 進行速度を選べる | `src/workflows.cjs`, `src/prompt-builder.cjs`, `src/webview.cjs`, `extension.js` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
+| Git 書き込み方針を FirstPrompt / Work Item Start に反映する | `src/workflows.cjs`, `src/prompt-builder.cjs`, `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/prompt-builder.test.cjs`, `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Webview から生成できる | `src/webview.cjs`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | Codex CLI で AI Agent を起動する | `src/codex-cli.cjs`, `extension.js` | `tests/codex-cli.test.cjs`, `docs/vscode-verification-guide.md` |
 | 対象 repo root で Codex を実行する | `src/invocation-target.cjs`, `extension.js` | `tests/invocation-target.test.cjs`, `docs/vscode-verification-guide.md` |

@@ -4,7 +4,7 @@
 
 - `extension.js`: VS Code API への接続、commands、Tree View、Webview、decorations。
 - `src/domains.cjs`: 分野ごとのパス、runtime gate、参照 docs、重点項目。
-- `src/workflows.cjs`: ガバナンス、工程、進行速度の選択肢。
+- `src/workflows.cjs`: ガバナンス、開発手法、工程、進行速度、Git 書き込み方針の選択肢。
 - `src/prompt-builder.cjs`: FirstPrompt 生成ロジック。
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
 - `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
@@ -26,6 +26,8 @@ Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` �
 Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` の結果へ解決し、`src/work-item-start.cjs` が selected Markdown と関連 Issue / Task を含む開始プロンプトに変換する。実行は既存の `invokeCodexAgent` を再利用し、確認ダイアログ、sandbox mode、model/profile 設定を共通化する。
 
 FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code workspace 外を対象にする場合、`src/invocation-target.cjs` が対象 repo path を抽出し、まだ repo が存在しないときは `D:\AI\ChromeExtension` のような最も近い既存親ディレクトリを `codex exec -C` の root にする。これにより starter repo を誤って編集することと、対象 repo への書き込みが project 外として拒否されることを避ける。
+
+Work Item Start Prompt は `codexFriendlyProjectStarter.codexGitWritePolicy` を読み、`preflight` または `defer` の Git 書き込み方針を Codex CLI に渡す。これにより `.git/index.lock Permission denied` が起きやすい環境では、Git 書き込みの反復ではなく未完了操作の報告へ誘導する。
 
 ## データ
 

@@ -3,7 +3,7 @@
 ## 実施済み
 
 - Command Palette と Webview の両方から FirstPrompt を生成できる。
-- FirstPrompt は分野、ガバナンス、開発手法、工程、進行速度を選べる。開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を用意している。
+- FirstPrompt は分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を選べる。開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を用意している。
 - Tree View で Agent docs を常設表示する。
 - Agent Docs と Work Items は title action と item context menu を持ち、主要機能へ icon button / context action / Command Palette のいずれからもアクセスできる。
 - FileDecorationProvider で Explorer 上の AI Agent 文書を示す。

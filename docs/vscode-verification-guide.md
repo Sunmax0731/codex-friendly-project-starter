@@ -89,7 +89,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Generate FirstPrompt` を実行する。
-3. 分野、ガバナンス、工程、進行を選ぶ。
+3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針を選ぶ。
 4. Repo 名と目的を入力する。
 5. 生成された FirstPrompt に `VS Code 内の Codex 拡張 / Codex パネル` と `Codex CLI 相当のローカル workspace agent` の前提が含まれることを確認する。
 
@@ -106,7 +106,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Open Project Starter` を実行する。
-3. Webview で分野、ガバナンス、工程、進行を切り替える。
+3. Webview で分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針を切り替える。
 4. `FirstPrompt を開く` を押す。
 5. `VS Code Codexへコピー` を押し、右側の Codex パネルへ貼り付ける。
 
@@ -153,7 +153,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Invoke AI Agent with FirstPrompt` を実行する。
-3. 分野、ガバナンス、工程、進行、Repo 名、目的を入力する。
+3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針、Repo 名、目的を入力する。
 4. 確認ダイアログで workspace root と sandbox mode を確認する。
 5. 問題なければ `Run Codex` を選ぶ。
 
