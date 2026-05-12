@@ -20,7 +20,7 @@
 - `Initialize Issues Directory` と `Create Local Issue` がユーザー workspace の意図した場所に Markdown を作ること。
 - Webview の select、button、clipboard 操作が実際の VS Code UI で動くこと。
 - FileDecorationProvider の badge が Explorer に表示されること。
-- `Codex Starter: Check Codex CLI` と `Invoke AI Agent` 系コマンドが実際の VS Code 統合ターミナルで期待通り動くこと。
+- `Codex Starter: Check Codex CLI` と VS Code Codex handoff 系コマンドが実際の VS Code UI で期待通り動くこと。Terminal mode を使う場合は統合ターミナルでの `codex exec` も確認する。
 
 ## 評価上限
 

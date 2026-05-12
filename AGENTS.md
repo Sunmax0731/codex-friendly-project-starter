@@ -17,7 +17,7 @@
 - Task 管理を変更する場合は、`Tasks/*.md` を legacy compatibility として扱い、新規既定は `Issues/*.md` に集約します。`Issues/*.md`、`TODO.md`、必要な `Tasks/*.md` のリンクを同じ変更でそろえます。
 - GitHub Issues 取込を変更する場合は、`src/github-issues.cjs`、`extension.js`、`src/work-items.cjs`、`tests/github-issues.test.cjs`、README / manual / user guide を同時に更新し、GitHub Issue URL の重複防止と local TODO / Issue、設定時の legacy Task のリンクを確認します。
 - QCDS 可視化を変更する場合は、`docs/qcds-strict-metrics.json`、`docs/qcds-evaluation.md`、`TODO.md`、`Issues/*.md` の `QCDS:` 紐づけを同時に確認します。
-- Codex CLI の Work Item 起動を変更する場合は、モデル、インテリジェンス、アクセス権限、session 記録、blocked follow-up Issue 作成の docs と tests を同時に更新します。
+- VS Code Codex handoff / Codex CLI の Work Item 起動を変更する場合は、モデル、インテリジェンス、アクセス権限、session 記録、blocked follow-up Issue 作成の docs と tests を同時に更新します。既定導線は右側の VS Code Codex sidebar への clipboard handoff です。
 - 新しいツールを追加する場合は C ドライブではなく `E:\DevEnv` 以下を使います。リポジトリ内の `node_modules` はこの制約の対象外です。
 - 文字化け、検証不足、環境依存の回避策を見つけた場合は SKILL.md に短く追記します。
 

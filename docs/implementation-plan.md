@@ -65,7 +65,7 @@
 
 - extension-launched Codex PowerShell launcher で `rg.exe` と `gh.exe` の PATH を補強する。
 - `Check Codex CLI` で `codex`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
-- Work Item Start 系の実行前に model、インテリジェンス、アクセス権限を選択し、`codex exec` と prompt に反映する。
+- Work Item Start 系の実行前に model、インテリジェンス、アクセス権限を選択し、既定の VS Code Codex handoff prompt と Terminal mode の `codex exec` に反映する。
 - Dashboard checkbox と Command Palette multi-select から選択 Work Items だけを Codex に渡せるようにする。
 - README、manual test、user guide、VSIX readiness、QCDS / traceability を同期する。
 

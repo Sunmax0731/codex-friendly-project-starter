@@ -151,6 +151,7 @@ async function copyFirstPromptCommand(context) {
   });
   await vscode.env.clipboard.writeText(prompt);
   await rememberFirstPrompt(context, input);
+  await openVsCodeCodexSidebar({ silent: true });
   vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
 }
 
@@ -231,6 +232,7 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   const cwd = target.cwd;
   const runOptions = resolveCodexRunOptions(config, options.runOptions);
   const sandboxMode = runOptions.sandboxMode;
+  const handoffTarget = config.get('codexHandoffTarget', 'vscode-codex');
   if (config.get('confirmBeforeCodexRun', true)) {
     const targetText = target.targetRepositoryPath && target.targetRepositoryPath !== cwd
       ? `\nTarget repo: ${target.targetRepositoryPath}`
@@ -238,11 +240,24 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
     const modelText = runOptions.model ? `\nModel: ${runOptions.model}` : '';
     const intelligenceText = runOptions.modelReasoningEffort ? `\nIntelligence: ${runOptions.modelReasoningEffort}` : '';
     const accessText = sandboxMode ? `\nAccess: ${sandboxMode}` : '';
-    const warning = sandboxMode === 'danger-full-access'
+    const handoffText = handoffTarget === 'vscode-codex'
+      ? `VS Code Codex に ${cwd} 用のプロンプトをコピーしてサイドバーを開きます。${targetText}${modelText}${intelligenceText}${accessText}\nCodex 入力欄へ貼り付けて送信してください。`
+      : '';
+    const warning = handoffText || (sandboxMode === 'danger-full-access'
       ? `Codex CLI を ${cwd} で danger-full-access 実行します。${targetText}${modelText}${intelligenceText}${accessText}\n続行しますか?`
-      : `Codex CLI を ${cwd} で実行します。${targetText}${modelText}${intelligenceText}${accessText}\n続行しますか?`;
-    const answer = await vscode.window.showWarningMessage(warning, { modal: false }, 'Run Codex', 'Cancel');
-    if (answer !== 'Run Codex') return;
+      : `Codex CLI を ${cwd} で実行します。${targetText}${modelText}${intelligenceText}${accessText}\n続行しますか?`);
+    const runLabel = handoffTarget === 'vscode-codex' ? 'Copy & Open Codex' : 'Run Codex';
+    const answer = await vscode.window.showWarningMessage(warning, { modal: false }, runLabel, 'Cancel');
+    if (answer !== runLabel) return;
+  }
+  if (handoffTarget === 'vscode-codex') {
+    await handoffPromptToVsCodeCodex(context, prompt, sourceLabel, {
+      workspaceRoot,
+      cwd,
+      runOptions,
+      workItems: options.workItems || []
+    });
+    return;
   }
   const promptFilePath = await writePromptFile(context, prompt);
   const launcherScript = buildCodexExecScript({
@@ -277,6 +292,34 @@ async function invokeCodexAgent(context, prompt, sourceLabel, options = {}) {
   vscode.window.setStatusBarMessage(`Codex Starter: ${sourceLabel} を Codex CLI に渡しました`, 5000);
 }
 
+async function handoffPromptToVsCodeCodex(context, prompt, sourceLabel, options = {}) {
+  const workspaceRoot = options.workspaceRoot || pickWorkspaceRoot();
+  const promptFilePath = await writePromptFile(context, prompt);
+  await vscode.env.clipboard.writeText(prompt);
+  if (vscode.workspace.getConfiguration('codexFriendlyProjectStarter').get('recordCodexSessions', true)) {
+    try {
+      const record = createCodexSessionRecord({
+        sourceLabel: `${sourceLabel} (VS Code Codex handoff)`,
+        workspaceRoot,
+        cwd: options.cwd || workspaceRoot,
+        promptFilePath,
+        launcherFilePath: '',
+        runOptions: options.runOptions,
+        workItems: options.workItems || []
+      });
+      recordCodexSession(workspaceRoot, record);
+    } catch (error) {
+      console.warn('Codex Starter: failed to record Codex handoff', error);
+    }
+  }
+  const opened = await openVsCodeCodexSidebar({ silent: true });
+  const message = opened
+    ? `Codex Starter: ${sourceLabel} を VS Code Codex 用にコピーしました。右側 Codex に貼り付けて送信してください。`
+    : `Codex Starter: ${sourceLabel} を clipboard にコピーしました。VS Code Codex を開いて貼り付けてください。`;
+  vscode.window.setStatusBarMessage(message, 7000);
+  if (!opened) vscode.window.showInformationMessage(message);
+}
+
 function checkCodexCliCommand() {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   const command = buildCodexCheckTerminalCommand({
@@ -287,12 +330,28 @@ function checkCodexCliCommand() {
 }
 
 function openCodexAppCommand() {
-  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const command = buildCodexAppTerminalCommand({
-    cliPath: config.get('codexCliPath', 'codex'),
-    toolPaths: collectCodexToolPaths(config)
-  });
-  runTerminalCommand('Codex App', command, pickWorkspaceRoot());
+  openVsCodeCodexSidebar();
+}
+
+async function openVsCodeCodexSidebar(options = {}) {
+  const candidates = [
+    'chatgpt.openSidebar',
+    'workbench.view.extension.codexSecondaryViewContainer',
+    'workbench.view.extension.codexViewContainer',
+    'chatgpt.newChat'
+  ];
+  for (const command of candidates) {
+    try {
+      await vscode.commands.executeCommand(command);
+      return true;
+    } catch (_error) {
+      // Try the next known command or view container.
+    }
+  }
+  if (!options.silent) {
+    vscode.window.showWarningMessage('Codex Starter: VS Code Codex 拡張の sidebar command が見つかりません。openai.chatgpt が有効か確認してください。');
+  }
+  return false;
 }
 
 async function pickCodexRunOptions(config) {
@@ -569,6 +628,7 @@ async function openStarterWebview(context) {
     if (message.type === 'copy') {
       await vscode.env.clipboard.writeText(buildFirstPrompt(input));
       await rememberFirstPrompt(context, input);
+      await openVsCodeCodexSidebar({ silent: true });
       vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
     }
   }, undefined, context.subscriptions);

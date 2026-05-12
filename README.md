@@ -23,7 +23,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - IDEAS Candidate Suggestions: `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から候補 project name / 目的文を表示し、明示的に採用した場合だけ入力欄へ反映します。
 - Git書き込み方針: FirstPrompt で `事前確認してから Git 書き込み`、`Git 書き込みを保留`、`通常どおり Git 書き込み` を選択できます。`.git/index.lock Permission denied` を避けたい場合は `Git 書き込みを保留` を選び、commit / push は手動または権限のある環境で実施します。
 - Starter Webview: Command Palette から選択式の生成画面を開き、プロンプトを untitled Markdown として表示、または VS Code 内の Codex パネルへ貼り付けるためにコピーできます。
-- VS Code Codex Handoff: 生成した FirstPrompt は VS Code の Codex 拡張 / Codex パネルで実行される前提を明記します。必要に応じて `codex exec` を VS Code 統合ターミナルから直接起動することもできます。
+- VS Code Codex Handoff: 生成した FirstPrompt と Work Item Start Prompt は、既定で VS Code の Codex 拡張 / Codex パネルへ渡す前提です。プロンプトを clipboard にコピーし、右側の Codex sidebar を開きます。必要に応じて `codexFriendlyProjectStarter.codexHandoffTarget=terminal` に変更すると `codex exec` を VS Code 統合ターミナルから直接起動できます。
 - Codex Run Options: TODO / Issue / legacy Task を Codex に渡す直前に、モデル、インテリジェンス、アクセス権限を選択できます。選択値は `codex exec -m`、`-c model_reasoning_effort=...`、`-s ...` として渡され、プロンプト本文にも記録されます。
 - Codex Sessions: Codex CLI を起動するたび、対象 project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を残します。Issue / legacy Task から起動した場合は対象 Markdown にも `Codex Sessions` セクションを追記します。
 - Blocked Follow-up: TODO / Issue / legacy Task が `closed` にならず `blocked` のまま残った場合、Dashboard または context menu から `Codex Starter: Create Blocked Follow-up Issue` を実行して、原因調査用 Issue を作成できます。
@@ -34,11 +34,11 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。Codex CLI 由来の下書きから作成した Issue / legacy Task には `Draft source: codex-cli` を記録します。
 `GitHub Issues 取込` も同じ下書き変換を使います。入力は `owner/repo` または GitHub URL で、現在の Git remote が GitHub の場合は既定値として補完します。public Issues API から open issue を取得し、複数選択した issue だけを local format に再構成します。既に同じ GitHub Issue URL を含む TODO / Issue / legacy Task がある場合は重複作成しません。
 
-Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue / legacy Task と関連リンクをまとめた Work Item Start Prompt を作り、通常の Codex CLI 実行確認を経て `codex exec` に渡します。Issue / legacy Task / Issue + Legacy Task を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox が追加され、TODO を入口にして作業を進められます。
+Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue / legacy Task と関連リンクをまとめた Work Item Start Prompt を作り、既定では clipboard にコピーして VS Code Codex sidebar を開きます。Terminal に出したい場合だけ `codexFriendlyProjectStarter.codexHandoffTarget=terminal` に変更します。Issue / legacy Task / Issue + Legacy Task を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox が追加され、TODO を入口にして作業を進められます。
 
 Work Item Start Prompt は設定 `codexFriendlyProjectStarter.codexGitWritePolicy` を参照します。既定は `preflight` で、Permission denied が出たら Git 書き込みを繰り返さず未完了操作を報告します。`defer` にすると Start から渡す作業でも `git add` / `git commit` / `git push` を実行しない方針になります。
 
-`Start Work Item with Codex`、`Start Selected Work Items with Codex`、`Start All Work Items with Codex` は、起動前にモデル、インテリジェンス、アクセス権限を選択します。候補は `codexFriendlyProjectStarter.codexModelChoices` で増減でき、既定値は Codex CLI default、`gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` です。アクセス権限は `workspace-write`、`read-only`、`danger-full-access` から選べます。`codexFriendlyProjectStarter.promptForCodexRunOptions` を `false` にすると、設定値 `codexFriendlyProjectStarter.codexModel`、`codexFriendlyProjectStarter.codexReasoningEffort`、`codexFriendlyProjectStarter.codexSandboxMode` をそのまま使います。
+`Start Work Item with Codex`、`Start Selected Work Items with Codex`、`Start All Work Items with Codex` は、起動前にモデル、インテリジェンス、アクセス権限を選択します。VS Code Codex handoff ではこれらの値をプロンプト本文に記録し、Terminal mode では `codex exec -m`、`-c model_reasoning_effort=...`、`-s ...` として渡します。候補は `codexFriendlyProjectStarter.codexModelChoices` で増減できます。
 
 VS Code 内 PowerShell で `rg.exe` または `gh.exe` が見つからない場合は、`Codex Starter: Check Codex CLI` を実行してください。この確認コマンドは `codex --version`、`codex exec --help`、`Get-Command rg.exe`、`Get-Command gh.exe`、`gh.exe auth status` を同じ PATH 補強付きで実行します。追加の配置先がある場合は `codexFriendlyProjectStarter.codexToolPathPrepend` にディレクトリを追加します。
 
@@ -74,10 +74,10 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 - `Codex Starter: Generate FirstPrompt`
 - `Codex Starter: Copy FirstPrompt for VS Code Codex`
 - `Codex Starter: Clear FirstPrompt History`
-- `Codex Starter: Invoke AI Agent with FirstPrompt`
-- `Codex Starter: Invoke AI Agent with Current Prompt`
+- `Codex Starter: Send FirstPrompt to VS Code Codex`
+- `Codex Starter: Send Current Prompt to VS Code Codex`
 - `Codex Starter: Check Codex CLI`
-- `Codex Starter: Open Codex App`
+- `Codex Starter: Open VS Code Codex`
 - `Codex Starter: Refresh Agent Docs`
 - `Codex Starter: Refresh Work Items`
 - `Codex Starter: Refresh Agent Docs and Work Items`

@@ -21,7 +21,7 @@ function buildWorkItemStartPrompt(input = {}) {
   return [
     '# Work Item Start Prompt',
     '',
-    'あなたは VS Code 内の Codex CLI / Codex App で動く実装エージェントです。',
+    'あなたは VS Code 内の Codex 拡張 / Codex CLI 相当のローカル実装エージェントです。',
     `対象リポジトリは \`${workspaceRoot}\` です。`,
     '',
     '## 最初に読むもの',
@@ -79,7 +79,7 @@ function buildAllWorkItemsStartPrompt(input = {}) {
   return [
     '# All Work Items Start Prompt',
     '',
-    'あなたは VS Code 内の Codex CLI / Codex App で動く実装エージェントです。',
+    'あなたは VS Code 内の Codex 拡張 / Codex CLI 相当のローカル実装エージェントです。',
     `対象リポジトリは \`${workspaceRoot}\` です。`,
     '',
     '## 主指示',
@@ -141,7 +141,7 @@ function buildSelectedWorkItemsStartPrompt(input = {}) {
   return [
     '# Selected Work Items Start Prompt',
     '',
-    'あなたは VS Code 内の Codex CLI / Codex App で動く実装エージェントです。',
+    'あなたは VS Code 内の Codex 拡張 / Codex CLI 相当のローカル実装エージェントです。',
     `対象リポジトリは \`${workspaceRoot}\` です。`,
     '',
     '## 主指示',

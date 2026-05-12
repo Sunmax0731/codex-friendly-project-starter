@@ -70,12 +70,12 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `Issue + Legacy Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
 - Issue / legacy Task / Issue + Legacy Task 作成後、`TODO.md` にリンク付き checkbox が追加される。
 - GitHub Issues 取込で作成した TODO / Issue には GitHub Issue 個別リンクが残り、同じ URL は重複 import されない。`workItemDetailMode=issues-and-tasks` の場合だけ legacy Task も作成される。
-- Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の `codex exec` が統合ターミナルに起動する。
+- Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
 - Work Item Start 系では model、インテリジェンス、アクセス権限を選べ、prompt に `Codex 実行設定`、`Access`、`Blocked handling` が含まれる。
 - Codex 起動後、対象 project に `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` が作成され、Issue / legacy Task には `Codex Sessions` セクションが追記される。
 - blocked の Work Item から `Codex Starter: Create Blocked Follow-up Issue` を実行でき、原因調査用 Issue が作成される。
-- `Start Selected Work Items with Codex` を実行でき、選択した TODO / Issue / legacy Task だけの開始 prompt が統合ターミナルに渡される。
-- `Start All Work Items with Codex` を実行でき、未完了 TODO / Issue / legacy Task の一括開始 prompt が統合ターミナルに渡される。
+- `Start Selected Work Items with Codex` を実行でき、選択した TODO / Issue / legacy Task だけの開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
+- `Start All Work Items with Codex` を実行でき、未完了 TODO / Issue / legacy Task の一括開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 
 ## 2.5 Markdown WebView と D:\AI 既定 docs
@@ -168,19 +168,19 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Codex Desktop / Codex App 固有の操作を前提にしない。
 - 必要な terminal / git / docs 確認は VS Code 内で進む。
 
-## 7. 生成プロンプトで Codex CLI を直接起動
+## 7. 生成プロンプトを VS Code Codex へ handoff
 
 手順:
 
 1. `Ctrl+Shift+P` を開く。
-2. `Codex Starter: Invoke AI Agent with FirstPrompt` を実行する。
+2. `Codex Starter: Send FirstPrompt to VS Code Codex` を実行する。
 3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針、Repo 名、目的を入力する。
 4. 確認ダイアログで workspace root と access を確認する。
 5. 問題なければ `Run Codex` を選ぶ。
 
 期待結果:
 
-- VS Code 統合ターミナルに `codex exec` が起動する。
+- 右側の VS Code Codex sidebar が開き、clipboard に FirstPrompt が入る。
 - FirstPrompt が stdin 経由で Codex Agent に渡る。
 - 生成元 prompt file と `run-codex-*.ps1` launcher は extension storage に保存される。
 - terminal に prompt 本文そのものが `>>` 継続入力として表示されたり、PowerShell の構文エラーになったりしない。
@@ -192,34 +192,33 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - まず挙動確認だけをしたい場合は Settings で `codexFriendlyProjectStarter.codexSandboxMode` を `read-only` にする。
 - FirstPrompt が `D:\AI\ChromeExtension\movie-loop-tool` など現在の starter repo 外を対象にする場合、確認ダイアログの workspace root が `D:\AI\ChromeExtension` など対象 repo の親ディレクトリになっていることを確認する。
 
-## 8. 現在のプロンプトで Codex CLI を直接起動
+## 8. 現在のプロンプトを VS Code Codex へ handoff
 
 手順:
 
 1. FirstPrompt の untitled Markdown、または任意の Markdown を開く。
 2. 必要なら実行したい範囲だけ選択する。
-3. `Ctrl+Shift+P` から `Codex Starter: Invoke AI Agent with Current Prompt` を実行する。
+3. `Ctrl+Shift+P` から `Codex Starter: Send Current Prompt to VS Code Codex` を実行する。
 4. 確認ダイアログで `Run Codex` を選ぶ。
 
 期待結果:
 
 - 選択範囲があれば選択範囲、なければ文書全体が `codex exec` に渡る。
-- 統合ターミナルで Codex Agent が起動する。
+- 右側の VS Code Codex sidebar が開き、clipboard に対象 prompt が入る。
 - 文書全体の FirstPrompt を渡した場合、target repo path が抽出され、対象 domain の既存親ディレクトリが `-C` root になる。
 
-## 9. Codex App 起動
+## 9. VS Code Codex 起動
 
 この導線は補助用です。通常の作業依頼は VS Code 内の Codex 拡張 / Codex パネルへ FirstPrompt を渡す。
 
 手順:
 
 1. `Ctrl+Shift+P` を開く。
-2. `Codex Starter: Open Codex App` を実行する。
+2. `Codex Starter: Open VS Code Codex` を実行する。
 
 期待結果:
 
-- 統合ターミナルで `codex app` が実行される。
-- Codex desktop app が起動、または CLI が案内を表示する。
+- 右側の VS Code Codex sidebar が開く。
 
 ## 10. 確認後の記録
 
@@ -228,6 +227,6 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 実行した VS Code command。
 - `codexFriendlyProjectStarter.codexCliPath` の設定値。
 - access / sandbox mode。
-- `codex exec` が起動した workspace root。
+- VS Code Codex handoff または `codex exec` が対象にした workspace root。
 - VS Code Codex パネルへ貼り付けた FirstPrompt の対象 repo。
 - 失敗した場合の terminal 出力。

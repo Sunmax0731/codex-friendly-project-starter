@@ -17,7 +17,7 @@
 - 実装だけでなく docs、検証、release readiness を同時に扱う。
 - TODO / Issue / legacy Task / QCDS を同じ work item 画面から辿れるようにする。
 - `D:\AI` 共通 docs と領域別 docs から、開始時に必要な Markdown を生成できるようにする。
-- Agent 起動は hidden process ではなく VS Code 統合ターミナルに出し、利用者が実行内容を確認できるようにする。
+- Agent 起動は既定で VS Code Codex sidebar への clipboard handoff とし、Terminal mode でも hidden process ではなく VS Code 統合ターミナルに出して利用者が実行内容を確認できるようにする。
 
 ## 差別化
 

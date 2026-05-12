@@ -74,12 +74,12 @@
       },
       {
         "command": "codex-friendly-project-starter.invokeCodexWithFirstPrompt",
-        "title": "Codex Starter: Invoke AI Agent with FirstPrompt",
+        "title": "Codex Starter: Send FirstPrompt to VS Code Codex",
         "icon": "$(run)"
       },
       {
         "command": "codex-friendly-project-starter.invokeCodexWithCurrentPrompt",
-        "title": "Codex Starter: Invoke AI Agent with Current Prompt",
+        "title": "Codex Starter: Send Current Prompt to VS Code Codex",
         "icon": "$(run)"
       },
       {
@@ -89,7 +89,7 @@
       },
       {
         "command": "codex-friendly-project-starter.openCodexApp",
-        "title": "Codex Starter: Open Codex App",
+        "title": "Codex Starter: Open VS Code Codex",
         "icon": "$(comment-discussion)"
       },
       {
@@ -372,6 +372,15 @@
           ],
           "default": "workspace-write",
           "description": "Default access permission passed to `codex exec -s`. Work Item starts can override this per run."
+        },
+        "codexFriendlyProjectStarter.codexHandoffTarget": {
+          "type": "string",
+          "enum": [
+            "vscode-codex",
+            "terminal"
+          ],
+          "default": "vscode-codex",
+          "description": "Where generated Work Item and prompt handoffs go. Use vscode-codex to copy the prompt and open the OpenAI Codex sidebar, or terminal to run codex exec."
         },
         "codexFriendlyProjectStarter.codexGitWritePolicy": {
           "type": "string",

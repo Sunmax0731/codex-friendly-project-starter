@@ -25,9 +25,9 @@ const checks = [
   check('version', /^\d+\.\d+\.\d+/.test(pkg.version || ''), 'semver version exists'),
   check('repository', !!pkg.repository?.url, 'repository url exists'),
   check('license', fs.existsSync(file('LICENSE')) && pkg.license === 'MIT', 'license exists'),
-  check('readme', includes('README.md', ['Codex Friendly Project Starter', 'Markdown WebView', 'Scaffold D:\\AI Default Docs', 'Start Selected Work Items', 'GitHub Issues 取込', 'Create Blocked Follow-up Issue', 'codex-sessions.md', 'rg.exe', 'gh.exe']), 'README documents release-facing features'),
-  check('manual-test', includes('docs/manual-test.md', ['Markdown WebView', 'Scaffold D:\\AI Default Docs', 'Create Legacy Local Task', 'Start Selected Work Items', 'GitHub Issues 取込', 'Create Blocked Follow-up Issue', 'rg.exe', 'gh.exe']), 'manual test covers new commands'),
-  check('user-guide', includes('docs/user-guide.md', ['Markdown WebView', 'Tasks/*.md', 'D:\\AI', 'FirstPrompt 履歴', 'Start Selected Work Items', 'GitHub Issues 取込', 'アクセス権限', 'codex-sessions.md']), 'user guide covers docs scaffold, tasks, history, and Codex run options'),
+  check('readme', includes('README.md', ['Codex Friendly Project Starter', 'Markdown WebView', 'Scaffold D:\\AI Default Docs', 'Start Selected Work Items', 'GitHub Issues 取込', 'Create Blocked Follow-up Issue', 'codex-sessions.md', 'VS Code Codex Handoff', 'rg.exe', 'gh.exe']), 'README documents release-facing features'),
+  check('manual-test', includes('docs/manual-test.md', ['Markdown WebView', 'Scaffold D:\\AI Default Docs', 'Create Legacy Local Task', 'Start Selected Work Items', 'GitHub Issues 取込', 'Create Blocked Follow-up Issue', 'Copy & Open Codex', 'rg.exe', 'gh.exe']), 'manual test covers new commands'),
+  check('user-guide', includes('docs/user-guide.md', ['Markdown WebView', 'Tasks/*.md', 'D:\\AI', 'FirstPrompt 履歴', 'Start Selected Work Items', 'GitHub Issues 取込', 'アクセス権限', 'codex-sessions.md', 'codexHandoffTarget']), 'user guide covers docs scaffold, tasks, history, and Codex run options'),
   check('commands', requiredCommands.every((command) => commands.has(command)), 'required commands exist'),
   check('qcds', fs.existsSync(file('docs/qcds-strict-metrics.json')) && fs.existsSync(file('docs/qcds-evaluation.md')), 'QCDS evidence docs exist'),
   check('icon', fs.existsSync(file('resources/codex-starter.svg')), 'activity bar icon exists')

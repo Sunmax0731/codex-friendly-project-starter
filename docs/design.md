@@ -32,9 +32,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - TODO、Issue、legacy Task の進捗は progress bar で表示する。
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
-- TODO / Issue / legacy Task / QCDS improvements の行には `Select` checkbox、`Start`、`Open`、必要に応じて `Follow-up` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item を Codex CLI に渡し、`Open` は該当 Markdown WebView へ移動する。`Follow-up` は blocked の原因を local Issue に起こす。
+- TODO / Issue / legacy Task / QCDS improvements の行には `Select` checkbox、`Start`、`Open`、必要に応じて `Follow-up` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item の prompt を既定では VS Code Codex sidebar へ渡し、`Open` は該当 Markdown WebView へ移動する。`Follow-up` は blocked の原因を local Issue に起こす。
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
-- 進行中操作には自然言語から Issue、GitHub Issues 取込、Issue 作成、Legacy Task 作成、FirstPrompt、QCDS Status、Codex App、現在Prompt実行、refresh を置く。
+- 進行中操作には自然言語から Issue、GitHub Issues 取込、Issue 作成、Legacy Task 作成、FirstPrompt、QCDS Status、VS Code Codex、現在PromptをCodexへ、refresh を置く。
 - 進行中操作には `選択Work Itemを開始` と `全Work Itemを開始` も置き、選択した TODO / Issue / legacy Task だけ、または未完了 TODO / Issue / legacy Task 全体を Codex CLI へ渡せるようにする。
 - 初回セットアップには `D:\AI` docs 生成、Issues / Tasks 初期化、Codex CLI 確認を折りたたみ領域として置く。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues、Open Legacy Tasks は `<details>` で折りたためるようにする。
@@ -85,10 +85,10 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Repo 名と目的を任意入力にする。
 - `IDEAS 候補` は domain 切り替えに追従し、`D:\AI\IDEAS\<Domain>` と正式ドメイン直下の `created_idea_*` から候補を表示する。採用ボタンを押すまで入力値は変更しない。
 - `Prompt 履歴` は workspace storage の入力履歴から復元する。履歴には prompt 本文を保存せず、削除ボタンと clear command を用意する。
-- `FirstPrompt を開く` と `VS Code Codexへコピー` を提供する。
+- `FirstPrompt を開く`、`VS Code Codexへコピー`、`VS Code Codexで開く` を提供する。
 - Permission denied 回避のため、Git 書き込み方針で `Git 書き込みを保留` を選ぶと prompt は `git add` / `git commit` / `git push` を実行しないよう指示する。
 - 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。
-- Codex CLI を直接使う環境向けに `Codex CLI で実行` も提供する。
+- Terminal で Codex CLI を直接使う環境向けには、設定 `codexHandoffTarget=terminal` で既存の `codex exec` 実行導線へ切り替える。
 
 ## 状態
 

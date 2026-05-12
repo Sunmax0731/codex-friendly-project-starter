@@ -37,7 +37,7 @@ function defaultSessionMarkdown() {
   return [
     '# Codex Sessions',
     '',
-    'TODO / Issue を Codex CLI へ渡した履歴です。Codex 側の Thread ID が分かる場合は、この表または対象 Issue の Notes に追記します。',
+    'TODO / Issue を VS Code Codex または Codex CLI へ渡した履歴です。Codex 側の Thread ID が分かる場合は、この表または対象 Issue の Notes に追記します。',
     '',
     '| Time | Session | Source | Access | Model | Intelligence | Targets | Prompt |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |'

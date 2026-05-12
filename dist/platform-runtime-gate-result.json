@@ -161,6 +161,11 @@
       "detail": "webview can invoke Codex agent"
     },
     {
+      "id": "vscode-codex-handoff",
+      "pass": true,
+      "detail": "Generated prompts can be handed off to the VS Code Codex sidebar without terminal output"
+    },
+    {
       "id": "file-decoration",
       "pass": true,
       "detail": "file decoration provider exists"
@@ -193,7 +198,7 @@
     {
       "id": "codex-session-records",
       "pass": true,
-      "detail": "Codex CLI sessions are recorded in the target project"
+      "detail": "Codex handoff and CLI sessions are recorded in the target project"
     },
     {
       "id": "qcds-fallback-dimensions",

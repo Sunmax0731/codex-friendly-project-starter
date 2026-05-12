@@ -60,7 +60,7 @@ function renderStarterWebview(nonce, options = {}) {
   </div>
   <div class="actions">
     <button id="generate">FirstPrompt を開く</button>
-    <button id="runCodex">Codex CLI で実行</button>
+    <button id="runCodex">VS Code Codexで開く</button>
     <button id="copy" class="secondary">VS Code Codexへコピー</button>
   </div>
   <div id="summary" class="summary"></div>
@@ -263,8 +263,8 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       <button class="action" data-action="openComposer" data-mode="task">Legacy Task を作成</button>
       <button class="action secondary" data-action="openStarter">FirstPrompt</button>
       <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
-      <button class="action secondary" data-action="openCodexApp">Codex App</button>
-      <button class="action secondary" data-action="invokeCurrentPrompt">現在Promptを実行</button>
+      <button class="action secondary" data-action="openCodexApp">VS Code Codex</button>
+      <button class="action secondary" data-action="invokeCurrentPrompt">現在PromptをCodexへ</button>
       <button class="action secondary" data-selected-start="true">選択Work Itemを開始</button>
       <button class="action secondary" data-action="startAllWorkItems">全Work Itemを開始</button>
       <button class="action subtle" data-action="refreshDashboard">Refresh</button>

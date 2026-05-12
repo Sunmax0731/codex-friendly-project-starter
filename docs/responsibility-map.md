@@ -12,7 +12,7 @@
 | Work item composer | `src/work-item-composer.cjs` | GUI 作成フォーム、ローカル補完、Codex CLI 下書き結果の表示 |
 | Codex work item draft | `src/codex-work-item-draft.cjs` | 自然言語メモを JSON 下書きにする Codex prompt と出力解析 |
 | GitHub Issues import | `src/github-issues.cjs` | public GitHub Issues 取得、URL 重複検出、local TODO / Issue 生成、設定時の legacy Task 生成 |
-| Codex sessions | `src/codex-sessions.cjs` | Codex CLI 起動 session の project-local index と Issue / legacy Task 参照追記 |
-| Codex CLI | `src/codex-cli.cjs` | `codex exec` / `codex app` の terminal command と UTF-8 / readable PowerShell launcher script 生成 |
+| Codex sessions | `src/codex-sessions.cjs` | VS Code Codex handoff / Codex CLI session の project-local index と Issue / legacy Task 参照追記 |
+| Codex handoff / CLI | `extension.js`, `src/codex-cli.cjs` | 既定の VS Code Codex sidebar handoff、Terminal mode の `codex exec` command と UTF-8 / readable PowerShell launcher script 生成 |
 | Invocation target | `src/invocation-target.cjs` | FirstPrompt の対象 repo path から実行 root を解決 |
 | Validation | `tools/` | QCDS、runtime gate、docs ZIP、guard |

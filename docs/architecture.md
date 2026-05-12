@@ -10,10 +10,10 @@
 - `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
 - `src/work-item-start.cjs`: TODO / Issue / legacy Task を Codex CLI へ渡す開始プロンプト生成。
-- `src/codex-sessions.cjs`: Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue / legacy Task に記録する。
+- `src/codex-sessions.cjs`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue / legacy Task に記録する。
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
 - `src/github-issues.cjs`: public GitHub Issues の取得、repository 入力の正規化、GitHub Issue URL による重複検出、local TODO / Issue と設定時の legacy Task 作成。
-- `src/codex-cli.cjs`: Codex CLI に渡す PowerShell command と terminal command 生成。
+- `src/codex-cli.cjs`: Terminal mode で Codex CLI に渡す PowerShell command と terminal command 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
 - `tools/`: QCDS、runtime gate、docs ZIP、closed alpha guard。
 
@@ -31,7 +31,7 @@ Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` �
 
 FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code workspace 外を対象にする場合、`src/invocation-target.cjs` が対象 repo path を抽出し、まだ repo が存在しないときは `D:\AI\ChromeExtension` のような最も近い既存親ディレクトリを `codex exec -C` の root にする。これにより starter repo を誤って編集することと、対象 repo への書き込みが project 外として拒否されることを避ける。
 
-Work Item Start Prompt は `codexFriendlyProjectStarter.codexGitWritePolicy` を読み、`preflight` または `defer` の Git 書き込み方針を Codex CLI に渡す。これにより `.git/index.lock Permission denied` が起きやすい環境では、Git 書き込みの反復ではなく未完了操作の報告へ誘導する。
+Work Item Start Prompt は `codexFriendlyProjectStarter.codexGitWritePolicy` を読み、`preflight` または `defer` の Git 書き込み方針を VS Code Codex / Codex CLI に渡す。これにより `.git/index.lock Permission denied` が起きやすい環境では、Git 書き込みの反復ではなく未完了操作の報告へ誘導する。
 Work Item が closed にならない場合は `src/work-items.cjs` の blocked follow-up helper が原因を分類し、`Issues/*.md` に新しい follow-up Issue を作成する。Dashboard と context menu はこの helper を呼び出すだけにし、GitHub auth、Git index lock / ACL、runtime gate、tool PATH などの判定を一箇所に閉じ込める。
 
 ## データ
