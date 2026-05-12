@@ -80,7 +80,7 @@ function buildGitHubIssueImportInput(issue = {}) {
     mode: 'issue',
     title: issue.title || '',
     naturalText: [
-      'GitHub Issue をローカルの TODO / Issue 用に整形してください。Tasks は legacy compatibility として明示設定時だけ作成します。',
+      'GitHub Issue をローカルの TODO / Issue 用に整形してください。Tasks は legacy compatibility として既存リンクの重複判定だけに使い、新規作成しません。',
       '',
       `URL: ${issue.url || ''}`,
       `Number: #${issue.number || ''}`,

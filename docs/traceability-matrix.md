@@ -7,16 +7,16 @@
 | Agent Docs / Work Items の操作導線を明示する | `package.json`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | TODO を可視化する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
 | local Issue を管理する | `src/work-items.cjs`, `extension.js`, `Issues/README.md` | `tests/work-items.test.cjs`, `Issues/*.md` |
-| legacy Task を互換管理する | `src/work-items.cjs`, `extension.js`, `Tasks/README.md` | `tests/work-items.test.cjs`, `Tasks/*.md` |
-| GUI で Issue / legacy Task を作成する | `src/work-item-composer.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
-| 自然言語から Issue / legacy Task を下書きする | `src/work-item-composer.cjs`, `src/codex-work-item-draft.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
+| legacy Task を通常 UI から隠し互換読み取りだけ残す | `src/work-items.cjs`, `src/webview.cjs`, `src/workspace-docs.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tests/workspace-docs.test.cjs`, `docs/manual-test.md` |
+| GUI で Issue を作成する | `src/work-item-composer.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
+| 自然言語から Issue を下書きする | `src/work-item-composer.cjs`, `src/codex-work-item-draft.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
 | GitHub Issues を local TODO / Issue に取り込む | `src/github-issues.cjs`, `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/github-issues.test.cjs`, `tests/work-items.test.cjs`, `Issues/0012-github-issues-import.md` |
-| Issue / legacy Task 作成時に TODO へ同期する | `src/work-items.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
-| Issue / legacy Task の分類を拡張する | `src/work-item-composer.cjs`, `src/work-items.cjs` | `tests/work-items.test.cjs` |
-| TODO / Issue / legacy Task から Codex に着手する | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
-| TODO / Issue / legacy Task を選択して Codex に渡す | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `Issues/0011-codex-tool-env-and-selected-work-items.md` |
-| TODO / Issue / legacy Task を一括で Codex に渡す | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
-| TODO / Issue / legacy Task link を解析する | `src/work-items.cjs` | `tests/work-items.test.cjs`, `Issues/0008-work-item-task-linking.md` |
+| Issue 作成時に TODO へ同期する | `src/work-items.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
+| Issue の分類を拡張する | `src/work-item-composer.cjs`, `src/work-items.cjs` | `tests/work-items.test.cjs` |
+| TODO / Issue から Codex に着手する | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
+| TODO / Issue を選択して Codex に渡す | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `Issues/0011-codex-tool-env-and-selected-work-items.md` |
+| TODO / Issue を一括で Codex に渡す | `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
+| TODO / Issue / legacy Task link を解析する | `src/work-items.cjs`, `src/markdown-webview.cjs` | `tests/work-items.test.cjs`, `tests/markdown-webview.test.cjs` |
 | Work Dashboard を表示する | `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Work Dashboard の日常操作 / 初回セットアップ / 折りたたみ / tag 表示を整える | `src/webview.cjs` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | GUI と Command Palette の機能対応をそろえる | `package.json`, `extension.js`, `src/webview.cjs` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |

@@ -9,7 +9,7 @@ const {
 
 test('buildCodexWorkItemDraftPrompt asks Codex CLI for JSON only', () => {
   const prompt = buildCodexWorkItemDraftPrompt({
-    mode: 'linked',
+    mode: 'issue',
     naturalText: 'ドキュメントと実装の整合性を確認し、必要ならドキュメントを更新する。'
   }, {
     workspaceRoot: 'D:\\AI\\ChromeExtension\\movie-loop-tool'
@@ -32,7 +32,7 @@ test('parseCodexWorkItemDraftOutput normalizes fenced JSON into composer draft',
   const draft = parseCodexWorkItemDraftOutput([
     '```json',
     '{',
-    '  "mode": "linked",',
+    '  "mode": "issue",',
     '  "title": "ドキュメントと実装の整合性を確認する",',
     '  "priority": "P1",',
     '  "type": "docs",',
@@ -43,10 +43,10 @@ test('parseCodexWorkItemDraftOutput normalizes fenced JSON into composer draft',
     '}',
     '```'
   ].join('\n'), {
-    mode: 'linked',
+    mode: 'issue',
     naturalText: 'ドキュメントと実装に齟齬がないか確認する。'
   });
-  assert.equal(draft.mode, 'linked');
+  assert.equal(draft.mode, 'issue');
   assert.equal(draft.title, 'ドキュメントと実装の整合性を確認する');
   assert.equal(draft.priority, 'P1');
   assert.equal(draft.type, 'docs');

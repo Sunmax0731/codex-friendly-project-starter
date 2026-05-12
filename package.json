@@ -37,9 +37,7 @@
     "onCommand:codex-friendly-project-starter.copyMarkdownPath",
     "onCommand:codex-friendly-project-starter.scaffoldDefaultDocs",
     "onCommand:codex-friendly-project-starter.initializeIssuesDirectory",
-    "onCommand:codex-friendly-project-starter.initializeTasksDirectory",
     "onCommand:codex-friendly-project-starter.createLocalIssue",
-    "onCommand:codex-friendly-project-starter.createLocalTask",
     "onCommand:codex-friendly-project-starter.openWorkItemComposer",
     "onCommand:codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
     "onCommand:codex-friendly-project-starter.importGitHubIssues",
@@ -148,18 +146,8 @@
         "icon": "$(issues)"
       },
       {
-        "command": "codex-friendly-project-starter.initializeTasksDirectory",
-        "title": "Codex Starter: Initialize Legacy Tasks Directory",
-        "icon": "$(tasklist)"
-      },
-      {
         "command": "codex-friendly-project-starter.createLocalIssue",
         "title": "Codex Starter: Create Local Issue",
-        "icon": "$(add)"
-      },
-      {
-        "command": "codex-friendly-project-starter.createLocalTask",
-        "title": "Codex Starter: Create Legacy Local Task",
         "icon": "$(add)"
       },
       {
@@ -342,7 +330,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / legacy Tasks / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {
@@ -427,16 +415,7 @@
         "codexFriendlyProjectStarter.promptForCodexRunOptions": {
           "type": "boolean",
           "default": true,
-          "description": "Ask for model, intelligence, and access permission before starting TODO / Issue / legacy Task processing with Codex."
-        },
-        "codexFriendlyProjectStarter.workItemDetailMode": {
-          "type": "string",
-          "enum": [
-            "issues-only",
-            "issues-and-tasks"
-          ],
-          "default": "issues-only",
-          "description": "Default local detail format for new imported/composed work items. Existing Tasks remain readable as legacy work items."
+          "description": "Ask for model, intelligence, and access permission before starting TODO / Issue processing with Codex."
         },
         "codexFriendlyProjectStarter.recordCodexSessions": {
           "type": "boolean",
@@ -487,7 +466,7 @@
             "sideBySide"
           ],
           "default": "webview",
-          "description": "How Agent Docs, TODO, Issues, and Tasks markdown files open from Codex Starter views."
+          "description": "How Agent Docs, TODO, Issues, and docs markdown files open from Codex Starter views."
         }
       }
     }

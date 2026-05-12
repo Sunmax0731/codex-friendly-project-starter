@@ -165,13 +165,13 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /QCDS Improvements/);
   assert.match(html, /Release Readiness/);
   assert.match(html, /Open TODO/);
-  assert.match(html, /Open Legacy Tasks/);
+  assert.doesNotMatch(html, /Open Legacy Tasks/);
   assert.match(html, /<details class="section" open>/);
   assert.match(html, /プロジェクト進行中に使う操作/);
   assert.match(html, /初回セットアップ/);
   assert.match(html, /Issue を作成/);
   assert.match(html, /自然言語から Issue/);
-  assert.match(html, /Legacy Task を作成/);
+  assert.doesNotMatch(html, /Legacy Task を作成/);
   assert.match(html, /D:\\AI Docs 生成/);
   assert.match(html, /openQcdsStatus/);
   assert.match(html, /openQcdsDimension|data-qcds-axis/);
@@ -190,7 +190,7 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /width:0%|width:50%|width:100%/);
 });
 
-test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and legacy Tasks into one backlog prompt', async () => {
+test('buildAllWorkItemsStartPrompt turns open TODO and Issues into one backlog prompt', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-all-work-items-'));
   fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
   fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
@@ -214,10 +214,10 @@ test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and legacy Tasks int
     runConfig: { model: 'gpt-5.4', modelLabel: 'gpt-5.4', modelReasoningEffort: 'high', intelligenceLabel: 'high', sandboxMode: 'danger-full-access' }
   });
   assert.match(prompt, /All Work Items Start Prompt/);
-  assert.match(prompt, /TODO、Issues、legacy Tasks/);
+  assert.match(prompt, /TODO と Issues/);
   assert.match(prompt, /Open TODO: 1/);
   assert.match(prompt, /Open Issues: 1/);
-  assert.match(prompt, /Open Legacy Tasks: 1/);
+  assert.doesNotMatch(prompt, /Open Legacy Tasks/);
   assert.match(prompt, /Prompt history reuse/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Codex 実行設定/);
@@ -227,7 +227,7 @@ test('buildAllWorkItemsStartPrompt turns open TODO, Issues, and legacy Tasks int
   assert.match(prompt, /Blocked handling:/);
 });
 
-test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and legacy Tasks', async () => {
+test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO and Issues', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-selected-work-items-'));
   fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
   fs.mkdirSync(path.join(root, 'Tasks'), { recursive: true });
@@ -246,8 +246,7 @@ test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and
   const dashboard = await scanWorkItems(root);
   const selected = [
     dashboard.todos.find((item) => item.title.includes('Tool PATH')),
-    dashboard.issues[0],
-    dashboard.tasks[0]
+    dashboard.issues[0]
   ];
   const prompt = buildSelectedWorkItemsStartPrompt({
     workspaceRoot: root,
@@ -263,10 +262,10 @@ test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO, Issues, and
     runConfig: { model: 'gpt-5.5', modelLabel: 'gpt-5.5', modelReasoningEffort: 'xhigh', intelligenceLabel: 'xhigh', sandboxMode: 'workspace-write' }
   });
   assert.match(prompt, /Selected Work Items Start Prompt/);
-  assert.match(prompt, /選択された TODO、Issues、legacy Tasks だけ/);
+  assert.match(prompt, /選択された TODO と Issues だけ/);
   assert.match(prompt, /Selected TODO: 1/);
   assert.match(prompt, /Selected Issues: 1/);
-  assert.match(prompt, /Selected Legacy Tasks: 1/);
+  assert.doesNotMatch(prompt, /Selected Legacy Tasks/);
   assert.match(prompt, /Tool PATH bootstrap/);
   assert.match(prompt, /選択外の Work Item/);
   assert.match(prompt, /Model: gpt-5\.5/);
@@ -307,12 +306,12 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
   assert.match(prompt, /Access: read-only/);
 });
 
-test('inferWorkItemDraft turns natural language into issue or task fields', () => {
+test('inferWorkItemDraft turns natural language into issue fields', () => {
   const draft = inferWorkItemDraft({
-    mode: 'linked',
+    mode: 'issue',
     naturalText: 'P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。'
   });
-  assert.equal(draft.mode, 'linked');
+  assert.equal(draft.mode, 'issue');
   assert.equal(draft.priority, 'P1');
   assert.equal(draft.type, 'release');
   assert.equal(draft.phase, '06-release');
@@ -322,14 +321,14 @@ test('inferWorkItemDraft turns natural language into issue or task fields', () =
 
 test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
   const html = renderWorkItemComposerWebview('nonce', {
-    mode: 'task',
-    naturalText: 'GUIでTaskを作成する'
+    mode: 'issue',
+    naturalText: 'GUIでIssueを作成する'
   });
   assert.match(html, /Codex Work Item Composer/);
   assert.match(html, /Codexで自然言語から反映/);
   assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
-  assert.match(html, /Issue \+ Legacy Task/);
+  assert.doesNotMatch(html, /Legacy Task/);
   assert.match(html, /security/);
   assert.match(html, /07-maintenance/);
   assert.match(html, /draftSource/);

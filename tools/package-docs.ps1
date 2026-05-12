@@ -11,7 +11,6 @@ $entries = @(
   "SKILL.md",
   "TODO.md",
   "Issues",
-  "Tasks",
   "package.json",
   "docs",
   "samples",

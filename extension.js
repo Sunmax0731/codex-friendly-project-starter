@@ -11,11 +11,8 @@ const { scanAgentDocs, isAgentDocPath } = require('./src/workspace-docs.cjs');
 const {
   scanWorkItems,
   ensureIssuesDirectory,
-  ensureTasksDirectory,
   nextIssueFilePath,
-  nextTaskFilePath,
   createIssueMarkdown,
-  createTaskMarkdown,
   createBlockedFollowUpIssue,
   appendTodoWorkItemLink,
   isWorkItemDocPath
@@ -103,9 +100,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', (item) => openQcdsStatus(context, treeProvider, workItemsProvider, qcdsAxisFromCommandArgument(item))),
     vscode.commands.registerCommand('codex-friendly-project-starter.scaffoldDefaultDocs', () => scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
-    vscode.commands.registerCommand('codex-friendly-project-starter.initializeTasksDirectory', () => initializeTasksDirectoryCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createLocalIssue', () => createLocalIssueCommand(context, workItemsProvider)),
-    vscode.commands.registerCommand('codex-friendly-project-starter.createLocalTask', () => createLocalTaskCommand(context, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.importGitHubIssues', () => importGitHubIssuesCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.createBlockedFollowUpIssue', (item) => createBlockedFollowUpIssueCommand(context, workItemsProvider, item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkItemComposer', () => openWorkItemComposer(context, workItemsProvider, 'issue')),
@@ -758,11 +753,6 @@ async function handleDashboardMessage(args) {
     await renderDashboardPanel(panel, nonce, workspaceRoot);
     return;
   }
-  if (message?.type === 'initializeTasks') {
-    await initializeTasksDirectoryCommand(workItemsProvider);
-    await renderDashboardPanel(panel, nonce, workspaceRoot);
-    return;
-  }
   if (message?.type === 'scaffoldDocs') {
     await scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider);
     await renderDashboardPanel(panel, nonce, workspaceRoot);
@@ -821,20 +811,8 @@ async function initializeIssuesDirectoryCommand(workItemsProvider) {
   vscode.window.setStatusBarMessage('Codex Starter: Issues directory initialized', 4000);
 }
 
-async function initializeTasksDirectoryCommand(workItemsProvider) {
-  const workspaceRoot = pickWorkspaceRoot();
-  const result = ensureTasksDirectory(workspaceRoot);
-  await openMarkdownWebview(undefined, result.readmePath);
-  workItemsProvider?.refresh();
-  vscode.window.setStatusBarMessage('Codex Starter: Tasks directory initialized', 4000);
-}
-
 function createLocalIssueCommand(context, workItemsProvider) {
   openWorkItemComposer(context, workItemsProvider, 'issue');
-}
-
-function createLocalTaskCommand(context, workItemsProvider) {
-  openWorkItemComposer(context, workItemsProvider, 'task');
 }
 
 async function importGitHubIssuesCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
@@ -853,7 +831,7 @@ async function importGitHubIssuesCommand(context, treeProvider, workItemsProvide
     return;
   }
   const limit = Math.max(1, Math.min(100, Number(config.get('githubIssueImportLimit', 30)) || 30));
-  const createTask = config.get('workItemDetailMode', 'issues-only') === 'issues-and-tasks';
+  const createTask = false;
   let remoteIssues;
   try {
     remoteIssues = await vscode.window.withProgress({
@@ -881,7 +859,7 @@ async function importGitHubIssuesCommand(context, treeProvider, workItemsProvide
     };
   }), {
     canPickMany: true,
-    placeHolder: 'ローカル TODO / Issues / Tasks に取り込む GitHub Issue を選択'
+    placeHolder: 'ローカル TODO / Issues に取り込む GitHub Issue を選択'
   });
   const targets = (selected || []).filter((item) => !item.existing).map((item) => item.issue);
   if (!targets.length) {
@@ -909,7 +887,7 @@ async function importGitHubIssuesCommand(context, treeProvider, workItemsProvide
   treeProvider?.refresh();
   workItemsProvider?.refresh();
   const created = imported.filter((item) => item.created);
-  vscode.window.setStatusBarMessage(`Codex Starter: GitHub Issues ${created.length}件を TODO / Issues${createTask ? ' / Tasks' : ''} に取り込みました`, 7000);
+  vscode.window.setStatusBarMessage(`Codex Starter: GitHub Issues ${created.length}件を TODO / Issues に取り込みました`, 7000);
   if (created[0]?.issuePath) await openMarkdownWebview(context, created[0].issuePath);
 }
 
@@ -1072,7 +1050,7 @@ async function createBlockedFollowUpIssueCommand(context, workItemsProvider, ite
     kind: item?.kind
   });
   if (!resolved) {
-    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues / Tasks.');
+    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues.');
     return;
   }
   const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
@@ -1108,7 +1086,7 @@ async function startWorkItemWithCodexCommand(context, item) {
     kind: item?.kind
   });
   if (!resolved) {
-    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues / Tasks.');
+    vscode.window.showWarningMessage('Codex Starter: selected work item could not be resolved from TODO / Issues.');
     return;
   }
   const documentText = await fs.promises.readFile(resolved.filePath, 'utf8').catch(() => '');
@@ -1134,7 +1112,7 @@ async function startSelectedWorkItemsWithCodexCommand(context, workspaceRootOver
     ? resolveWorkItemReferences(dashboard, references)
     : await pickWorkItemsToStart(dashboard, workspaceRoot);
   if (!selectedItems.length) {
-    vscode.window.showInformationMessage('Codex Starter: 選択された open TODO / Issue / Task はありません。');
+    vscode.window.showInformationMessage('Codex Starter: 選択された open TODO / Issue はありません。');
     return;
   }
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
@@ -1157,9 +1135,8 @@ async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride)
   const dashboard = await scanWorkItems(workspaceRoot);
   const openTodoCount = (dashboard.todos || []).filter((item) => !item.done).length;
   const openIssueCount = (dashboard.issues || []).filter((item) => item.status !== 'closed').length;
-  const openTaskCount = (dashboard.tasks || []).filter((item) => item.status !== 'closed').length;
-  if (!openTodoCount && !openIssueCount && !openTaskCount) {
-    vscode.window.showInformationMessage('Codex Starter: open TODO / Issue / Task はありません。');
+  if (!openTodoCount && !openIssueCount) {
+    vscode.window.showInformationMessage('Codex Starter: open TODO / Issue はありません。');
     return;
   }
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
@@ -1214,7 +1191,7 @@ async function pickWorkItemsToStart(dashboard, workspaceRoot) {
     item
   })), {
     canPickMany: true,
-    placeHolder: 'Codex に処理させる TODO / Issue / Task を選択'
+    placeHolder: 'Codex に処理させる TODO / Issue を選択'
   });
   return (picked || []).map((entry) => entry.item);
 }
@@ -1222,8 +1199,7 @@ async function pickWorkItemsToStart(dashboard, workspaceRoot) {
 function openWorkItemsFromDashboard(dashboard) {
   return [
     ...(dashboard.todos || []).filter((item) => !item.done),
-    ...(dashboard.issues || []).filter((item) => item.status !== 'closed'),
-    ...(dashboard.tasks || []).filter((item) => item.status !== 'closed')
+    ...(dashboard.issues || []).filter((item) => item.status !== 'closed')
   ];
 }
 
@@ -1507,13 +1483,6 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
     tooltip: item.relativePath,
     icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'issues')
   }));
-  const openTasks = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 20).map((item) => ({
-    ...item,
-    label: item.title,
-    description: item.priority + ' ' + (item.phase || item.status),
-    tooltip: item.relativePath,
-    icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'tasklist')
-  }));
   const readiness = dashboard.releaseReadiness.map((item) => ({
     label: item.label,
     description: item.status,
@@ -1527,7 +1496,7 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
     description: dimension.grade + ' ' + dimension.score,
     tooltip: dimension.passed + '/' + dimension.expected + ' checks',
     icon: new vscode.ThemeIcon(dimension.status === 'pass' ? 'pass' : 'warning'),
-    children: dimension.linkedItems.filter((item) => !item.done).slice(0, 8).map((item) => ({
+    children: dimension.linkedItems.filter((item) => item.kind !== 'task' && !item.done).slice(0, 8).map((item) => ({
       ...item,
       label: item.title,
       description: item.priority + ' ' + item.status,
@@ -1548,12 +1517,6 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
       description: dashboard.stats.issues.percent + '%',
       children: openIssues,
       icon: new vscode.ThemeIcon('issues')
-    },
-    {
-      label: prefix + 'Legacy Tasks ' + (dashboard.stats.tasks?.closed || 0) + '/' + (dashboard.stats.tasks?.total || 0),
-      description: (dashboard.stats.tasks?.percent || 0) + '%',
-      children: openTasks,
-      icon: new vscode.ThemeIcon('tasklist')
     },
     {
       label: prefix + 'QCDS ' + (dashboard.qcds.overallGrade ? dashboard.qcds.overallGrade + ' ' + dashboard.qcds.overallScore : 'missing'),
@@ -1580,7 +1543,6 @@ class AgentDocFileDecorationProvider {
 class WorkItemFileDecorationProvider {
   provideFileDecoration(uri) {
     if (isIssueFileDecoration(uri.fsPath)) return new vscode.FileDecoration('IS', 'Local Issue', new vscode.ThemeColor('charts.yellow'));
-    if (isTaskFileDecoration(uri.fsPath)) return new vscode.FileDecoration('TK', 'Local Task', new vscode.ThemeColor('charts.purple'));
     if (isTodoFileDecoration(uri.fsPath)) return new vscode.FileDecoration('TD', 'TODO document', new vscode.ThemeColor('charts.blue'));
     return undefined;
   }
@@ -1592,10 +1554,6 @@ function isIssueFileDecoration(filePath) {
 
 function isTodoFileDecoration(filePath) {
   return isWorkItemDocPath(filePath) && /TODO\.md$/i.test(filePath);
-}
-
-function isTaskFileDecoration(filePath) {
-  return isWorkItemDocPath(filePath) && /[\\/]Tasks[\\/]/i.test(filePath);
 }
 
 function updateEditorDecorations(editor, headingDecoration, keywordDecoration) {

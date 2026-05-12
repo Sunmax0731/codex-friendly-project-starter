@@ -10,7 +10,7 @@ const {
   ensureDefaultProjectDocs
 } = require('../src/default-docs.cjs');
 
-test('renderDefaultDocs includes D:\\AI source docs, phase skills, Tasks, and Issues', () => {
+test('renderDefaultDocs includes D:\\AI source docs, phase skills, and Issues', () => {
   const rendered = renderDefaultDocs({
     domainId: 'VSCodeExtension',
     projectName: 'sample-extension',
@@ -21,8 +21,9 @@ test('renderDefaultDocs includes D:\\AI source docs, phase skills, Tasks, and Is
   assert.ok(paths.has('SKILL.md'));
   assert.ok(paths.has('Design.md'));
   assert.ok(paths.has('Architecture.md'));
-  assert.ok(paths.has('Tasks/0001-initial-docs-and-scope.md'));
-  assert.ok(paths.has('Issues/0001-project-startup-docs.md'));
+  assert.equal([...paths].some((item) => item.startsWith('Tasks/')), false);
+  assert.ok(paths.has('Issues/0001-initial-docs-and-scope.md'));
+  assert.ok(paths.has('Issues/0003-qcds-release-readiness.md'));
   for (const phase of PHASE_SKILLS) assert.ok(paths.has(`skills/${phase.directory}/SKILL.md`));
   const rootSkill = rendered.files.find((file) => file.relativePath === 'SKILL.md').content;
   assert.match(rootSkill, /skills\/01-requirements\/SKILL\.md/);
@@ -37,7 +38,8 @@ test('ensureDefaultProjectDocs writes missing files and preserves existing files
   assert.ok(result.skipped.includes('README.md'));
   assert.equal(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), '# Existing\n');
   assert.ok(fs.existsSync(path.join(root, 'skills', '06-release', 'SKILL.md')));
-  assert.ok(fs.existsSync(path.join(root, 'Tasks', '0003-qcds-release-readiness.md')));
+  assert.ok(fs.existsSync(path.join(root, 'Issues', '0003-qcds-release-readiness.md')));
+  assert.equal(fs.existsSync(path.join(root, 'Tasks')), false);
 });
 
 test('collectDefaultDocSources reports common and domain source paths', () => {

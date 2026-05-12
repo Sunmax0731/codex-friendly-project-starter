@@ -25,7 +25,7 @@ const DEVELOPMENT_METHODS = [
   {
     id: 'agile',
     label: 'アジャイル',
-    instruction: '短いイテレーションで TODO / Issue / legacy Task を更新し、動く単位を継続的に検証する。'
+    instruction: '短いイテレーションで TODO / Issue を更新し、動く単位を継続的に検証する。'
   },
   {
     id: 'waterfall',
@@ -35,7 +35,7 @@ const DEVELOPMENT_METHODS = [
   {
     id: 'prototyping',
     label: 'プロトタイピング',
-    instruction: '価値検証に必要な試作品を先に作り、学びを仕様、TODO、Issue、必要な legacy Task に反映してから本実装へ進む。'
+    instruction: '価値検証に必要な試作品を先に作り、学びを仕様、TODO、Issue に反映してから本実装へ進む。'
   },
   {
     id: 'kanban',

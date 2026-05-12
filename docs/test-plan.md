@@ -16,12 +16,12 @@ npm test
 - VS Code Codex sidebar handoff と CLI check の command builder が使え、Terminal mode では設定された CLI path、`rg.exe` と `gh.exe` の PATH 補強と確認を行う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
 - Agent docs 判定とスキャンが `node_modules` を除外する。
-- Issue / legacy Task 作成時に `TODO.md` へリンク付き checkbox を同期できる。
-- GitHub Issues 取込が public GitHub Issue URL を保持したまま既定では `TODO.md` と `Issues/*.md` を生成し、設定時だけ legacy `Tasks/*.md` を生成し、重複 URL を再 import しない。
-- Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue / legacy Task、QCDS、Git 書き込み方針が含まれる。
-- Work Dashboard に `Select` checkbox と `選択Work Itemを開始` があり、選択 TODO / Issue / legacy Task だけの開始 prompt を生成できる。
+- Issue 作成時に `TODO.md` へリンク付き checkbox を同期できる。
+- GitHub Issues 取込が public GitHub Issue URL を保持したまま `TODO.md` と `Issues/*.md` を生成し、legacy `Tasks/*.md` を新規生成せず、重複 URL を再 import しない。
+- Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue、QCDS、Git 書き込み方針が含まれる。
+- Work Dashboard に `Select` checkbox と `選択Work Itemを開始` があり、選択 TODO / Issue だけの開始 prompt を生成できる。
 - Work Item Start Prompt に model、インテリジェンス、アクセス権限の `Codex 実行設定` が含まれ、既定で VS Code Codex sidebar handoff になる。
-- `Start All Work Items` が未完了 TODO / Issue / legacy Task を一括開始 prompt に変換できる。
+- `Start All Work Items` が未完了 TODO / Issue を一括開始 prompt に変換できる。
 - VS Code Codex handoff / Codex CLI session が `docs/codex-sessions.md` / `.jsonl` に記録され、blocked work item から follow-up Issue を作成できる。
 - FirstPrompt 履歴が workspace storage に保存、復元、削除できる。
 - `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から project name 候補を補完し、文字化け候補を除外できる。
@@ -40,9 +40,9 @@ npm test
 - `Codex Starter: Check Codex CLI` が PATH 補強後の `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 - `Codex Starter: Send FirstPrompt to VS Code Codex` が一時 prompt file を作り、clipboard にコピーして Codex sidebar を開く。
 - `Codex Starter: Send Current Prompt to VS Code Codex` が選択範囲または開いている文書全体を clipboard にコピーして Codex sidebar を開く。
-- `Codex Starter: Start Work Item with Codex` が選択 TODO / Issue / legacy Task を開始プロンプトにして VS Code Codex に渡す。
-- `Codex Starter: Start Selected Work Items with Codex` が複数選択した TODO / Issue / legacy Task を開始プロンプトにして VS Code Codex に渡す。
-- `Codex Starter: Start All Work Items with Codex` が未完了 TODO / Issue / legacy Task を優先度順の一括開始プロンプトにして VS Code Codex に渡す。
+- `Codex Starter: Start Work Item with Codex` が選択 TODO / Issue を開始プロンプトにして VS Code Codex に渡す。
+- `Codex Starter: Start Selected Work Items with Codex` が複数選択した TODO / Issue を開始プロンプトにして VS Code Codex に渡す。
+- `Codex Starter: Start All Work Items with Codex` が未完了 TODO / Issue を優先度順の一括開始プロンプトにして VS Code Codex に渡す。
 - `Codex Starter: Import GitHub Issues` が public GitHub Issues API から open issue を取得し、選択 issue を Codex CLI read-only inference 経由で local work item に変換する。
 
 ## 手動テスト

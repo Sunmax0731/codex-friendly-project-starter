@@ -17,7 +17,7 @@ function buildWorkItemStartPrompt(input = {}) {
       trimDocument(doc.content),
       '```'
     ].join('\n')).join('\n\n')
-    : '関連する Issue / legacy Task 文書は見つかりません。必要なら TODO を入口にして Issue を作成・同期してください。';
+    : '関連する Issue 文書は見つかりません。必要なら TODO を入口にして Issue を作成・同期してください。';
   return [
     '# Work Item Start Prompt',
     '',
@@ -42,10 +42,10 @@ function buildWorkItemStartPrompt(input = {}) {
     '',
     '## 進め方',
     '',
-    '- TODO を入口にし、リンクされた Issue を主な作業契約として扱ってください。legacy Task がリンクされている場合だけ互換情報として参照してください。',
-    '- Issue が不足している場合は、この作業単位に結びつく Markdown を `Issues/` に追加し、`TODO.md` にリンクを残してください。`Tasks/` は既存互換が必要な場合だけ使います。',
+    '- TODO を入口にし、リンクされた Issue を主な作業契約として扱ってください。',
+    '- Issue が不足している場合は、この作業単位に結びつく Markdown を `Issues/` に追加し、`TODO.md` にリンクを残してください。',
     '- 作業は選択された Work Item の範囲に限定し、必要な実装、テスト、docs、QCDS 証跡を更新してください。',
-    '- 完了または中断時は TODO / Issue / legacy Task の状態、チェック項目、残作業を最新化してください。',
+    '- 完了または中断時は TODO / Issue の状態、チェック項目、残作業を最新化してください。',
     '- 検証コマンドと未実施の手動確認がある場合は最後に短く報告してください。',
     '',
     '## Git 書き込み方針',
@@ -75,7 +75,6 @@ function buildAllWorkItemsStartPrompt(input = {}) {
   const runConfigSection = formatCodexRunConfig(input.runConfig);
   const todos = sortWorkItems(openDashboardItems(dashboard.todos, (item) => !item.done));
   const issues = sortWorkItems(openDashboardItems(dashboard.issues, (item) => item.status !== 'closed'));
-  const tasks = sortWorkItems(openDashboardItems(dashboard.tasks, (item) => item.status !== 'closed'));
   return [
     '# All Work Items Start Prompt',
     '',
@@ -84,12 +83,12 @@ function buildAllWorkItemsStartPrompt(input = {}) {
     '',
     '## 主指示',
     '',
-    '- TODO、Issues、legacy Tasks の未完了項目を一つの連結したバックログとして通しで処理してください。',
-    '- `TODO.md` を入口にし、リンクされた Issue を同じ作業契約として扱ってください。legacy Task は既存互換の補助情報として扱います。',
+    '- TODO と Issues の未完了項目を一つの連結したバックログとして通しで処理してください。',
+    '- `TODO.md` を入口にし、リンクされた Issue を同じ作業契約として扱ってください。',
     '- 優先順位は P0 -> P1 -> P2 -> P3 -> P4、次にファイル上の順序です。',
-    '- Issue が不足している TODO は `Issues/` に Markdown を追加し、`TODO.md` からリンクしてください。legacy Task は明示的な互換要件がある場合だけ追加します。',
-    '- 完了した項目は TODO チェック、Issue / legacy Task の Status、チェック項目、docs、tests、QCDS 証跡を同期してください。',
-    '- すべてを完了できない場合は、各 TODO / Issue / legacy Task に blocked 理由と次アクションを残し、follow-up Issue を作れるだけの原因を報告してください。',
+    '- Issue が不足している TODO は `Issues/` に Markdown を追加し、`TODO.md` からリンクしてください。',
+    '- 完了した項目は TODO チェック、Issue の Status、チェック項目、docs、tests、QCDS 証跡を同期してください。',
+    '- すべてを完了できない場合は、各 TODO / Issue に blocked 理由と次アクションを残し、follow-up Issue を作れるだけの原因を報告してください。',
     '',
     '## 最初に読むもの',
     '',
@@ -98,7 +97,6 @@ function buildAllWorkItemsStartPrompt(input = {}) {
     '- `SKILL.md`',
     '- `TODO.md`',
     '- `Issues/README.md`',
-    '- `Tasks/README.md`',
     '',
     '## Git 書き込み方針',
     '',
@@ -112,7 +110,6 @@ function buildAllWorkItemsStartPrompt(input = {}) {
     '',
     `- Open TODO: ${todos.length}`,
     `- Open Issues: ${issues.length}`,
-    `- Open Legacy Tasks: ${tasks.length}`,
     '',
     '## Open TODO',
     '',
@@ -121,10 +118,6 @@ function buildAllWorkItemsStartPrompt(input = {}) {
     '## Open Issues',
     '',
     formatWorkItemList(issues, workspaceRoot, 'Open Issue はありません。'),
-    '',
-    '## Open Legacy Tasks',
-    '',
-    formatWorkItemList(tasks, workspaceRoot, 'Open Task はありません。'),
     '',
     '## Release readiness',
     '',
@@ -146,19 +139,19 @@ function buildSelectedWorkItemsStartPrompt(input = {}) {
     '',
     '## 主指示',
     '',
-    '- 選択された TODO、Issues、legacy Tasks だけを一つの連結した作業範囲として処理してください。',
+    '- 選択された TODO と Issues だけを一つの連結した作業範囲として処理してください。',
     '- 選択外の Work Item は、依存関係の確認や参照に留め、勝手に完了扱いにしないでください。',
-    '- TODO を入口にし、リンクされた Issue が選択範囲にある場合は同じ作業契約として扱ってください。legacy Task は既存互換の補助情報として扱います。',
+    '- TODO を入口にし、リンクされた Issue が選択範囲にある場合は同じ作業契約として扱ってください。',
     '- 優先順位は P0 -> P1 -> P2 -> P3 -> P4、次にファイル上の順序です。',
-    '- 完了した項目は TODO チェック、Issue / legacy Task の Status、チェック項目、docs、tests、QCDS 証跡を同期してください。',
-    '- すべてを完了できない場合は、該当 TODO / Issue / legacy Task に blocked 理由と次アクションを残し、follow-up Issue を作れるだけの原因を報告してください。',
+    '- 完了した項目は TODO チェック、Issue の Status、チェック項目、docs、tests、QCDS 証跡を同期してください。',
+    '- すべてを完了できない場合は、該当 TODO / Issue に blocked 理由と次アクションを残し、follow-up Issue を作れるだけの原因を報告してください。',
     '',
     '## 最初に読むもの',
     '',
     '- `README.md`',
     '- `AGENTS.md`',
     '- `SKILL.md`',
-    '- 選択された TODO / Issues / legacy Tasks',
+    '- 選択された TODO / Issues',
     '',
     '## Git 書き込み方針',
     '',
@@ -172,7 +165,6 @@ function buildSelectedWorkItemsStartPrompt(input = {}) {
     '',
     `- Selected TODO: ${selectedItems.filter((item) => item.kind === 'todo').length}`,
     `- Selected Issues: ${selectedItems.filter((item) => item.kind === 'issue').length}`,
-    `- Selected Legacy Tasks: ${selectedItems.filter((item) => item.kind === 'task').length}`,
     '',
     '## Selected Work Items',
     '',
@@ -237,7 +229,7 @@ function formatCodexRunConfig(runConfig = {}) {
     `- Model: ${model}`,
     `- Intelligence: ${intelligence}`,
     `- Access: ${access}`,
-    '- Blocked handling: if the selected work cannot be closed, set the relevant TODO / Issue / legacy Task to blocked, document the direct cause, and create a follow-up local Issue linked from TODO.md.'
+    '- Blocked handling: if the selected work cannot be closed, set the relevant TODO / Issue to blocked, document the direct cause, and create a follow-up local Issue linked from TODO.md.'
   ].join('\n');
 }
 

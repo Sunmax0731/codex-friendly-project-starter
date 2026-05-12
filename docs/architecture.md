@@ -9,10 +9,10 @@
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
 - `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
-- `src/work-item-start.cjs`: TODO / Issue / legacy Task を Codex CLI へ渡す開始プロンプト生成。
-- `src/codex-sessions.cjs`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue / legacy Task に記録する。
+- `src/work-item-start.cjs`: TODO / Issue を Codex CLI へ渡す開始プロンプト生成。
+- `src/codex-sessions.cjs`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue に記録する。
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
-- `src/github-issues.cjs`: public GitHub Issues の取得、repository 入力の正規化、GitHub Issue URL による重複検出、local TODO / Issue と設定時の legacy Task 作成。
+- `src/github-issues.cjs`: public GitHub Issues の取得、repository 入力の正規化、GitHub Issue URL による重複検出、local TODO / Issue 作成。
 - `src/codex-cli.cjs`: Terminal mode で Codex CLI に渡す PowerShell command と terminal command 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
 - `tools/`: QCDS、runtime gate、docs ZIP、closed alpha guard。
@@ -25,9 +25,9 @@ Codex CLI 呼び出しも VS Code API から分離し、`src/codex-cli.cjs` で 
 
 Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` が JSON 専用 prompt と JSON schema を作り、拡張本体が `codex exec -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を background 実行して last-message file から JSON を取り出す。Codex CLI の失敗、timeout、JSON 不正時は `src/work-item-composer.cjs` のローカル補完に戻す。
 
-GitHub Issues 取込は `src/github-issues.cjs` が public GitHub Issues API と local work item 書き込みの境界を担当する。拡張本体は repository 入力、issue 選択、進捗表示、Codex inference 呼び出しだけを担い、GitHub Issue の内容を既定では local `Issues/*.md` / `TODO.md` に書く処理は helper に閉じ込める。`workItemDetailMode=issues-and-tasks` の場合だけ legacy `Tasks/*.md` も作成する。GitHub 側への書き込みは行わない。
+GitHub Issues 取込は `src/github-issues.cjs` が public GitHub Issues API と local work item 書き込みの境界を担当する。拡張本体は repository 入力、issue 選択、進捗表示、Codex inference 呼び出しだけを担い、GitHub Issue の内容を local `Issues/*.md` / `TODO.md` に書く処理は helper に閉じ込める。GitHub 側への書き込みは行わない。
 
-Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` の結果へ解決し、`src/work-item-start.cjs` が selected Markdown と関連 Issue / legacy Task を含む開始プロンプトに変換する。実行は既存の `invokeCodexAgent` を再利用し、確認ダイアログ、access、model/profile 設定を共通化する。起動時は `src/codex-sessions.cjs` で project 内の session index を更新する。
+Work Item の着手導線は `extension.js` が選択 item を `scanWorkItems` の結果へ解決し、`src/work-item-start.cjs` が selected Markdown と関連 Issue を含む開始プロンプトに変換する。実行は既存の `invokeCodexAgent` を再利用し、確認ダイアログ、access、model/profile 設定を共通化する。起動時は `src/codex-sessions.cjs` で project 内の session index を更新する。
 
 FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code workspace 外を対象にする場合、`src/invocation-target.cjs` が対象 repo path を抽出し、まだ repo が存在しないときは `D:\AI\ChromeExtension` のような最も近い既存親ディレクトリを `codex exec -C` の root にする。これにより starter repo を誤って編集することと、対象 repo への書き込みが project 外として拒否されることを避ける。
 

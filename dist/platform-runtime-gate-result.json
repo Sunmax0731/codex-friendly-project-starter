@@ -58,7 +58,7 @@
     {
       "id": "work-composer-command",
       "pass": true,
-      "detail": "Work Item Composer and legacy Tasks init commands exist"
+      "detail": "Work Item Composer commands exist"
     },
     {
       "id": "github-issue-import-command",
@@ -88,7 +88,7 @@
     {
       "id": "default-docs-command",
       "pass": true,
-      "detail": "Default docs scaffold and local task commands exist"
+      "detail": "Default docs scaffold and issue-only default work items exist"
     },
     {
       "id": "webview-panel",
@@ -143,7 +143,7 @@
     {
       "id": "github-issue-import-contract",
       "pass": true,
-      "detail": "GitHub Issues import normalizes remote issues into local TODO and Issue with optional legacy Task"
+      "detail": "GitHub Issues import normalizes remote issues into local TODO and Issue while keeping legacy duplicate detection compatible"
     },
     {
       "id": "markdown-webview",

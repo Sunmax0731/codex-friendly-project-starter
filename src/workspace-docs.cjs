@@ -30,6 +30,7 @@ function toSlash(value) {
 
 function isAgentDocPath(filePath) {
   const normalized = toSlash(filePath);
+  if (/[\\/]?Tasks[\\/]/i.test(normalized)) return false;
   const base = path.basename(normalized);
   if (ROOT_AGENT_DOCS.has(base)) return true;
   const docsIndex = normalized.toLowerCase().lastIndexOf('/docs/');

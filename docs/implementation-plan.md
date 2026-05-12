@@ -37,14 +37,14 @@
 
 - `src/markdown-webview.cjs` を追加し、Markdown を sanitize して WebView 表示する。
 - Agent Docs / Work Items / Dashboard / QCDS から Markdown WebView へ遷移できるようにする。
-- `Tasks/*.md` を legacy 互換の作業単位として解析し、TODO / Issue / QCDS と紐づける。
-- `Create Legacy Local Task` command を追加する。
+- `Tasks/*.md` を legacy 互換の作業単位として解析し、既存 Markdown link を壊さない。
+- 通常 UI の作業単位は TODO / Issue に集約し、legacy Task 作成導線は表示しない。
 - `tests/markdown-webview.test.cjs` と `tests/work-items.test.cjs` を更新する。
 
 ## Phase 3.7: D:\AI 既定 docs scaffold
 
 - `src/default-docs.cjs` を追加し、`D:\AI` 共通 docs と領域別 docs を生成元として管理する。
-- root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、工程別 `skills/*/SKILL.md` を生成する。
+- root docs、`docs/*.md`、`Issues/*.md`、工程別 `skills/*/SKILL.md` を生成する。
 - 既存ファイルを既定では上書きしない command として提供する。
 - `tests/default-docs.test.cjs` を追加する。
 
@@ -56,9 +56,9 @@
 
 ## Phase 3.9: TODO 起点の Codex 着手導線
 
-- Dashboard と Work Items Tree から TODO / Issue / legacy Task の `Start` を実行できる command を追加する。
-- 選択した Work Item と関連 Issue / legacy Task を Work Item Start Prompt にまとめ、Codex CLI へ渡す。
-- Issue / legacy Task / Issue + Legacy Task の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
+- Dashboard と Work Items Tree から TODO / Issue の `Start` を実行できる command を追加する。
+- 選択した Work Item と関連 Issue を Work Item Start Prompt にまとめ、Codex CLI へ渡す。
+- Issue の GUI 作成時に `TODO.md` へ linked checkbox を同期し、TODO を作業入口として維持する。
 - Unit test、manual test、platform runtime gate、traceability を更新する。
 
 ## Phase 3.10: Codex 実行環境と複数選択
@@ -74,8 +74,8 @@
 - `src/github-issues.cjs` を追加し、public GitHub repository 入力、remote URL 解析、Issues API 取得、PR 除外、GitHub Issue 正規化を担当させる。
 - Dashboard と Command Palette に `GitHub Issues 取込` を追加し、GitHub Issue を複数選択して取り込めるようにする。
 - 選択 issue は Codex CLI read-only inference に渡し、既定では local Issue の下書きに整えて `TODO.md` に linked checkbox を追加する。
-- `codexFriendlyProjectStarter.workItemDetailMode=issues-and-tasks` の場合だけ legacy Task も作成する。
-- GitHub Issue URL が既に `TODO.md` / `Issues` / `Tasks` にある場合は import 済みとして重複作成しない。
+- legacy Task は作成せず、既定の local work item は TODO / Issue に集約する。
+- GitHub Issue URL が既に `TODO.md` / `Issues` / `Tasks` にある場合は import 済みとして扱い、重複作成しない。
 - Codex 実行 session の project-local index と blocked follow-up Issue 作成導線を追加する。
 - tests、platform runtime gate、VSIX readiness gate、manual/user/release docs を更新する。
 

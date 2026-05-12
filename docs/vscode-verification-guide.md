@@ -38,15 +38,15 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. Activity Bar の `Codex Starter` を開く。
 2. `Work Items` を開く。
-3. `TODO`、`Issues`、legacy `Tasks`、`QCDS`、`Release readiness` の group を確認する。
+3. `TODO`、`Issues`、`QCDS`、`Release readiness` の group を確認し、legacy `Tasks` group が表示されないことを確認する。
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
 6. Dashboard の `Issues 初期化` を実行する。
 7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
-8. Dashboard の `Legacy Task を作成` を押し、Work Item Composer で title、priority、phase、QCDS、acceptance criteria を入力して互換用 Task を作成する。
-9. Dashboard の `自然言語から Issue` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。必要な場合だけ作成先を `Issue + Legacy Task` に変える。
+8. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
+9. Dashboard の `自然言語から Issue` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
 10. Dashboard の `GitHub Issues 取込` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
-11. 作成された TODO / Issue / legacy Task の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
+11. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
 12. Dashboard の checkbox で複数 Work Item を選び、`選択Work Itemを開始` を実行する。
 13. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
 14. Dashboard の `全Work Itemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
@@ -56,27 +56,25 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - `TODO.md` の未完了 task が `Work Items` に表示される。
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
-- legacy `Tasks/*.md` の open / in-progress / blocked Task が表示される。
+- legacy `Tasks/*.md` は通常 UI に表示されない。
 - Dashboard に TODO と Issue の progress bar が表示される。
-- Dashboard 上部に `Issue を作成`、`Legacy Task を作成`、`自然言語から Issue`、`Issues 初期化`、`Tasks 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示される。
+- Dashboard 上部に `Issue を作成`、`自然言語から Issue`、`Issues 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示され、legacy Task 作成 / Tasks 初期化ボタンは表示されない。
 - Dashboard 上部と Work Items title action から `GitHub Issues 取込` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。
-- QCDS に紐づいた TODO / Issue / legacy Task がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。
+- QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
-- legacy `Tasks/README.md` と `Tasks/000x-*.md` が UTF-8 Markdown として作成される。
 - Work Item Composer の `Codexで自然言語から反映` で Codex CLI が priority、type、phase、QCDS、acceptance criteria を補完し、完了後に `Codex CLI の下書き` 由来であることが status text に表示される。
-- Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` と必要な legacy `Tasks/*.md` に `Draft source: codex-cli` が記録される。
-- Codex CLI が利用できない場合でもローカル補完へフォールバックし、Issue / legacy Task 作成操作は継続できる。
-- `Issue + Legacy Task` 作成では Issue と Task が相互リンクされ、Markdown WebView 内のリンククリックで遷移できる。
-- Issue / legacy Task / Issue + Legacy Task 作成後、`TODO.md` にリンク付き checkbox が追加される。
-- GitHub Issues 取込で作成した TODO / Issue には GitHub Issue 個別リンクが残り、同じ URL は重複 import されない。`workItemDetailMode=issues-and-tasks` の場合だけ legacy Task も作成される。
+- Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` に `Draft source: codex-cli` が記録される。
+- Codex CLI が利用できない場合でもローカル補完へフォールバックし、Issue 作成操作は継続できる。
+- Issue 作成後、`TODO.md` にリンク付き checkbox が追加される。
+- GitHub Issues 取込で作成した TODO / Issue には GitHub Issue 個別リンクが残り、同じ URL は重複 import されない。legacy Task は作成されない。
 - Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
 - Work Item Start 系では model、インテリジェンス、アクセス権限を選べ、prompt に `Codex 実行設定`、`Access`、`Blocked handling` が含まれる。
-- Codex 起動後、対象 project に `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` が作成され、Issue / legacy Task には `Codex Sessions` セクションが追記される。
+- Codex 起動後、対象 project に `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` が作成され、Issue には `Codex Sessions` セクションが追記される。
 - blocked の Work Item から `Codex Starter: Create Blocked Follow-up Issue` を実行でき、原因調査用 Issue が作成される。
-- `Start Selected Work Items with Codex` を実行でき、選択した TODO / Issue / legacy Task だけの開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
-- `Start All Work Items with Codex` を実行でき、未完了 TODO / Issue / legacy Task の一括開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
+- `Start Selected Work Items with Codex` を実行でき、選択した TODO / Issue だけの開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
+- `Start All Work Items with Codex` を実行でき、未完了 TODO / Issue の一括開始 prompt が VS Code Codex へ渡す clipboard 内容になる。
 - 作成した Issue の checkbox を変更して refresh すると、Issue progress が更新される。
 
 ## 2.5 Markdown WebView と D:\AI 既定 docs
@@ -85,7 +83,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` から `Codex Starter: Open Markdown WebView` を実行する。
 2. WebView の `Open Source`、`Copy Path`、`Refresh` を押す。
-3. `TODO.md` から `Tasks/*.md` への link、または `Issues/*.md` から `Tasks/*.md` への link をクリックする。
+3. `TODO.md` から `Issues/*.md` への link をクリックする。既存互換の `Tasks/*.md` link がある場合は Markdown WebView 内で遷移できることも確認する。
 4. 新しい検証用 workspace で `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
 
 期待結果:
@@ -93,7 +91,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Markdown が VS Code theme に追従した WebView として表示される。
 - Workspace 内の Markdown link は WebView 内で遷移する。
 - workspace 外への相対リンクは開かれない。
-- `D:\AI` の共通 docs と領域別 docs を参照した root docs、`docs/*.md`、`Issues/*.md`、`Tasks/*.md`、`skills/*/SKILL.md` が生成される。
+- `D:\AI` の共通 docs と領域別 docs を参照した root docs、`docs/*.md`、`Issues/*.md`、`skills/*/SKILL.md` が生成される。`Tasks/*.md` は新規生成されない。
 
 ## 3. FirstPrompt 生成
 

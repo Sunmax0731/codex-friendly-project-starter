@@ -9,6 +9,7 @@ test('isAgentDocPath recognizes root AI agent files and selected docs', () => {
   assert.equal(isAgentDocPath('D:/repo/AGENTS.md'), true);
   assert.equal(isAgentDocPath('D:/repo/SKILL.md'), true);
   assert.equal(isAgentDocPath('D:/repo/docs/specification.md'), true);
+  assert.equal(isAgentDocPath('D:/repo/Tasks/README.md'), false);
   assert.equal(isAgentDocPath('D:/repo/src/index.js'), false);
 });
 
@@ -28,4 +29,3 @@ test('scanAgentDocs walks a workspace and skips node_modules', async () => {
   const docs = await scanAgentDocs(root);
   assert.deepEqual(docs.map((doc) => doc.relativePath), ['AGENTS.md', 'docs/design.md']);
 });
-

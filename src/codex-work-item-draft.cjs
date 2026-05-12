@@ -31,7 +31,7 @@ const WORK_ITEM_DRAFT_JSON_SCHEMA = {
 function buildCodexWorkItemDraftPrompt(input = {}, options = {}) {
   const workspaceRoot = options.workspaceRoot || process.cwd();
   const requested = {
-    mode: input.mode || 'linked',
+    mode: input.mode || 'issue',
     naturalText: input.naturalText || '',
     title: input.title || '',
     priority: input.priority || '',
@@ -45,14 +45,14 @@ function buildCodexWorkItemDraftPrompt(input = {}, options = {}) {
     '# Work Item Draft JSON Task',
     '',
     'あなたは VS Code 拡張の Work Item Composer から呼び出される Codex CLI です。',
-    '入力された自然言語メモを Issue の下書き JSON に構造化してください。legacy Task は明示された場合だけ同じ項目を使います。',
+    '入力された自然言語メモを Issue の下書き JSON に構造化してください。',
     'ファイル編集、コマンド実行、追加調査は不要です。回答は JSON オブジェクトだけにしてください。',
     '',
     '## 出力スキーマ',
     '',
     '```json',
     '{',
-    '  "mode": "issue | task | linked",',
+    '  "mode": "issue",',
     '  "title": "短いタイトル",',
     '  "priority": "P0 | P1 | P2 | P3 | P4",',
     '  "type": "feature | bug | docs | release | test | task",',
@@ -93,7 +93,7 @@ function parseCodexWorkItemDraftOutput(output, originalInput = {}) {
 }
 
 function normalizeCodexWorkItemDraft(raw = {}, originalInput = {}) {
-  const mode = validOption(WORK_ITEM_FORM_OPTIONS.modes.map((item) => item.id), raw.mode, originalInput.mode || 'linked');
+  const mode = validOption(WORK_ITEM_FORM_OPTIONS.modes.map((item) => item.id), raw.mode, originalInput.mode || 'issue');
   const priority = validOption(WORK_ITEM_FORM_OPTIONS.priorities, raw.priority, originalInput.priority || '');
   const type = validOption(WORK_ITEM_FORM_OPTIONS.issueTypes, raw.type, originalInput.type || '');
   const phase = validOption(WORK_ITEM_FORM_OPTIONS.phases, raw.phase, originalInput.phase || '');

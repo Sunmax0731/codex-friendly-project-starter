@@ -190,7 +190,6 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   const safe = JSON.stringify(dashboard).replace(/</g, '\\u003c');
   const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
   const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
-  const taskItems = (dashboard.tasks || []).filter((item) => item.status !== 'closed').slice(0, 12);
   const qcdsStatus = dashboard.qcds.overallGrade
     ? `${dashboard.qcds.overallGrade} / ${dashboard.qcds.overallScore}`
     : 'missing';
@@ -261,7 +260,6 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       <button class="action" data-action="openComposer" data-mode="issue">自然言語から Issue</button>
       <button class="action" data-action="importGitHubIssues">GitHub Issues 取込</button>
       <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
-      <button class="action" data-action="openComposer" data-mode="task">Legacy Task を作成</button>
       <button class="action secondary" data-action="openStarter">FirstPrompt</button>
       <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
       <button class="action secondary" data-action="openCodexApp">VS Code Codex</button>
@@ -276,14 +274,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     <div class="actions">
       <button class="action secondary" data-action="scaffoldDocs">D:\\AI Docs 生成</button>
       <button class="action secondary" data-action="initializeIssues">Issues 初期化</button>
-      <button class="action secondary" data-action="initializeTasks">Tasks 初期化</button>
       <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
     </div>
   </details>
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
-    ${metricHtml('Legacy Tasks', (dashboard.stats.tasks?.closed || 0) + ' / ' + (dashboard.stats.tasks?.total || 0), dashboard.stats.tasks?.percent || 0, (dashboard.stats.tasks?.open || 0) + (dashboard.stats.tasks?.active || 0) + (dashboard.stats.tasks?.blocked || 0) + ' active')}
     ${metricHtml('QCDS', qcdsStatus, dashboard.qcds.summary.percent, dashboard.qcds.summary.passedChecks + ' / ' + dashboard.qcds.summary.totalChecks + ' checks')}
   </section>
   <details class="section" open>
@@ -292,7 +288,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   </details>
   <details class="section" open>
     <summary>QCDS Improvements</summary>
-    <div class="list">${dashboard.qcds.improvements.length ? dashboard.qcds.improvements.slice(0, 12).map(qcdsImprovementHtml).join('') : '<div class="empty">QCDS に紐づく未完了 TODO / Issue はありません。</div>'}</div>
+    <div class="list">${visibleWorkItems(dashboard.qcds.improvements).length ? visibleWorkItems(dashboard.qcds.improvements).slice(0, 12).map(qcdsImprovementHtml).join('') : '<div class="empty">QCDS に紐づく未完了 TODO / Issue はありません。</div>'}</div>
   </details>
   <details class="section" open>
     <summary>Release Readiness</summary>
@@ -305,10 +301,6 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <details class="section" open>
     <summary>Open Issues</summary>
     <div class="list">${issueItems.length ? issueItems.map(issueHtml).join('') : '<div class="empty">Open Issue はありません。</div>'}</div>
-  </details>
-  <details class="section" open>
-    <summary>Open Legacy Tasks</summary>
-    <div class="list">${taskItems.length ? taskItems.map(taskHtml).join('') : '<div class="empty">Open Task はありません。</div>'}</div>
   </details>
 </main>
 <script nonce="${nonce}">
@@ -467,7 +459,7 @@ function qcdsDetailHtml(dimension, selectedAxis = '') {
       <span>
         <h2>${escapeHtml(dimension.label)}</h2>
         <span class="badges">${badge(dimension.grade, 'tag-qcds')} ${badge(dimension.status, 'tag-' + dimension.status)}</span>
-        <span class="path">${dimension.passed}/${dimension.expected} checks / ${dimension.linkedItems.length} linked work items</span>
+    <span class="path">${dimension.passed}/${dimension.expected} checks / ${visibleWorkItems(dimension.linkedItems).length} linked work items</span>
       </span>
       <span class="score">${escapeHtml(String(dimension.score))}</span>
     </summary>
@@ -475,7 +467,7 @@ function qcdsDetailHtml(dimension, selectedAxis = '') {
     <h3>Checks</h3>
     <div class="checks">${dimension.checks.length ? dimension.checks.map(qcdsCheckHtml).join('') : '<div class="empty">Check はありません。</div>'}</div>
     <h3>Linked Work Items</h3>
-    <div class="work-list">${dimension.linkedItems.length ? dimension.linkedItems.map(qcdsLinkedWorkItemHtml).join('') : '<div class="empty">紐づく Work Item はありません。</div>'}</div>
+    <div class="work-list">${visibleWorkItems(dimension.linkedItems).length ? visibleWorkItems(dimension.linkedItems).map(qcdsLinkedWorkItemHtml).join('') : '<div class="empty">紐づく Work Item はありません。</div>'}</div>
   </details>`;
 }
 
@@ -506,6 +498,10 @@ function qcdsWorkActions(item) {
 
 function percentOf(done, total) {
   return total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
+}
+
+function visibleWorkItems(items = []) {
+  return (Array.isArray(items) ? items : []).filter((item) => item.kind !== 'task');
 }
 
 function metricHtml(label, value, percent, subtext) {
@@ -560,7 +556,7 @@ function qcdsDimensionHtml(item) {
     <div class="row-main">
       <div class="badges">${badge(item.grade, 'tag-qcds')} ${badge(item.status, 'tag-status-' + item.status)}</div>
       <span class="row-title">${escapeHtml(item.label)}</span>
-      <span class="path">${item.passed}/${item.expected} checks / ${item.linkedItems.length} linked work items</span>
+      <span class="path">${item.passed}/${item.expected} checks / ${visibleWorkItems(item.linkedItems).length} linked work items</span>
     </div>
     <span class="row-actions"><span class="${cls}">${item.score}</span><button class="open-doc" data-qcds-axis="${escapeHtml(item.label)}">Details</button></span>
   </div>`;

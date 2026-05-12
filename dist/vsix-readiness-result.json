@@ -38,12 +38,12 @@
     {
       "id": "manual-test",
       "pass": true,
-      "detail": "manual test covers new commands"
+      "detail": "manual test covers visible commands and hidden legacy tasks"
     },
     {
       "id": "user-guide",
       "pass": true,
-      "detail": "user guide covers docs scaffold, tasks, history, and Codex run options"
+      "detail": "user guide covers docs scaffold, issue-first work items, history, and Codex run options"
     },
     {
       "id": "commands",

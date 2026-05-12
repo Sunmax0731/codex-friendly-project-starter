@@ -10,13 +10,13 @@
 - [ ] `docs/vsix-package-guide.md` に VSIX package と local install の確認手順がある。
 - [ ] `dist/codex-friendly-project-starter-0.1.0.vsix` の生成結果、size、SHA256 が `docs/release-evidence.json` に記録されている。
 - [ ] `tools/vsix-readiness.mjs` が package metadata、docs、必須 command を確認する。
-- [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / legacy Task / release readiness を確認する。
+- [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / release readiness を確認し、legacy Task group が表示されないことを確認する。
 - [ ] `Start Selected Work Items` と `Start All Work Items` の model / インテリジェンス / アクセス権限選択を確認する。
-- [ ] `GitHub Issues 取込` が public GitHub Issue を既定では local TODO / Issue に取り込み、GitHub Issue URL を保持することを確認する。設定時だけ legacy Task が作られることも確認する。
+- [ ] `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue に取り込み、GitHub Issue URL を保持し、legacy Task を新規作成しないことを確認する。
 - [ ] `docs/codex-sessions.md` / `.jsonl` と blocked follow-up Issue 作成導線を確認する。
 - [ ] `Codex Starter: Check Codex CLI` で `rg.exe`、`gh.exe`、`gh auth status` の確認手順が残っている。
 - [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。
-- [ ] `Open Markdown WebView` で AGENTS / SKILL / TODO / Issues / legacy Tasks / docs のリンク遷移を確認する。
+- [ ] `Open Markdown WebView` で AGENTS / SKILL / TODO / Issues / docs のリンク遷移と、既存互換の `Tasks/*.md` link 解決を確認する。
 - [ ] `Issues` ディレクトリの open Issue が正式リリース範囲と整合している。
 - [ ] VSIX package と local install をユーザー環境で確認する。
 - [ ] `git status --short --branch` が clean である。
