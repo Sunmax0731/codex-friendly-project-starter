@@ -1,6 +1,6 @@
 # WebView 上部操作のアイコン化と固定ヘッダー統一
 
-- Status: open
+- Status: closed
 - Priority: P2
 - Type: ux
 - Source: user-feedback
@@ -22,11 +22,22 @@ Markdown WebView の `Open Source`、`Copy Path`、`Refresh` は常時表示さ�
 
 ## Acceptance Criteria
 
-- [ ] Markdown WebView の固定ヘッダーが、パス付きタイトルと右上アイコン操作を持つ。
-- [ ] `Open Source`、`Copy Path`、`Refresh` の文字ボタンが、tooltip 付きアイコン操作へ置き換わる。
-- [ ] QCDS Status、Work Dashboard、その他 WebView の上部操作も同じ設計ルールに揃う。
-- [ ] キーボード操作、aria-label、tooltip が維持される。
-- [ ] 既存 command と WebView message contract の互換性が保たれる。
+- [x] Markdown WebView の固定ヘッダーが、パス付きタイトルと右上アイコン操作を持つ。
+- [x] `Open Source`、`Copy Path`、`Refresh` の文字ボタンが、tooltip 付きアイコン操作へ置き換わる。
+- [x] QCDS Status、Work Dashboard、その他 WebView の上部操作も同じ設計ルールに揃う。
+- [x] キーボード操作、aria-label、tooltip が維持される。
+- [x] 既存 command と WebView message contract の互換性が保たれる。
+
+## Resolution
+
+- `src/markdown-webview.cjs` の toolbar を固定ヘッダー + icon button に置き換え、title / path / aria-label / tooltip を保持した。
+- `src/webview.cjs` の Work Dashboard と QCDS Status も固定ヘッダー + icon action の構成に揃えた。
+- WebView message type は既存互換を維持し、表示だけを変更した。
+
+## Validation
+
+- `node --test tests\work-items.test.cjs tests\markdown-webview.test.cjs tests\default-docs.test.cjs tests\workspace-docs.test.cjs tests\i18n.test.cjs`
+- Closed: 2026-05-13
 
 ## Duplicate Handling
 

@@ -7,8 +7,10 @@
 | Workflow catalog | `src/workflows.cjs` | Issue/TODO/spec/TDD と工程選択 |
 | Prompt generation | `src/prompt-builder.cjs` | FirstPrompt 生成 |
 | Workspace scan | `src/workspace-docs.cjs` | Agent docs 検出と分類 |
-| Work item scan | `src/work-items.cjs` | TODO / Issue Markdown 解析、legacy Task 互換読み取り、QCDS metrics 読み取り、Issues 初期化、dashboard data、blocked follow-up Issue 作成 |
-| Webview | `src/webview.cjs` | Starter UI と Work Dashboard HTML |
+| Work item scan | `src/work-items.cjs` | TODO / Issue Markdown 解析、legacy Task 互換読み取り、QCDS metrics 読み取り、Issues 初期化、dashboard data、blocked follow-up Issue、QCDS 改善 Issue 作成 |
+| Webview | `src/webview.cjs` | Starter UI、Work Dashboard、QCDS Status HTML |
+| Markdown WebView | `src/markdown-webview.cjs` | Markdown / JSON 表示、link 解決、panel reuse、root AGENTS / SKILL の子 docs 統合表示 |
+| Localization | `src/i18n.cjs`, `package.nls.json`, `package.nls.ja.json` | runtime UI label と Command Palette title の ja / en 切り替え |
 | Work item composer | `src/work-item-composer.cjs` | GUI 作成フォーム、ローカル補完、Codex CLI 下書き結果の表示 |
 | Codex work item draft | `src/codex-work-item-draft.cjs` | 自然言語メモを JSON 下書きにする Codex prompt と出力解析 |
 | GitHub Issues import | `src/github-issues.cjs` | public GitHub Issues 取得、URL 重複検出、local TODO / Issue 生成 |

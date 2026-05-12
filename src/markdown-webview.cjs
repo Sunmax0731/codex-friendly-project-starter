@@ -1,19 +1,25 @@
+const fs = require('node:fs');
 const path = require('node:path');
+const { t, normalizeLocale } = require('./i18n.cjs');
 
 function buildMarkdownDocumentModel(input = {}) {
   const rootPath = input.rootPath || process.cwd();
   const filePath = input.filePath || '';
   const content = String(input.content || '');
+  const baseHtml = documentToHtml(content, { rootPath, filePath });
+  const integrated = buildIntegratedChildDocs({ rootPath, filePath });
   return {
     title: firstHeading(content) || path.basename(filePath || 'Markdown'),
     rootPath,
     filePath,
     relativePath: filePath ? toSlash(path.relative(rootPath, filePath)) : '',
-    html: documentToHtml(content, { rootPath, filePath })
+    childDocs: integrated.childDocs,
+    html: baseHtml + integrated.html
   };
 }
 
-function renderMarkdownDocumentWebview(nonce, model) {
+function renderMarkdownDocumentWebview(nonce, model, options = {}) {
+  const locale = normalizeLocale(options.locale || 'en');
   const safeModel = JSON.stringify({
     title: model.title,
     filePath: model.filePath,
@@ -28,8 +34,12 @@ function renderMarkdownDocumentWebview(nonce, model) {
   <title>${escapeHtml(model.title)}</title>
   <style>
     body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; }
-    .toolbar { position: sticky; top: 0; display: flex; gap: 8px; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); z-index: 2; }
-    button { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); padding: 5px 8px; border-radius: 3px; cursor: pointer; }
+    .toolbar { position: sticky; top: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); z-index: 2; }
+    .title-block { min-width: 0; }
+    .doc-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .icon-actions { display: inline-flex; gap: 4px; }
+    .icon-button { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1px solid transparent; background: transparent; color: var(--vscode-foreground); border-radius: 3px; cursor: pointer; font-size: 14px; }
+    .icon-button:hover, .icon-button:focus { background: var(--vscode-toolbar-hoverBackground); border-color: var(--vscode-panel-border); outline: none; }
     .path { color: var(--vscode-descriptionForeground); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     main { max-width: 980px; padding: 18px 22px 40px; line-height: 1.65; }
     h1 { font-size: 24px; margin: 0 0 16px; }
@@ -49,14 +59,21 @@ function renderMarkdownDocumentWebview(nonce, model) {
     a { color: var(--vscode-textLink-foreground); cursor: pointer; text-decoration: none; }
     a:hover { text-decoration: underline; }
     .task-box { margin-right: 6px; }
+    .integrated-docs { margin-top: 28px; border-top: 1px solid var(--vscode-panel-border); padding-top: 16px; }
+    .integrated-doc { border: 1px solid var(--vscode-panel-border); padding: 12px; margin: 12px 0; background: var(--vscode-sideBar-background); }
   </style>
 </head>
 <body>
   <div class="toolbar">
-    <button id="openSource">Open Source</button>
-    <button id="copyPath">Copy Path</button>
-    <button id="refresh">Refresh</button>
-    <span class="path">${escapeHtml(model.relativePath || model.filePath)}</span>
+    <span class="title-block">
+      <span class="doc-title">${escapeHtml(model.title)}</span>
+      <span class="path">${escapeHtml(model.relativePath || model.filePath)}</span>
+    </span>
+    <span class="icon-actions">
+      <button class="icon-button" id="openSource" aria-label="${escapeHtml(t('webview.openSource', locale))}" title="${escapeHtml(t('webview.openSource', locale))}">↗</button>
+      <button class="icon-button" id="copyPath" aria-label="${escapeHtml(t('webview.copyPath', locale))}" title="${escapeHtml(t('webview.copyPath', locale))}">⧉</button>
+      <button class="icon-button" id="refresh" aria-label="${escapeHtml(t('webview.refresh', locale))}" title="${escapeHtml(t('webview.refresh', locale))}">↻</button>
+    </span>
   </div>
   <main>${model.html}</main>
   <script nonce="${nonce}">
@@ -74,6 +91,69 @@ function renderMarkdownDocumentWebview(nonce, model) {
   </script>
 </body>
 </html>`;
+}
+
+function buildIntegratedChildDocs(input = {}) {
+  const rootPath = input.rootPath || process.cwd();
+  const filePath = input.filePath || '';
+  const base = path.basename(filePath);
+  if (!['AGENTS.md', 'SKILL.md'].includes(base)) return { childDocs: [], html: '' };
+  if (path.dirname(path.resolve(filePath)) !== path.resolve(rootPath)) return { childDocs: [], html: '' };
+  const childDocs = collectChildDocs(rootPath, base);
+  if (!childDocs.length) return { childDocs, html: '' };
+  const sections = childDocs.map((doc) => [
+    `<article class="integrated-doc" id="${escapeHtml(anchorId(doc.relativePath))}">`,
+    `<h3><a href="#" data-href="${escapeHtml(doc.relativePath)}">${escapeHtml(doc.relativePath)}</a></h3>`,
+    documentToHtml(doc.content, { rootPath, filePath: doc.filePath }),
+    '</article>'
+  ].join('\n'));
+  return {
+    childDocs,
+    html: [
+      '<section class="integrated-docs">',
+      '<h2>Integrated Child Docs</h2>',
+      '<p>Root AGENTS / SKILL から参照する子階層の文書を統合表示しています。各見出しのリンクから元ファイルを開けます。</p>',
+      ...sections,
+      '</section>'
+    ].join('\n')
+  };
+}
+
+function collectChildDocs(rootPath, base) {
+  const roots = base === 'AGENTS.md'
+    ? [path.join(rootPath, 'agents'), path.join(rootPath, 'skills')]
+    : [path.join(rootPath, 'skills'), path.join(rootPath, 'agents')];
+  const results = [];
+  for (const currentRoot of roots) walkChildDocs(rootPath, currentRoot, results, 0);
+  return results.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+}
+
+function walkChildDocs(rootPath, current, results, depth) {
+  if (depth > 5 || !fs.existsSync(current)) return;
+  let entries;
+  try {
+    entries = fs.readdirSync(current, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const fullPath = path.join(current, entry.name);
+    if (entry.isDirectory()) {
+      walkChildDocs(rootPath, fullPath, results, depth + 1);
+      continue;
+    }
+    if (!entry.isFile() || !/^(AGENTS|SKILL)\.md$/i.test(entry.name)) continue;
+    const relativePath = toSlash(path.relative(rootPath, fullPath));
+    results.push({
+      filePath: fullPath,
+      relativePath,
+      content: fs.readFileSync(fullPath, 'utf8')
+    });
+  }
+}
+
+function anchorId(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 function documentToHtml(content, context = {}) {
@@ -247,7 +327,7 @@ function resolveMarkdownLink(input = {}) {
   const normalizedHref = withoutAnchor.replace(/\//g, path.sep);
   const baseDir = input.baseFilePath ? path.dirname(input.baseFilePath) : (input.rootPath || process.cwd());
   const root = path.resolve(input.rootPath || baseDir);
-  const rootRelative = /^(Tasks|Issues|docs|skills)[\\/]/i.test(normalizedHref) || /^TODO\.md$/i.test(normalizedHref);
+  const rootRelative = /^(Tasks|Issues|docs|agents|skills)[\\/]/i.test(normalizedHref) || /^(TODO|AGENTS|SKILL)\.md$/i.test(normalizedHref);
   const resolved = path.resolve(rootRelative ? root : baseDir, normalizedHref);
   const rel = path.relative(root, resolved);
   if (rel.startsWith('..') || path.isAbsolute(rel)) return { kind: 'rejected', href, reason: 'outside workspace' };

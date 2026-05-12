@@ -22,13 +22,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 手順:
 
 1. VS Code 左側 Activity Bar の `Codex Starter` を開く。
-2. `Agent Docs` に `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 docs が並ぶことを確認する。
+2. `Agent Docs` に `Agent Control Docs`、`Development Documentation`、`Workspace Docs` があり、`AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 docs、子階層 `agents/**/AGENTS.md` / `skills/**/SKILL.md` が並ぶことを確認する。
 3. `AGENTS.md` をクリックして開く。
 
 期待結果:
 
 - Tree View から文書を開ける。
-- 既定設定では Markdown WebView が開き、`Open Source` から編集元へ戻れる。
+- 既定設定では Markdown WebView が開き、右上の `Open Source` icon から編集元へ戻れる。
 - Explorer 上で AI Agent 文書に `AI` badge が見える。
 - Markdown 見出しと `QCDS`、`AGENTS`、`SKILL` などがハイライトされる。
 
@@ -42,14 +42,14 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
 6. Dashboard の `Issues 初期化` を実行する。
-7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
+7. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
 8. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
-9. Dashboard の `自然言語から Issue` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
-10. Dashboard の `GitHub Issues 取込` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
+9. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
+10. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
 11. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
-12. Dashboard の checkbox で複数 Work Item を選び、`選択Work Itemを開始` を実行する。
+12. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
 13. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
-14. Dashboard の `全Work Itemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
+14. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
 15. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
@@ -60,11 +60,11 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - legacy `Tasks/*.md` は通常 UI に表示されない。
 - Dashboard に TODO と Issue の progress bar が表示される。
 - Dashboard に `Project Phase` と `Work Items by Phase` が表示され、Issue の `Created`、TODO / Issue の工程、未着手 / 着手済み / 解決済み状態が同じ方針で表示される。
-- Dashboard 上部に `Issue を作成`、`自然言語から Issue`、`Issues 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示され、legacy Task 作成 / Tasks 初期化ボタンは表示されない。
-- Dashboard 上部と Work Items title action から `GitHub Issues 取込` を実行できる。
+- Dashboard 上部の日常操作に `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` が表示され、初回セットアップに `FirstPrompt`、`Issues 初期化`、`D:\AI Docs 生成`、`Codex CLI 確認` が表示される。legacy Task 作成 / Tasks 初期化ボタンは表示されない。
+- Dashboard 上部と Work Items title action から `GitHub Issuesインポート` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。
-- QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。
+- QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。grade が `A-` 以下の観点では改善調査 / TODO 化 action から同観点の改善 Issue を作成または再利用できる。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
 - Work Item Composer の `Codexで自然言語から反映` で Codex CLI が priority、type、phase、QCDS、acceptance criteria を補完し、完了後に `Codex CLI の下書き` 由来であることが status text に表示される。
 - Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` に `Draft source: codex-cli` が記録される。
@@ -84,7 +84,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 手順:
 
 1. `Ctrl+Shift+P` から `Codex Starter: Open Markdown WebView` を実行する。
-2. WebView の `Open Source`、`Copy Path`、`Refresh` を押す。
+2. WebView 右上の icon button で `Open Source`、`Copy Path`、`Refresh` を押す。
 3. `TODO.md` から `Issues/*.md` への link をクリックする。既存互換の `Tasks/*.md` link がある場合は Markdown WebView 内で遷移できることも確認する。
 4. 新しい検証用 workspace で `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
 
@@ -92,8 +92,10 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - Markdown が VS Code theme に追従した WebView として表示される。
 - Workspace 内の Markdown link は WebView 内で遷移する。
+- 同じ Markdown を複数回開いても既存 WebView panel が active になる。
+- root `AGENTS.md` / `SKILL.md` では子階層 docs の統合表示と元ファイル link が見える。
 - workspace 外への相対リンクは開かれない。
-- `D:\AI` の共通 docs と領域別 docs を参照した root docs、`docs/*.md`、`Issues/*.md`、`skills/*/SKILL.md` が生成される。`Tasks/*.md` は新規生成されない。
+- `D:\AI` の共通 docs と領域別 docs を参照した root docs、`docs/*.md`、`Issues/*.md`、`agents/phases/*/AGENTS.md`、`skills/*/SKILL.md`、`skills/work-types/*/SKILL.md` が生成される。`Tasks/*.md` は新規生成されない。
 
 ## 3. FirstPrompt 生成
 
@@ -156,6 +158,20 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - Settings で `codexFriendlyProjectStarter.codexCliPath` に `codex` または `C:\Users\<user>\AppData\Roaming\npm\codex.ps1` などの実パスを設定する。
 - `rg.exe` または `gh.exe` が見つからない場合は、Settings の `codexFriendlyProjectStarter.codexToolPathPrepend` に配置ディレクトリを追加する。既定では Codex bundled ripgrep と `E:\DevEnv\GitHubCLI` が候補に含まれる。
+
+## 5.5 表示言語
+
+手順:
+
+1. VS Code の表示言語を日本語にした環境で Extension Development Host を起動する。
+2. Command Palette、Dashboard、Agent Docs Tree、Markdown WebView、QCDS Status を確認する。
+3. 未対応 locale の想定では英語 fallback 文言を確認する。
+
+期待結果:
+
+- Command Palette title は `package.nls.ja.json` の日本語文言になる。
+- Dashboard、Tree group、WebView action は日本語 locale 用の文言を使う。
+- command id、設定キー、WebView message contract は表示言語に関係なく変わらない。
 
 ## 6. 生成プロンプトを VS Code Codex へ渡す
 

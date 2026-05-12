@@ -1,6 +1,6 @@
 # Dashboard 操作ボタンの統合、配置、ラベル整理
 
-- Status: open
+- Status: closed
 - Priority: P1
 - Type: ux
 - Source: user-feedback
@@ -26,11 +26,22 @@ Issueを起票  GitHub Issuesインポート  CodexにPrompt送信
 
 ## Acceptance Criteria
 
-- [ ] Dashboard の日常操作から `FirstPrompt` が外れ、初回セットアップ / 環境確認側へ移動している。
-- [ ] Issue 作成系の入口が `Issueを起票` として統合され、自然言語入力と手動入力の両方に到達できる。
-- [ ] Codex 関連入口が `CodexにPrompt送信` として統合され、必要な場合に Codex sidebar open と current prompt handoff を選べる。
-- [ ] 日常操作ボタンの順序と改行が指定どおりになっている。Issue 作成系の表示ラベルは `Issueを起票` に統一する。
-- [ ] Command Palette の既存 command 互換と docs / manual test の表記が整理されている。
+- [x] Dashboard の日常操作から `FirstPrompt` が外れ、初回セットアップ / 環境確認側へ移動している。
+- [x] Issue 作成系の入口が `Issueを起票` として統合され、自然言語入力と手動入力の両方に到達できる。
+- [x] Codex 関連入口が `CodexにPrompt送信` として統合され、必要な場合に Codex sidebar open と current prompt handoff を選べる。
+- [x] 日常操作ボタンの順序と改行が指定どおりになっている。Issue 作成系の表示ラベルは `Issueを起票` に統一する。
+- [x] Command Palette の既存 command 互換と docs / manual test の表記が整理されている。
+
+## Resolution
+
+- `src/webview.cjs` で日常操作を `Issueを起票` / `GitHub Issuesインポート` / `CodexにPrompt送信` と `選択WorkItemを開始` / `全WorkItemを開始` / `Refresh` の2行に整理した。
+- `extension.js` に `CodexにPrompt送信` の選択導線を追加し、current prompt handoff と Codex sidebar open を選べるようにした。
+- README、仕様、デザイン、ユーザーガイド、手動テスト、VS Code 確認ガイドを更新した。
+
+## Validation
+
+- `node --test tests\work-items.test.cjs tests\markdown-webview.test.cjs tests\default-docs.test.cjs tests\workspace-docs.test.cjs tests\i18n.test.cjs`
+- Closed: 2026-05-13
 
 ## Duplicate Handling
 

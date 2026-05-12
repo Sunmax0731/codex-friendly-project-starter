@@ -1,6 +1,6 @@
 # 階層型 AGENTS / SKILL と人向け統合表示
 
-- Status: open
+- Status: closed
 - Priority: P1
 - Type: feature
 - Source: user-feedback
@@ -23,11 +23,22 @@
 
 ## Acceptance Criteria
 
-- [ ] 生成 docs の root `AGENTS.md` / `SKILL.md` が、工程別と作業種類別の子 docs を参照する構造になる。
-- [ ] 工程別 docs と作業種類別 docs の配置、命名、読み込み順が仕様化される。
-- [ ] Agent / Codex が読む順序と、人が WebView で読む統合表示の両方が成立する。
-- [ ] WebView で階層型 `AGENTS.md` / `SKILL.md` を統合表示でき、元ファイルへのリンクも保持される。
-- [ ] 既存の `skills/01-requirements` から `skills/06-release` までの互換性を保つ。
+- [x] 生成 docs の root `AGENTS.md` / `SKILL.md` が、工程別と作業種類別の子 docs を参照する構造になる。
+- [x] 工程別 docs と作業種類別 docs の配置、命名、読み込み順が仕様化される。
+- [x] Agent / Codex が読む順序と、人が WebView で読む統合表示の両方が成立する。
+- [x] WebView で階層型 `AGENTS.md` / `SKILL.md` を統合表示でき、元ファイルへのリンクも保持される。
+- [x] 既存の `skills/01-requirements` から `skills/06-release` までの互換性を保つ。
+
+## Resolution
+
+- `src/default-docs.cjs` で `agents/phases/*/AGENTS.md` と `skills/work-types/*/SKILL.md` を生成対象に追加し、root `AGENTS.md` / `SKILL.md` から参照する構造にした。
+- `src/markdown-webview.cjs` で root `AGENTS.md` / `SKILL.md` の統合子 docs 表示を追加し、元ファイルへの link を保持した。
+- 既存の工程別 `skills/01-requirements` から `skills/06-release` は継続生成する。
+
+## Validation
+
+- `node --test tests\work-items.test.cjs tests\markdown-webview.test.cjs tests\default-docs.test.cjs tests\workspace-docs.test.cjs tests\i18n.test.cjs`
+- Closed: 2026-05-13
 
 ## Duplicate Handling
 

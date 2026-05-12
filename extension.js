@@ -14,6 +14,7 @@ const {
   nextIssueFilePath,
   createIssueMarkdown,
   createBlockedFollowUpIssue,
+  createQcdsImprovementIssue,
   appendTodoWorkItemLink,
   isWorkItemDocPath
 } = require('./src/work-items.cjs');
@@ -68,9 +69,11 @@ const {
   fallbackOpenAiPromptGuidanceState,
   normalizeOpenAiPromptGuidanceState
 } = require('./src/openai-prompt-guidance.cjs');
+const { t } = require('./src/i18n.cjs');
 
 const execFileAsync = promisify(execFile);
 let lastMarkdownWebview = null;
+const markdownWebviewPanels = new Map();
 const OPENAI_PROMPT_GUIDANCE_STATE_KEY = 'openAiPromptGuidanceState.v1';
 
 function activate(context) {
@@ -717,16 +720,16 @@ async function openQcdsStatus(context, treeProvider, workItemsProvider, selected
 
 async function renderDashboardPanel(panel, nonce, workspaceRoot) {
   const dashboard = await scanWorkItems(workspaceRoot);
-  panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+  panel.webview.html = renderWorkDashboardWebview(nonce, dashboard, { locale: uiLocale() });
 }
 
 async function renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis = '') {
   const dashboard = await scanWorkItems(workspaceRoot);
-  panel.webview.html = renderQcdsStatusWebview(nonce, dashboard, { selectedAxis });
+  panel.webview.html = renderQcdsStatusWebview(nonce, dashboard, { selectedAxis, locale: uiLocale() });
 }
 
 async function handleQcdsStatusMessage(args) {
-  const { context, panel, nonce, workspaceRoot, selectedAxis, workItemsProvider, message } = args;
+  const { context, panel, nonce, workspaceRoot, selectedAxis, treeProvider, workItemsProvider, message } = args;
   if (message?.type === 'openMarkdown' && message.filePath) {
     await openMarkdownWebview(context, message.filePath, message.lineNumber);
     return;
@@ -736,6 +739,11 @@ async function handleQcdsStatusMessage(args) {
     return;
   }
   if (message?.type === 'refreshQcdsStatus') {
+    await renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis);
+    return;
+  }
+  if (message?.type === 'createQcdsImprovementIssue') {
+    await createQcdsImprovementIssueCommand(context, treeProvider, workItemsProvider, workspaceRoot, message.axis || selectedAxis);
     await renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis);
     return;
   }
@@ -784,6 +792,15 @@ async function handleDashboardMessage(args) {
     openQcdsStatus(context, treeProvider, workItemsProvider, message.axis || '');
     return;
   }
+  if (message?.type === 'createQcdsImprovementIssue') {
+    await createQcdsImprovementIssueCommand(context, treeProvider, workItemsProvider, workspaceRoot, message.axis || '');
+    await renderDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'sendPromptToCodex') {
+    await sendPromptToCodexCommand(context);
+    return;
+  }
   if (message?.type === 'invokeCurrentPrompt') {
     await invokeCodexWithCurrentPromptCommand(context);
     return;
@@ -815,6 +832,41 @@ async function handleDashboardMessage(args) {
     workItemsProvider?.refresh();
     await renderDashboardPanel(panel, nonce, workspaceRoot);
   }
+}
+
+async function sendPromptToCodexCommand(context) {
+  const choice = await vscode.window.showQuickPick([
+    {
+      label: 'CodexにPrompt送信: 現在Promptを送信',
+      description: '開いている文書または選択範囲を VS Code Codex へ渡す',
+      action: 'current'
+    },
+    {
+      label: 'CodexにPrompt送信: Codex Sidebarを開く',
+      description: 'プロンプトは作らず VS Code Codex sidebar だけを開く',
+      action: 'sidebar'
+    }
+  ], { placeHolder: 'Codex に送る Prompt 操作を選択' });
+  if (!choice) return;
+  if (choice.action === 'current') return invokeCodexWithCurrentPromptCommand(context);
+  return openCodexAppCommand();
+}
+
+async function createQcdsImprovementIssueCommand(context, treeProvider, workItemsProvider, workspaceRoot, axis) {
+  const dashboard = await scanWorkItems(workspaceRoot);
+  const dimension = (dashboard.qcds.dimensions || []).find((item) => String(item.label || item.id || '').toLowerCase() === String(axis || '').toLowerCase());
+  if (!dimension) {
+    vscode.window.showWarningMessage('Codex Starter: QCDS dimension が見つかりません。');
+    return;
+  }
+  const result = createQcdsImprovementIssue(workspaceRoot, dimension, { dashboard });
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+  await openMarkdownWebview(context, result.issuePath);
+  const message = result.created
+    ? `Codex Starter: QCDS改善 Issue を作成しました (${result.axis})`
+    : `Codex Starter: 既存の QCDS改善 Issue を再利用しました (${result.axis})`;
+  vscode.window.setStatusBarMessage(message, 6000);
 }
 
 async function scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider) {
@@ -1323,6 +1375,10 @@ function normalizePath(filePath) {
   return path.resolve(String(filePath || '')).toLowerCase();
 }
 
+function uiLocale() {
+  return vscode.env.language || 'en';
+}
+
 async function openMarkdownCommand(context, item) {
   const filePath = item?.filePath || item?.resourceUri?.fsPath || vscode.window.activeTextEditor?.document?.uri?.fsPath;
   if (!filePath) return;
@@ -1382,6 +1438,14 @@ async function openMarkdownSource(filePath, lineNumber, column = vscode.ViewColu
 
 async function openMarkdownWebview(context, filePath, lineNumber, column = vscode.ViewColumn.One) {
   const workspaceRoot = pickWorkspaceRootForPath(filePath);
+  const key = normalizePath(filePath);
+  const existing = markdownWebviewPanels.get(key);
+  if (existing?.panel) {
+    existing.panel.reveal(column);
+    await existing.render();
+    lastMarkdownWebview = existing;
+    return;
+  }
   const content = await fs.promises.readFile(filePath, 'utf8');
   const model = buildMarkdownDocumentModel({ rootPath: workspaceRoot, filePath, content });
   const panel = vscode.window.createWebviewPanel(
@@ -1394,13 +1458,15 @@ async function openMarkdownWebview(context, filePath, lineNumber, column = vscod
     const latest = await fs.promises.readFile(filePath, 'utf8');
     const latestModel = buildMarkdownDocumentModel({ rootPath: workspaceRoot, filePath, content: latest });
     panel.title = latestModel.title;
-    panel.webview.html = renderMarkdownDocumentWebview(String(Date.now()) + String(Math.random()).slice(2), latestModel);
+    panel.webview.html = renderMarkdownDocumentWebview(String(Date.now()) + String(Math.random()).slice(2), latestModel, { locale: uiLocale() });
   };
   await render();
-  const panelState = { filePath, render };
+  const panelState = { filePath, panel, render };
   lastMarkdownWebview = panelState;
+  markdownWebviewPanels.set(key, panelState);
   panel.onDidDispose(() => {
     if (lastMarkdownWebview === panelState) lastMarkdownWebview = null;
+    if (markdownWebviewPanels.get(key) === panelState) markdownWebviewPanels.delete(key);
   });
   panel.webview.onDidReceiveMessage(async (message) => {
     if (message?.type === 'openSource') return openMarkdownSource(message.filePath || filePath, lineNumber);
@@ -1427,7 +1493,7 @@ function pickWorkspaceRootForPath(filePath) {
 
 class AgentDocsTreeProvider {
   constructor() {
-    this.items = [];
+    this.roots = [];
     this.onDidChangeTreeDataEmitter = new vscode.EventEmitter();
     this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
   }
@@ -1438,32 +1504,80 @@ class AgentDocsTreeProvider {
 
   async load() {
     const folders = vscode.workspace.workspaceFolders || [];
-    const all = [];
+    const roots = [];
     for (const folder of folders) {
       const items = await scanAgentDocs(folder.uri.fsPath);
-      all.push(...items);
+      roots.push(...buildAgentDocTreeRoots(folder.name, items));
     }
-    this.items = all;
+    this.roots = roots;
     this.onDidChangeTreeDataEmitter.fire();
   }
 
   getTreeItem(item) {
-    const treeItem = new vscode.TreeItem(item.relativePath, vscode.TreeItemCollapsibleState.None);
-    treeItem.description = item.label;
+    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+    const treeItem = new vscode.TreeItem(item.label || item.relativePath, hasChildren ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
+    treeItem.description = item.description || item.label;
     treeItem.tooltip = item.filePath;
-    treeItem.resourceUri = vscode.Uri.file(item.filePath);
-    treeItem.contextValue = 'codexAgentDoc';
-    treeItem.command = {
-      command: 'codex-friendly-project-starter.openAgentDoc',
-      title: 'Open Agent Doc',
-      arguments: [item]
-    };
+    treeItem.iconPath = item.icon;
+    if (item.filePath) {
+      treeItem.label = item.relativePath;
+      treeItem.description = item.docLabel || item.label;
+      treeItem.resourceUri = vscode.Uri.file(item.filePath);
+      treeItem.contextValue = 'codexAgentDoc';
+      treeItem.command = {
+        command: 'codex-friendly-project-starter.openAgentDoc',
+        title: 'Open Agent Doc',
+        arguments: [item]
+      };
+    }
     return treeItem;
   }
 
-  getChildren() {
-    return this.items;
+  getChildren(item) {
+    return item?.children || this.roots;
   }
+}
+
+function buildAgentDocTreeRoots(folderName, items = []) {
+  const groups = [
+    {
+      key: 'agent-control',
+      label: t('tree.agentControlDocs', uiLocale()),
+      icon: new vscode.ThemeIcon('symbol-misc'),
+      children: []
+    },
+    {
+      key: 'development-docs',
+      label: t('tree.developmentDocs', uiLocale()),
+      icon: new vscode.ThemeIcon('book'),
+      children: []
+    },
+    {
+      key: 'workspace-docs',
+      label: t('tree.workspaceDocs', uiLocale()),
+      icon: new vscode.ThemeIcon('files'),
+      children: []
+    }
+  ];
+  const byKey = new Map(groups.map((group) => [group.key, group]));
+  for (const item of items) {
+    const group = byKey.get(item.group || 'workspace-docs') || byKey.get('workspace-docs');
+    group.children.push({
+      ...item,
+      docLabel: item.label,
+      icon: new vscode.ThemeIcon(item.group === 'development-docs' ? 'book' : 'file')
+    });
+  }
+  const prefix = vscode.workspace.workspaceFolders?.length > 1 ? folderName + ' ' : '';
+  return groups
+    .filter((group) => group.children.length > 0)
+    .map((group) => ({
+      ...group,
+      label: prefix + group.label,
+      description: String(group.children.length),
+      tooltip: group.label,
+      children: group.children
+    }));
 }
 
 class WorkItemsTreeProvider {

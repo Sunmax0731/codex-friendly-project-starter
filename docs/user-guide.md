@@ -4,8 +4,8 @@
 
 1. 対象 workspace を VS Code で開く。
 2. Activity Bar の `Codex Starter` を開く。
-3. `Agent Docs` から `AGENTS.md`、`SKILL.md`、`README.md`、`Design.md`、`Architecture.md`、主要 docs を確認する。
-4. 既定設定では Markdown WebView が開く。必要に応じて `Open Source` で編集元を開く。
+3. `Agent Docs` から `Agent Control Docs`、`Development Documentation`、`Workspace Docs` を確認し、`AGENTS.md`、`SKILL.md`、`README.md`、`Design.md`、`Architecture.md`、主要 docs、子階層 `agents/**/AGENTS.md` / `skills/**/SKILL.md` を確認する。
+4. 既定設定では Markdown WebView が開く。必要に応じて右上の `Open Source` icon で編集元を開く。
 5. `Agent Docs` の title action から Project Starter、`D:\AI` 既定 docs 生成、refresh を実行できる。各項目の context menu から Markdown WebView、source 表示、path copy を実行できる。
 
 ## TODO と Issue を可視化する
@@ -15,7 +15,7 @@
 3. `Work Items` で `TODO`、`Issues`、`QCDS`、`Release readiness` を確認する。既存互換の `Tasks/*.md` は通常 UI には表示しない。
 4. 未完了 TODO、Issue を選択すると、該当 Markdown が Markdown WebView で開く。
 5. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を開くと、TODO、Issue、QCDS の進捗を progress bar で確認できる。
-6. Dashboard 上部は、日常的に使う `Issue を作成`、`自然言語から Issue`、`FirstPrompt`、`QCDS Status`、`VS Code Codex`、`現在PromptをCodexへ`、`選択Work Itemを開始`、`全Work Itemを開始`、`Refresh` と、初回セットアップ向けの `D:\AI Docs 生成`、`Issues 初期化`、`Codex CLI 確認` に分かれている。
+6. Dashboard 上部は、日常的に使う `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` と、初回セットアップ向けの `FirstPrompt`、`D:\AI Docs 生成`、`Issues 初期化`、`Codex CLI 確認` に分かれている。
 7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
 8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
@@ -32,7 +32,7 @@
 ## TODO / Issue を選択して Codex に渡す
 
 1. `Codex Work Dashboard` の Open TODO / Open Issues で、処理したい行の `Select` checkbox をオンにする。
-2. Dashboard 上部の `選択Work Itemを開始` を押す。
+2. Dashboard 上部の `選択WorkItemを開始` を押す。
 3. モデル、インテリジェンス、アクセス権限を選び、確認ダイアログで実行条件を確認する。
 4. 既定では選択した TODO / Issue だけを含む開始 prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
 5. Command Palette の `Codex Starter: Start Selected Work Items with Codex` から実行する場合は、QuickPick の複数選択で対象を選ぶ。
@@ -40,7 +40,7 @@
 
 ## TODO / Issue を一括で Codex に渡す
 
-1. `Codex Work Dashboard` の `全Work Itemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
+1. `Codex Work Dashboard` の `全WorkItemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
 2. モデル、インテリジェンス、アクセス権限を選び、確認ダイアログで workspace root、access、model、インテリジェンスを確認する。
 3. 必要な場合だけ既定導線では `Copy & Open Codex`、Terminal mode では `Run Codex` を選ぶ。
 4. 既定では未完了 TODO、Issue の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
@@ -53,13 +53,14 @@
 3. `docs/qcds-strict-metrics.json` は `dimensions` 形式と `grades` 形式のどちらも読み取る。未生成または未対応形式の場合も4観点が D- fallback として表示される。
 4. Work Items tree の QCDS 配下にある `Quality`、`Cost`、`Delivery`、`Satisfaction` をクリックすると、該当項目を開いた状態で QCDS Status WebView を表示できる。
 5. `Open Metrics JSON` から `docs/qcds-strict-metrics.json` を開くと、元ファイルを変更せずに整形表示される。
-6. TODO、Issue に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
+6. grade が `A-` 以下の観点では `改善案を調査および検討しTODOに起こす` を押すと、該当観点、grade、checks、linked work items を含む改善 Issue が作成または再利用される。
+7. TODO、Issue に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
 
 ## Local Issue を管理する
 
 1. Dashboard の `Issues 初期化`、または Command Palette から `Codex Starter: Initialize Issues Directory` を実行する。
 2. `Issues/README.md` が作成または表示される。
-3. Dashboard の `Issue を作成`、または `Codex Starter: Create Local Issue` を実行して Work Item Composer を開く。
+3. Dashboard の `Issueを起票`、または `Codex Starter: Create Local Issue` を実行して Work Item Composer を開く。
 4. 自然言語メモを入力して `Codexで自然言語から反映` を押すか、title、priority、type、acceptance criteria を GUI で入力する。
 5. `作成して開く` で `Issues/0001-short-title.md` を作成する。
 6. 同時に `TODO.md` へ Issue へのリンク付き checkbox が追加される。TODO を入口にして進捗を管理する。
@@ -69,7 +70,7 @@
 ## GitHub Issues 取込
 
 1. public GitHub repository を指定できる workspace を開く。
-2. Dashboard の `GitHub Issues 取込`、Work Items title action、または Command Palette の `Codex Starter: Import GitHub Issues` を実行する。
+2. Dashboard の `GitHub Issuesインポート`、Work Items title action、または Command Palette の `Codex Starter: Import GitHub Issues` を実行する。
 3. `owner/repo` または GitHub URL を入力する。現在の Git remote が GitHub の場合は repository 名が既定値として入る。
 4. QuickPick で取り込む GitHub Issue を複数選択する。既に同じ URL が local TODO / Issue にある item は `imported` として表示される。
 5. 選択した issue は Codex CLI read-only inference で title、priority、type、phase、QCDS、acceptance criteria に整理され、`Issues/*.md` と `TODO.md` に作成される。
@@ -77,7 +78,7 @@
 
 ## 自然言語から Issue を作る
 
-1. Dashboard の `自然言語から Issue`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` を実行する。
+1. Dashboard の `Issueを起票`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` を実行する。
 2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
@@ -90,7 +91,7 @@ Work Item の `Start` で Permission denied を避けたい場合は、Settings 
 
 ## Codex session と blocked follow-up を確認する
 
-1. Work Item の `Start`、`選択Work Itemを開始`、`全Work Itemを開始`、または current prompt handoff で VS Code Codex へプロンプトを渡す。
+1. Work Item の `Start`、`選択WorkItemを開始`、`全WorkItemを開始`、または current prompt handoff で VS Code Codex へプロンプトを渡す。
 2. 対象 project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に handoff 時刻、session id、prompt file、model、intelligence、access、対象 Work Item が追記される。
 3. Issue から起動した場合は、その Markdown の `Codex Sessions` セクションにも同じ session 参照が追記される。
 4. Codex 実行後に対象 Work Item が `closed` にならず `blocked` として残った場合は、Dashboard の `Follow-up`、または context menu の `Codex Starter: Create Blocked Follow-up Issue` を実行する。
@@ -100,15 +101,16 @@ Work Item の `Start` で Permission denied を避けたい場合は、Settings 
 
 1. Markdown ファイルを開くか、Agent Docs / Work Items の node を選択する。
 2. `Codex Starter: Open Markdown WebView` を実行する。
-3. `Open Source` で編集元、`Copy Path` で絶対パス、`Refresh` で再読込を行う。絶対パスのコピーは `Codex Starter: Copy Markdown Path` または Tree item context menu からも実行できる。再読込は `Codex Starter: Refresh Markdown WebView` からも実行できる。
-4. WebView 内の `Issues/*.md`、`docs/*.md`、既存互換の `Tasks/*.md` リンクをクリックして関連文書へ移動する。
+3. 右上の icon button から `Open Source`、`Copy Path`、`Refresh` を実行する。絶対パスのコピーは `Codex Starter: Copy Markdown Path` または Tree item context menu からも実行できる。再読込は `Codex Starter: Refresh Markdown WebView` からも実行できる。
+4. 同じ文書を再度開いた場合は既存 WebView panel が active になる。WebView 内の `Issues/*.md`、`docs/*.md`、既存互換の `Tasks/*.md` リンクをクリックして関連文書へ移動する。
+5. root `AGENTS.md` / `SKILL.md` では、子階層 `agents/**/AGENTS.md` と `skills/**/SKILL.md` の統合表示も確認できる。
 
 ## D:\AI 既定 docs を生成する
 
 1. 対象 workspace を開く。
 2. Dashboard の `D:\AI Docs 生成`、または Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
 3. 分野、Repo 名、目的、上書き可否を選択する。
-4. `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の docs を参照元として、root docs、`docs/*.md`、`Issues/*.md`、`skills/*/SKILL.md` が生成される。
+4. `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の docs を参照元として、root docs、`docs/*.md`、`Issues/*.md`、`agents/phases/*/AGENTS.md`、`skills/*/SKILL.md`、`skills/work-types/*/SKILL.md` が生成される。
 5. 生成される root `AGENTS.md` と `SKILL.md` には OpenAI 公式 latest model / prompt guidance / AGENTS.md / Skills ページの参照先が含まれる。
 
 ## FirstPrompt を生成する
@@ -151,6 +153,10 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `Codex Starter: Send Current Prompt to VS Code Codex`: 現在開いているプロンプト、または選択範囲だけを clipboard にコピーして Codex sidebar を開く。
 
 初回は `Codex Starter: Check Codex CLI` で CLI と補助ツールが見えることを確認する。この command は extension-launched Codex と同じ PATH 補強を使い、`codex --version`、`codex exec --help`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。VS Code 内 PowerShell で `rg.exe` や `gh.exe` が見つからない場合は、`codexFriendlyProjectStarter.codexToolPathPrepend` に追加の配置先を入れる。
+
+## 表示言語
+
+VS Code の表示言語が日本語の場合、Dashboard、QCDS Status、Markdown WebView、Agent Docs Tree group、Command Palette title は日本語寄りの文言になります。未対応言語では英語に fallback し、command id と設定キーは変わりません。
 
 ## 設定
 

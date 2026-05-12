@@ -1,6 +1,7 @@
 const path = require('node:path');
 const { DOMAINS } = require('./domains.cjs');
 const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./workflows.cjs');
+const { t, normalizeLocale } = require('./i18n.cjs');
 
 function renderStarterWebview(nonce, options = {}) {
   const modelChoices = normalizeModelChoices(options.modelChoices, options.defaultModel);
@@ -221,7 +222,8 @@ function normalizeOpenAiGuide(value = {}) {
   };
 }
 
-function renderWorkDashboardWebview(nonce, dashboard) {
+function renderWorkDashboardWebview(nonce, dashboard, options = {}) {
+  const locale = normalizeLocale(options.locale || 'en');
   const safe = JSON.stringify(dashboard).replace(/</g, '\\u003c');
   const todoItems = dashboard.todos.filter((item) => !item.done).slice(0, 12);
   const issueItems = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 12);
@@ -241,11 +243,16 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 18px; }
     main { max-width: 1040px; }
     h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
+    .webview-header { position: sticky; top: 0; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; margin: -18px -18px 14px; padding: 8px 14px; border-bottom: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); }
+    .icon-actions { display: inline-flex; gap: 4px; }
+    .icon-button { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1px solid transparent; background: transparent; color: var(--vscode-foreground); border-radius: 3px; cursor: pointer; font-size: 14px; }
+    .icon-button:hover, .icon-button:focus { background: var(--vscode-toolbar-hoverBackground); border-color: var(--vscode-panel-border); outline: none; }
     .root { color: var(--vscode-descriptionForeground); margin-bottom: 14px; }
     .action-panel { border: 1px solid var(--vscode-panel-border); border-radius: 5px; padding: 10px; margin-bottom: 12px; background: var(--vscode-sideBar-background); }
     .action-panel summary { cursor: pointer; font-weight: 600; }
     .action-heading { color: var(--vscode-descriptionForeground); font-size: 12px; margin: 0 0 8px; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
+    .actions { display: grid; gap: 8px; margin: 8px 0 0; }
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .action { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-background); color: var(--vscode-button-foreground); padding: 6px 9px; border-radius: 3px; cursor: pointer; }
     .action.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
     .action.subtle { background: transparent; color: var(--vscode-foreground); border-color: var(--vscode-panel-border); }
@@ -298,41 +305,51 @@ function renderWorkDashboardWebview(nonce, dashboard) {
 </head>
 <body>
 <main>
-  <h1>Codex Work Dashboard</h1>
-  <div class="root">${escapeHtml(dashboard.rootPath)}</div>
+  <div class="webview-header">
+    <span>
+      <h1>${escapeHtml(t('dashboard.title', locale))}</h1>
+      <span class="root">${escapeHtml(dashboard.rootPath)}</span>
+    </span>
+    <span class="icon-actions">
+      <button class="icon-button" data-action="refreshDashboard" aria-label="${escapeHtml(t('webview.refresh', locale))}" title="${escapeHtml(t('webview.refresh', locale))}">↻</button>
+    </span>
+  </div>
   <section class="action-panel" aria-label="Daily work actions">
-    <div class="action-heading">プロジェクト進行中に使う操作</div>
+    <div class="action-heading">${escapeHtml(t('dashboard.dailyActions', locale))}</div>
     <div class="actions">
-      <button class="action" data-action="openComposer" data-mode="issue">自然言語から Issue</button>
-      <button class="action" data-action="importGitHubIssues">GitHub Issues 取込</button>
-      <button class="action" data-action="openComposer" data-mode="issue">Issue を作成</button>
-      <button class="action secondary" data-action="openStarter">FirstPrompt</button>
-      <button class="action secondary" data-action="openQcdsStatus">QCDS Status</button>
-      <button class="action secondary" data-action="openCodexApp">VS Code Codex</button>
-      <button class="action secondary" data-action="invokeCurrentPrompt">現在PromptをCodexへ</button>
-      <button class="action secondary" data-selected-start="true">選択Work Itemを開始</button>
-      <button class="action secondary" data-action="startAllWorkItems">全Work Itemを開始</button>
-      <button class="action subtle" data-action="refreshDashboard">Refresh</button>
+      <div class="action-row">
+        <button class="action" data-action="openComposer" data-mode="issue">${escapeHtml(t('dashboard.issueTicket', locale))}</button>
+        <button class="action" data-action="importGitHubIssues">${escapeHtml(t('dashboard.githubImport', locale))}</button>
+        <button class="action" data-action="sendPromptToCodex">${escapeHtml(t('dashboard.sendPrompt', locale))}</button>
+      </div>
+      <div class="action-row">
+        <button class="action secondary" data-selected-start="true">${escapeHtml(t('dashboard.startSelected', locale))}</button>
+        <button class="action secondary" data-action="startAllWorkItems">${escapeHtml(t('dashboard.startAll', locale))}</button>
+        <button class="action subtle" data-action="refreshDashboard">${escapeHtml(t('dashboard.refresh', locale))}</button>
+      </div>
     </div>
   </section>
   <details class="action-panel">
-    <summary>初回セットアップ / 環境確認</summary>
+    <summary>${escapeHtml(t('dashboard.setupActions', locale))}</summary>
     <div class="actions">
-      <button class="action secondary" data-action="scaffoldDocs">D:\\AI Docs 生成</button>
-      <button class="action secondary" data-action="initializeIssues">Issues 初期化</button>
-      <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
+      <div class="action-row">
+        <button class="action secondary" data-action="openStarter">${escapeHtml(t('dashboard.firstPrompt', locale))}</button>
+        <button class="action secondary" data-action="scaffoldDocs">${escapeHtml(t('dashboard.scaffoldDocs', locale))}</button>
+        <button class="action secondary" data-action="initializeIssues">${escapeHtml(t('dashboard.initializeIssues', locale))}</button>
+        <button class="action secondary" data-action="checkCodexCli">${escapeHtml(t('dashboard.checkCodexCli', locale))}</button>
+      </div>
     </div>
   </details>
   <section class="project-phase" aria-label="Project phase">
     <div class="project-phase-head">
       <span>
-        <span class="path">Project Phase</span>
+        <span class="path">${escapeHtml(t('dashboard.projectPhase', locale))}</span>
         <strong>${escapeHtml(projectPhase.currentLabel)}</strong>
         <span class="path">${escapeHtml(projectPhase.detail || '')}</span>
       </span>
       <span class="badges">${(projectPhase.statePolicy || []).map((item) => badge(item.label, 'tag-work-state-' + item.id)).join('')}</span>
     </div>
-    <div class="path">状態方針: 未着手 = open / unchecked、着手済み = in-progress / blocked、解決済み = closed / checked。source Markdown は既存 metadata と checkbox を維持します。</div>
+    <div class="path">${escapeHtml(t('dashboard.statePolicy', locale))}</div>
   </section>
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
@@ -341,7 +358,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   </section>
   <details class="section" open>
     <summary>QCDS Current Status</summary>
-    <div class="list">${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map(qcdsDimensionHtml).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
+    <div class="list">${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map((dimension) => qcdsDimensionHtml(dimension, locale)).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}</div>
   </details>
   <details class="section" open>
     <summary>QCDS Improvements</summary>
@@ -352,7 +369,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     ${dashboard.releaseReadiness.map(readinessHtml).join('')}
   </details>
   <details class="section" open>
-    <summary>Work Items by Phase</summary>
+    <summary>${escapeHtml(t('dashboard.workItemsByPhase', locale))}</summary>
     <div class="phase-grid">${phaseGroups.length ? phaseGroups.map(phaseGroupHtml).join('') : '<div class="empty">工程に紐づく Work Item はありません。</div>'}</div>
   </details>
   <details class="section" open>
@@ -396,6 +413,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       axis: button.getAttribute('data-qcds-axis')
     }));
   }
+  for (const button of document.querySelectorAll('button[data-qcds-improvement-axis]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'createQcdsImprovementIssue',
+      axis: button.getAttribute('data-qcds-improvement-axis')
+    }));
+  }
   const selectedStart = document.querySelector('button[data-selected-start]');
   if (selectedStart) {
     selectedStart.addEventListener('click', () => vscode.postMessage({
@@ -419,6 +442,7 @@ function renderWorkDashboardWebview(nonce, dashboard) {
 }
 
 function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
+  const locale = normalizeLocale(options.locale || 'en');
   const selectedAxis = String(options.selectedAxis || '').toLowerCase();
   const metricsPath = dashboard.qcds.metricsPath || '';
   const evaluationPath = path.join(dashboard.rootPath, 'docs', 'qcds-evaluation.md');
@@ -433,6 +457,10 @@ function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
     body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 18px; }
     main { max-width: 1040px; }
     h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
+    .webview-header { position: sticky; top: 0; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; margin: -18px -18px 14px; padding: 8px 14px; border-bottom: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); }
+    .icon-actions { display: inline-flex; gap: 4px; }
+    .icon-button { width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1px solid transparent; background: transparent; color: var(--vscode-foreground); border-radius: 3px; cursor: pointer; font-size: 14px; }
+    .icon-button:hover, .icon-button:focus { background: var(--vscode-toolbar-hoverBackground); border-color: var(--vscode-panel-border); outline: none; }
     h2 { font-size: 16px; margin: 0; }
     h3 { font-size: 13px; margin: 14px 0 6px; }
     .root, .path, .detail { color: var(--vscode-descriptionForeground); font-size: 12px; }
@@ -466,13 +494,17 @@ function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
 </head>
 <body>
 <main>
-  <h1>Codex QCDS Status</h1>
-  <div class="root">${escapeHtml(dashboard.rootPath)}</div>
-  <div class="toolbar">
-    <button data-action="refreshQcdsStatus">Refresh</button>
-    <button data-action="openWorkDashboard">Work Dashboard</button>
-    ${metricsPath ? `<button data-file="${escapeHtml(metricsPath)}" data-line="1">Open Metrics JSON</button>` : ''}
-    <button data-file="${escapeHtml(evaluationPath)}" data-line="1">Open Evaluation</button>
+  <div class="webview-header">
+    <span>
+      <h1>Codex QCDS Status</h1>
+      <span class="root">${escapeHtml(dashboard.rootPath)}</span>
+    </span>
+    <span class="icon-actions">
+      <button class="icon-button" data-action="refreshQcdsStatus" aria-label="${escapeHtml(t('webview.refresh', locale))}" title="${escapeHtml(t('webview.refresh', locale))}">↻</button>
+      <button class="icon-button" data-action="openWorkDashboard" aria-label="${escapeHtml(t('webview.workDashboard', locale))}" title="${escapeHtml(t('webview.workDashboard', locale))}">▦</button>
+      ${metricsPath ? `<button class="icon-button" data-file="${escapeHtml(metricsPath)}" data-line="1" aria-label="${escapeHtml(t('webview.openMetrics', locale))}" title="${escapeHtml(t('webview.openMetrics', locale))}">{}</button>` : ''}
+      <button class="icon-button" data-file="${escapeHtml(evaluationPath)}" data-line="1" aria-label="${escapeHtml(t('webview.openEvaluation', locale))}" title="${escapeHtml(t('webview.openEvaluation', locale))}">↗</button>
+    </span>
   </div>
   <section class="summary">
     ${qcdsMetricSummaryHtml('Overall', dashboard.qcds.overallGrade || 'missing', String(dashboard.qcds.overallScore ?? 0))}
@@ -480,7 +512,7 @@ function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
     ${qcdsMetricSummaryHtml('Below A-', dashboard.qcds.summary.belowAMinus.length ? dashboard.qcds.summary.belowAMinus.join(', ') : 'none', dashboard.qcds.available ? 'metrics available' : 'fallback')}
   </section>
   <section>
-    ${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map((dimension) => qcdsDetailHtml(dimension, selectedAxis)).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}
+    ${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map((dimension) => qcdsDetailHtml(dimension, selectedAxis, locale)).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}
   </section>
 </main>
 <script nonce="${nonce}">
@@ -500,6 +532,12 @@ function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
       kind: button.getAttribute('data-kind') || ''
     }));
   }
+  for (const button of document.querySelectorAll('button[data-qcds-improvement-axis]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'createQcdsImprovementIssue',
+      axis: button.getAttribute('data-qcds-improvement-axis')
+    }));
+  }
   for (const button of document.querySelectorAll('button[data-action]')) {
     button.addEventListener('click', () => vscode.postMessage({ type: button.getAttribute('data-action') }));
   }
@@ -512,7 +550,7 @@ function qcdsMetricSummaryHtml(label, value, detail) {
   return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="path">${escapeHtml(detail)}</span></div>`;
 }
 
-function qcdsDetailHtml(dimension, selectedAxis = '') {
+function qcdsDetailHtml(dimension, selectedAxis = '', locale = 'en') {
   const isSelected = selectedAxis && selectedAxis === String(dimension.label || dimension.id || '').toLowerCase();
   const percent = percentOf(dimension.passed, dimension.expected);
   return `<details class="dimension" ${!selectedAxis || isSelected ? 'open' : ''}>
@@ -529,6 +567,7 @@ function qcdsDetailHtml(dimension, selectedAxis = '') {
     <div class="checks">${dimension.checks.length ? dimension.checks.map(qcdsCheckHtml).join('') : '<div class="empty">Check はありません。</div>'}</div>
     <h3>Linked Work Items</h3>
     <div class="work-list">${visibleWorkItems(dimension.linkedItems).length ? visibleWorkItems(dimension.linkedItems).map(qcdsLinkedWorkItemHtml).join('') : '<div class="empty">紐づく Work Item はありません。</div>'}</div>
+    ${qcdsImprovementActionHtml(dimension, locale)}
   </details>`;
 }
 
@@ -611,7 +650,7 @@ function taskHtml(item) {
   </div>`;
 }
 
-function qcdsDimensionHtml(item) {
+function qcdsDimensionHtml(item, locale = 'en') {
   const cls = item.status === 'pass' ? 'status-pass' : 'status-blocked';
   return `<div class="row">
     <div class="row-main">
@@ -619,8 +658,13 @@ function qcdsDimensionHtml(item) {
       <span class="row-title">${escapeHtml(item.label)}</span>
       <span class="path">${item.passed}/${item.expected} checks / ${visibleWorkItems(item.linkedItems).length} linked work items</span>
     </div>
-    <span class="row-actions"><span class="${cls}">${item.score}</span><button class="open-doc" data-qcds-axis="${escapeHtml(item.label)}">Details</button></span>
+    <span class="row-actions"><span class="${cls}">${item.score}</span>${item.improvementAction ? `<button class="open-doc" data-qcds-improvement-axis="${escapeHtml(item.label)}">${escapeHtml(t('dashboard.qcdsInvestigate', locale))}</button>` : ''}<button class="open-doc" data-qcds-axis="${escapeHtml(item.label)}">Details</button></span>
   </div>`;
+}
+
+function qcdsImprovementActionHtml(dimension, locale = 'en') {
+  if (!dimension.improvementAction) return '';
+  return `<div class="toolbar"><button data-qcds-improvement-axis="${escapeHtml(dimension.label)}">${escapeHtml(t('dashboard.qcdsInvestigate', locale))}</button></div>`;
 }
 
 function qcdsImprovementHtml(item) {

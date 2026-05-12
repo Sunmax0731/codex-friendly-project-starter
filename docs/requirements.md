@@ -20,7 +20,8 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - TODO / Issue は工程別に整理して表示し、Issue は `Created` metadata を起票日として一覧上に表示する。source Markdown の既存 `Status`、`Phase`、`Created`、checkbox 形式は互換維持する。
 - 状態表現は、`open` / unchecked を未着手、`in-progress` / `blocked` を着手済み、`closed` / checked を解決済みとして表示する。
 - `Tasks/*.md` は legacy compatibility として内部読み取りと Markdown link 解決だけを残し、通常 UI、Dashboard、Agent Docs、新規作成導線には表示しない。
-- Work Dashboard から Issue 作成、自然言語から Issue 作成、QCDS Status、VS Code Codex sidebar、現在PromptをCodexへ、Issues 初期化、FirstPrompt 画面、Codex CLI 確認などの主要操作を GUI で実行できる。
+- Work Dashboard から `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、選択 / 全 Work Item 開始、Issues 初期化、FirstPrompt 画面、Codex CLI 確認などの主要操作を GUI で実行できる。
+- Dashboard の日常操作は `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` に整理し、FirstPrompt と環境確認は初回セットアップ / 環境確認へ分ける。
 - GUI で提供する主要操作は Command Palette からも呼び出せる。Command Palette にある主要操作は Dashboard、Tree title、Tree item context、Markdown WebView toolbar のいずれかの GUI 導線から到達できる。
 - GUI フォームに自然言語メモを入力し、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue を作成できる。Codex CLI が利用できない場合はローカル補完で作業を止めない。
 - Issue 作成時に `TODO.md` へリンク付き checkbox を追加し、TODO を作業入口として維持できる。
@@ -39,8 +40,11 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Work Item が closed にならない場合、blocked 原因を調査する follow-up Issue を作成できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue を専用 WebView で項目別に可視化する。metrics が未生成でも4観点の fallback を表示する。
+- QCDS dimension が `A-` 以下の場合は改善調査 / TODO 化 action を表示し、該当観点の改善 Issue を作成または既存 Issue に追記できる。
 - `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。JSON は元ファイルを変更せず整形表示できる。
-- `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
+- Markdown WebView は同じ文書の panel を再利用し、上部操作を icon button に統一し、root `AGENTS.md` / `SKILL.md` では子階層 docs を統合表示できる。
+- Agent Docs Tree は agent control docs と Development Documentation を分け、`agents/**/AGENTS.md` と `skills/**/SKILL.md` も収集できる。
+- `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、`agents/phases/*/AGENTS.md`、工程別 `skills/*/SKILL.md`、作業種類別 `skills/work-types/*/SKILL.md` を生成できる。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を選択して FirstPrompt を生成する。
 - Starter Webview で、直近の FirstPrompt 入力履歴を workspace storage から復元できる。履歴は prompt 本文を保存せず、削除 command で消去できる。
@@ -51,6 +55,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - FirstPrompt 生成時にも対象モデルを選択でき、Starter Webview 内にもモデル選択と OpenAI 公式ガイド取得状況が表示される。
 - Codex CLI を直接利用したい環境では、設定で handoff target を `terminal` に切り替え、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡せる。
 - Codex CLI の存在確認と VS Code Codex sidebar 起動導線を Command Palette または GUI 導線から呼べる。
+- VS Code の表示言語に応じて Dashboard、Tree group、WebView action、Command Palette title の文言を `ja` / `en` で切り替え、未対応 locale は英語へ fallback できる。command id は変更しない。
 - AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension を最低限サポートする。
 - QCDS、platform runtime gate、docs ZIP、代表シナリオを検証できる。
 - VSIX package 前の readiness を静的に確認できる。
@@ -70,7 +75,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Work Items Tree と Work Dashboard が `TODO.md`、`Issues/*.md`、QCDS、release readiness を表示し、legacy `Tasks/*.md` を通常 UI に出さない。
 - Work Items Tree と Work Dashboard が Project Phase、工程別 Work Items、Issue 起票日、未着手 / 着手済み / 解決済みの状態方針を表示できる。
 - QCDS Status が現在の grade、check、`QCDS:` metadata/tag で紐づいた TODO / Issue を4観点別に表示できる。
+- QCDS `A-` 以下の観点から改善 Issue を作成または再利用できる。
 - Dashboard の中段セクションを折りたたみでき、Issue / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
+- Dashboard の日常操作と初回セットアップ操作が分かれ、主要 action label が `Issueを起票`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始` に整理される。
 - Work Item Composer が Codex CLI で自然言語から Issue の下書きを作り、作成後に Tree View と Dashboard が更新される。
 - Work Item の `Start` が、選択 work item と関連 Issue を含む開始プロンプトを VS Code Codex に渡せる。
 - `Start Selected Work Items` が、選択した TODO / Issue だけを含む開始プロンプトを VS Code Codex に渡せる。
@@ -80,3 +87,4 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Work Item Start Prompt と FirstPrompt に、選択モデル別の OpenAI prompt guidance section と公式参照 URL が含まれる。
 - Codex session index と blocked follow-up Issue 作成が project 内で参照できる。
 - FirstPrompt と Work Item Start Prompt に Git 書き込み方針が含まれる。
+- Agent Docs Tree、Markdown WebView、default docs scaffold、VS Code locale fallback のテストがある。

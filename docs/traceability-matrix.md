@@ -3,6 +3,7 @@
 | 要件 | 実装 | テスト / 証跡 |
 | --- | --- | --- |
 | Agent docs を一覧化する | `src/workspace-docs.cjs`, `extension.js` | `tests/workspace-docs.test.cjs` |
+| Agent docs と Development Documentation を分類する | `src/workspace-docs.cjs`, `extension.js` | `tests/workspace-docs.test.cjs`, `docs/manual-test.md` |
 | Agent docs をハイライトする | `extension.js` | `tools/platform-runtime-gate.mjs` |
 | Agent Docs / Work Items の操作導線を明示する | `package.json`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | TODO を可視化する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
@@ -19,10 +20,15 @@
 | TODO / Issue / legacy Task link を解析する | `src/work-items.cjs`, `src/markdown-webview.cjs` | `tests/work-items.test.cjs`, `tests/markdown-webview.test.cjs` |
 | Work Dashboard を表示する | `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Work Dashboard の日常操作 / 初回セットアップ / 折りたたみ / tag 表示を整える | `src/webview.cjs` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
+| Dashboard の action label と Codex handoff 導線を整理する | `src/webview.cjs`, `extension.js`, `src/i18n.cjs` | `tests/work-items.test.cjs`, `tests/i18n.test.cjs`, `Issues/0015-dashboard-action-labels-and-layout.md` |
 | GUI と Command Palette の機能対応をそろえる | `package.json`, `extension.js`, `src/webview.cjs` | `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | QCDS status と fallback を可視化する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `dist/platform-runtime-gate-result.json` |
+| QCDS A- 以下から改善 Issue を作成または再利用する | `src/work-items.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `Issues/0019-qcds-below-threshold-improvement-action.md` |
 | Markdown WebView で docs を読む | `src/markdown-webview.cjs`, `extension.js` | `tests/markdown-webview.test.cjs`, `Issues/0007-markdown-webview.md` |
+| Markdown WebView の icon header / panel reuse / 統合子 docs 表示 | `src/markdown-webview.cjs`, `extension.js` | `tests/markdown-webview.test.cjs`, `Issues/0016-development-docs-section-and-document-activation.md`, `Issues/0017-hierarchical-agents-skill-docs.md`, `Issues/0018-webview-toolbar-icon-and-header-unification.md` |
 | `D:\AI` 既定 docs を生成する | `src/default-docs.cjs`, `extension.js` | `tests/default-docs.test.cjs`, `Issues/0006-default-doc-scaffold.md` |
+| 階層型 AGENTS / SKILL docs を生成する | `src/default-docs.cjs`, `src/markdown-webview.cjs` | `tests/default-docs.test.cjs`, `tests/markdown-webview.test.cjs`, `Issues/0017-hierarchical-agents-skill-docs.md` |
+| VS Code 表示言語に UI 文言を追従させる | `src/i18n.cjs`, `src/webview.cjs`, `src/markdown-webview.cjs`, `extension.js`, `package.nls.json`, `package.nls.ja.json` | `tests/i18n.test.cjs`, `tests/work-items.test.cjs`, `Issues/0020-vscode-language-localization.md` |
 | 分野を選んで FirstPrompt を作る | `src/domains.cjs`, `src/prompt-builder.cjs` | `tests/prompt-builder.test.cjs`, `samples/representative-suite.json` |
 | OpenAI 公式 guidance を起動時に確認し model 別 prompt を生成する | `src/openai-prompt-guidance.cjs`, `src/prompt-builder.cjs`, `src/work-item-start.cjs`, `src/codex-work-item-draft.cjs`, `extension.js`, `package.json` | `tests/openai-prompt-guidance.test.cjs`, `tests/prompt-builder.test.cjs`, `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
 | FirstPrompt 履歴を保存して復元する | `src/prompt-history.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/prompt-history.test.cjs`, `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |

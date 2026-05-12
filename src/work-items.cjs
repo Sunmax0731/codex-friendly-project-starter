@@ -167,6 +167,7 @@ function parseIssueMarkdown(content, context = {}) {
     type: metadata.type || 'task',
     source: metadata.source || 'local',
     draftSource: metadata.draftsource || '',
+    qcdsImprovementAxis: metadata.qcdsimprovementaxis || '',
     created: metadata.created || '',
     phase: normalizePhaseId(metadata.phase),
     links,
@@ -223,7 +224,7 @@ function parseIssueMetadata(lines) {
     const match = bullet || colon;
     if (!match) continue;
     const key = match[1].toLowerCase().replace(/\s+/g, '');
-  if (['id', 'status', 'priority', 'type', 'source', 'draftsource', 'created', 'qcds', 'phase', 'tasks', 'evidence', 'githubissue'].includes(key)) metadata[key] = match[2].trim();
+  if (['id', 'status', 'priority', 'type', 'source', 'draftsource', 'created', 'qcds', 'phase', 'tasks', 'evidence', 'githubissue', 'qcdsimprovementaxis'].includes(key)) metadata[key] = match[2].trim();
   }
   return metadata;
 }
@@ -597,6 +598,7 @@ function buildQcdsDimensionFromStrictMetrics(id, dimension, work) {
     passed: numberOrUndefined(dimension.passed) ?? checks.filter((check) => check.pass).length,
     expected: numberOrUndefined(dimension.expected) ?? checks.length,
     status: isGradeAtLeast(grade, 'A-') ? 'pass' : 'needs-improvement',
+    improvementAction: isGradeAtMost(grade, 'A-'),
     checks,
     linkedItems
   };
@@ -627,6 +629,7 @@ function buildQcdsDimensionFromGrade(axis, grades, scores, definitions, metrics,
     passed: pass ? 1 : 0,
     expected: 1,
     status: pass ? 'pass' : 'needs-improvement',
+    improvementAction: isGradeAtMost(grade, 'A-'),
     checks: [check],
     linkedItems
   };
@@ -644,6 +647,7 @@ function buildUnavailableQcdsStatus(rootPath, workItems = {}, metricsPath = '', 
       passed: 0,
       expected: 1,
       status: 'needs-improvement',
+      improvementAction: true,
       checks: [{
         id: 'missing-qcds-metrics',
         description: reason || 'QCDS metrics are not available.',
@@ -773,6 +777,10 @@ function normalizeGrade(value) {
 
 function isGradeAtLeast(value, floor) {
   return (GRADE_RANK.get(normalizeGrade(value)) ?? -1) >= (GRADE_RANK.get(normalizeGrade(floor)) ?? -1);
+}
+
+function isGradeAtMost(value, ceiling) {
+  return (GRADE_RANK.get(normalizeGrade(value)) ?? -1) <= (GRADE_RANK.get(normalizeGrade(ceiling)) ?? -1);
 }
 
 function numberOrUndefined(value) {
@@ -1044,6 +1052,123 @@ function createBlockedFollowUpIssue(rootPath, item = {}, options = {}) {
   };
 }
 
+function createQcdsImprovementIssue(rootPath, dimension = {}, options = {}) {
+  const axis = labelFromDimensionId(dimension.label || dimension.id || options.axis || 'Quality');
+  const existing = findExistingQcdsImprovementIssue(rootPath, axis);
+  const checks = Array.isArray(dimension.checks) ? dimension.checks : [];
+  const linkedItems = uniqueLinkedItems([
+    ...(Array.isArray(dimension.linkedItems) ? dimension.linkedItems : []),
+    ...checks.flatMap((check) => Array.isArray(check.linkedItems) ? check.linkedItems : [])
+  ]);
+  const evidence = qcdsImprovementEvidence(axis, dimension, checks, linkedItems);
+  if (existing) {
+    appendQcdsImprovementReference(existing.filePath, evidence);
+    return {
+      created: false,
+      issuePath: existing.filePath,
+      issueRelative: toSlash(path.relative(rootPath, existing.filePath)),
+      todoCreated: false,
+      axis
+    };
+  }
+
+  const title = `QCDS改善: ${axis}`;
+  const issuePath = nextIssueFilePath(rootPath, title);
+  const issueRelative = toSlash(path.relative(rootPath, issuePath));
+  const qcdsAxes = unique([axis, 'Quality', 'Delivery']);
+  const content = createIssueMarkdown({
+    title,
+    status: 'open',
+    priority: 'P1',
+    type: 'feature',
+    source: 'qcds-improvement',
+    phase: '04-implementation',
+    qcdsAxes,
+    context: [
+      `QCDS の ${axis} が \`${dimension.grade || 'unknown'}\` のため、改善案の調査と TODO / Issue 化を行うための Issue です。`,
+      '',
+      '## Low Grade Evidence',
+      '',
+      evidence,
+      '',
+      '## Codex Investigation Policy',
+      '',
+      '- まず read-only で現状の docs、metrics、関連 Work Items、競合または公式標準との差分を調査する。',
+      '- 改善案はこの Issue の Acceptance Criteria または追加 Issue として記録し、重複する QCDS 改善 Issue は作成しない。',
+      '- 実装に進む場合は同じ作業ブランチで docs、tests、QCDS metrics、manual test 手順を同期する。'
+    ].join('\n'),
+    acceptance: [
+      `${axis} の低評価理由、関連 checks、既存 linked work items を確認する。`,
+      '改善案を具体的な TODO / Issue acceptance criteria に落とし込む。',
+      '同じ QCDS 観点の改善 Issue が既にある場合は新規作成せず、既存 Issue に追記またはリンクする。',
+      '改善後に `npm test` 相当の検証と QCDS docs を更新する。'
+    ]
+  }).replace('- QCDS: ' + qcdsAxes.join(', '), `- QCDS: ${qcdsAxes.join(', ')}\n- QCDS Improvement Axis: ${axis}`);
+  fs.writeFileSync(issuePath, content, 'utf8');
+  const todo = appendTodoWorkItemLink(rootPath, {
+    title,
+    priority: 'P1',
+    qcdsAxes,
+    links: [{ label: 'Issue', href: issueRelative }]
+  });
+  return {
+    created: true,
+    issuePath,
+    issueRelative,
+    todoPath: todo.todoPath,
+    todoCreated: todo.created,
+    axis
+  };
+}
+
+function findExistingQcdsImprovementIssue(rootPath, axis) {
+  const issuesDir = path.join(rootPath, 'Issues');
+  if (!fs.existsSync(issuesDir)) return null;
+  const entries = fs.readdirSync(issuesDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.md$/i.test(entry.name) && !ISSUE_README_NAMES.has(entry.name));
+  const axisPattern = new RegExp(`QCDS Improvement Axis:\\s*${escapeRegExp(axis)}\\b`, 'i');
+  for (const entry of entries) {
+    const filePath = path.join(issuesDir, entry.name);
+    const content = fs.readFileSync(filePath, 'utf8');
+    if (/Source:\s*qcds-improvement/i.test(content) && (axisPattern.test(content) || new RegExp(`QCDS改善:\\s*${escapeRegExp(axis)}\\b`, 'i').test(content))) {
+      return { filePath, content };
+    }
+  }
+  return null;
+}
+
+function qcdsImprovementEvidence(axis, dimension, checks, linkedItems) {
+  const checkLines = checks.length
+    ? checks.map((check) => `- [${check.pass ? 'x' : ' '}] ${check.id || axis}: ${check.description || '(no description)'}${check.detail ? ` (${check.detail})` : ''}`)
+    : ['- [ ] check detail is not available'];
+  const linkedLines = linkedItems.length
+    ? linkedItems.map((item) => `- ${item.kind || 'work'}: ${item.relativePath || item.title} ${item.title ? `- ${item.title}` : ''}`)
+    : ['- linked work item is not available'];
+  return [
+    `- Axis: ${axis}`,
+    `- Grade: ${dimension.grade || 'unknown'}`,
+    `- Score: ${dimension.score ?? 'unknown'}`,
+    `- Checks: ${dimension.passed ?? 0}/${dimension.expected ?? checks.length}`,
+    '',
+    '### Checks',
+    '',
+    ...checkLines,
+    '',
+    '### Linked Work Items',
+    '',
+    ...linkedLines
+  ].join('\n');
+}
+
+function appendQcdsImprovementReference(filePath, evidence) {
+  if (!filePath || !fs.existsSync(filePath)) return;
+  let content = fs.readFileSync(filePath, 'utf8');
+  const marker = '## QCDS Recheck Notes';
+  if (!content.includes(marker)) content = content.replace(/\s*$/, '') + `\n\n${marker}\n\n`;
+  const line = `- ${new Date().toISOString()} QCDS improvement action reused this Issue.\n\n${evidence}\n`;
+  fs.writeFileSync(filePath, content + line, 'utf8');
+}
+
 function inferBlockedCause(input = {}) {
   const item = input.item || {};
   const source = [
@@ -1191,6 +1316,10 @@ function slugify(value) {
   return slug || 'issue';
 }
 
+function escapeRegExp(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 module.exports = {
   TODO_FILE_NAMES,
   isTodoFilePath,
@@ -1214,5 +1343,6 @@ module.exports = {
   createIssueMarkdown,
   createTaskMarkdown,
   createBlockedFollowUpIssue,
+  createQcdsImprovementIssue,
   slugify
 };

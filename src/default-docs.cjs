@@ -54,6 +54,24 @@ const PHASE_SKILLS = [
   }
 ];
 
+const WORK_TYPE_SKILLS = [
+  {
+    directory: 'ui-ux',
+    title: 'UI / UX',
+    focus: '利用者の作業導線、表示密度、アクセシビリティ、手動確認しやすい UI を扱います。'
+  },
+  {
+    directory: 'test-verification',
+    title: 'テスト / 検証',
+    focus: '自動テスト、platform runtime gate、manual test、証跡更新を扱います。'
+  },
+  {
+    directory: 'release-operations',
+    title: 'リリース / 運用',
+    focus: 'QCDS、release evidence、docs ZIP、GitHub release、配布前確認を扱います。'
+  }
+];
+
 const DEFAULT_DOC_PATHS = [
   'README.md',
   'AGENTS.md',
@@ -78,7 +96,9 @@ const DEFAULT_DOC_PATHS = [
   'Issues/0001-initial-docs-and-scope.md',
   'Issues/0002-platform-runtime-gate.md',
   'Issues/0003-qcds-release-readiness.md',
-  ...PHASE_SKILLS.map((phase) => `skills/${phase.directory}/SKILL.md`)
+  ...PHASE_SKILLS.map((phase) => `skills/${phase.directory}/SKILL.md`),
+  ...PHASE_SKILLS.map((phase) => `agents/phases/${phase.directory}/AGENTS.md`),
+  ...WORK_TYPE_SKILLS.map((skill) => `skills/work-types/${skill.directory}/SKILL.md`)
 ];
 
 function collectDefaultDocSources(domainId, aiRoot = DEFAULT_AI_ROOT) {
@@ -112,7 +132,8 @@ function buildDefaultDocPlan(input = {}) {
     aiRoot,
     sourcePaths: sources,
     targetFiles: DEFAULT_DOC_PATHS.slice(),
-    phaseSkills: PHASE_SKILLS.slice()
+    phaseSkills: PHASE_SKILLS.slice(),
+    workTypeSkills: WORK_TYPE_SKILLS.slice()
   };
 }
 
@@ -164,6 +185,8 @@ function renderDefaultDocs(input = {}) {
   ];
 
   for (const phase of PHASE_SKILLS) files.push(doc(`skills/${phase.directory}/SKILL.md`, renderPhaseSkill(plan, phase)));
+  for (const phase of PHASE_SKILLS) files.push(doc(`agents/phases/${phase.directory}/AGENTS.md`, renderPhaseAgent(plan, phase)));
+  for (const skill of WORK_TYPE_SKILLS) files.push(doc(`skills/work-types/${skill.directory}/SKILL.md`, renderWorkTypeSkill(plan, skill)));
   return { plan, files };
 }
 
@@ -218,6 +241,8 @@ function renderReadme(plan, sourceList) {
 }
 
 function renderAgents(plan, sourceList) {
+  const phaseLinks = PHASE_SKILLS.map((phase) => `- [${phase.title} Agent](agents/phases/${phase.directory}/AGENTS.md): ${phase.focus}`).join('\n');
+  const workTypeLinks = WORK_TYPE_SKILLS.map((skill) => `- [${skill.title} Skill](skills/work-types/${skill.directory}/SKILL.md): ${skill.focus}`).join('\n');
   return [
     '# AGENTS',
     '',
@@ -229,7 +254,7 @@ function renderAgents(plan, sourceList) {
     '2. `AGENTS.md` と `SKILL.md` を確認する。',
     '3. `TODO.md` と `Issues/*.md` の work item を確認する。',
     '4. `docs/requirements.md`、`docs/specification.md`、`Design.md`、`Architecture.md` を確認する。',
-    '5. 現在の工程に対応する `skills/<phase>/SKILL.md` を確認する。',
+    '5. 現在の工程に対応する `agents/phases/<phase>/AGENTS.md` と `skills/<phase>/SKILL.md` を確認する。',
     '6. OpenAI 公式 prompt guidance が更新されている場合は、対象モデルに合わせて prompt の成功条件、証拠、停止条件を見直す。',
     '',
     '## Rules',
@@ -241,6 +266,14 @@ function renderAgents(plan, sourceList) {
     '- 手動確認を Codex が実施したとは書かず、未実施の場合は未実施として記録します。',
     '- OpenAI 公式 docs の参照先は `https://developers.openai.com/api/docs/guides/latest-model`、`https://developers.openai.com/api/docs/guides/prompt-guidance?model=gpt-5.5`、`https://developers.openai.com/codex/guides/agents-md`、`https://developers.openai.com/codex/skills` です。',
     '',
+    '## Phase Agent Docs',
+    '',
+    phaseLinks,
+    '',
+    '## Work Type Skills',
+    '',
+    workTypeLinks,
+    '',
     '## Source Docs',
     '',
     sourceList
@@ -249,6 +282,7 @@ function renderAgents(plan, sourceList) {
 
 function renderRootSkill(plan, sourceList) {
   const phaseLinks = PHASE_SKILLS.map((phase) => `- [${phase.title}](skills/${phase.directory}/SKILL.md): ${phase.focus}`).join('\n');
+  const workTypeLinks = WORK_TYPE_SKILLS.map((skill) => `- [${skill.title}](skills/work-types/${skill.directory}/SKILL.md): ${skill.focus}`).join('\n');
   return [
     '# SKILL',
     '',
@@ -263,6 +297,10 @@ function renderRootSkill(plan, sourceList) {
     '## Phase Skills',
     '',
     phaseLinks,
+    '',
+    '## Work Type Skills',
+    '',
+    workTypeLinks,
     '',
     '## Domain Focus',
     '',
@@ -302,6 +340,51 @@ function renderPhaseSkill(plan, phase) {
     '',
     `- ${plan.domain.label} の制約と runtime gate に反していないこと。`,
     '- QCDS の該当観点に紐づく改善が残る場合、Issue として明示されていること。'
+  ].join('\n') + '\n';
+}
+
+function renderPhaseAgent(plan, phase) {
+  return [
+    `# ${phase.title} Agent`,
+    '',
+    '## Role',
+    '',
+    `${phase.title} 工程で Codex / AI Agent が先に確認する判断基準です。`,
+    '',
+    '## Read Order',
+    '',
+    '- `README.md`',
+    '- `AGENTS.md`',
+    '- `SKILL.md`',
+    `- \`skills/${phase.directory}/SKILL.md\``,
+    `- \`${phase.output}\``,
+    '',
+    '## Rules',
+    '',
+    `- Focus: ${phase.focus}`,
+    `- Output: ${phase.output}`,
+    `- Domain runtime gate: ${plan.domain.runtimeGate}`,
+    '- 複雑な横断ノウハウは `skills/work-types/*/SKILL.md` を参照します。'
+  ].join('\n') + '\n';
+}
+
+function renderWorkTypeSkill(plan, skill) {
+  return [
+    `# ${skill.title} Skill`,
+    '',
+    '## Purpose',
+    '',
+    skill.focus,
+    '',
+    '## Applies When',
+    '',
+    `- ${skill.title} に関係する設計、実装、検証、docs 更新が必要なとき。`,
+    '',
+    '## Checks',
+    '',
+    `- Domain: ${plan.domain.label}`,
+    `- Runtime gate: ${plan.domain.runtimeGate}`,
+    '- 関連する TODO / Issue / QCDS / manual test を同じ変更で同期します。'
   ].join('\n') + '\n';
 }
 
@@ -539,6 +622,7 @@ module.exports = {
   DEFAULT_AI_ROOT,
   COMMON_SOURCE_FILES,
   PHASE_SKILLS,
+  WORK_TYPE_SKILLS,
   DEFAULT_DOC_PATHS,
   collectDefaultDocSources,
   buildDefaultDocPlan,

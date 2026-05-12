@@ -4,20 +4,21 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 
 ## 主な機能
 
-- Agent Docs Tree: ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を一覧化します。
+- Agent Docs Tree: ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を一覧化します。agent control docs、Development Documentation、workspace docs を分け、`agents/**/AGENTS.md` と `skills/**/SKILL.md` の子階層も扱います。
 - Agent Doc Highlight: Agent 向け文書を開いたとき、重要見出しと制約語をエディタ上でハイライトします。
 - Work Items Tree: `TODO.md`、`Issues/*.md` を読み取り、現在の Project Phase、未完了 TODO、local Issue、QCDS、release readiness を常設 Tree View で確認できます。既存互換の `Tasks/*.md` は内部読み取りだけに残し、通常 UI には表示しません。
-- Work Dashboard: TODO、Issue、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、現在工程、工程別 Work Items、Issue 起票日、未着手 / 着手済み / 解決済みの状態方針を確認できます。日常操作と初回セットアップを分けた GUI ボタンから主要操作を実行でき、中段の QCDS、release readiness、Open TODO / Issues は折りたためます。
+- Work Dashboard: TODO、Issue、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、現在工程、工程別 Work Items、Issue 起票日、未着手 / 着手済み / 解決済みの状態方針を確認できます。日常操作は `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` に整理し、FirstPrompt と環境確認は初回セットアップ側へ分けます。
 - Work Item Start: Dashboard または Work Items Tree の TODO / Issue から `Start` を押すと、その作業単位を入口にした開始プロンプトを Codex CLI へ渡せます。
 - Start Selected Work Items: Dashboard の checkbox または Command Palette の複数選択から、選んだ TODO / Issues だけを連結した作業範囲として Codex CLI へ渡せます。
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues を優先度順の一括バックログとして Codex CLI へ渡せます。
-- QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。
-- Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。JSON は元ファイルを変更せずに整形表示します。
+- QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。A- 以下の観点には改善調査 / TODO 化 action を表示し、同じ観点の改善 Issue は再利用します。
+- Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。既に同じ文書の WebView がある場合は既存 panel を active にし、上部操作は tooltip / aria-label 付き icon button に統一します。root `AGENTS.md` / `SKILL.md` は子階層 docs を統合表示し、JSON は元ファイルを変更せずに整形表示します。
 - Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。
 - GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込みます。取り込んだ local Issue / TODO には GitHub Issue の個別リンクを残します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Legacy Tasks: 既存プロジェクト互換のため `Tasks/*.md` の読み取りとリンク解決は残しますが、通常 UI と新規作成導線には表示しません。新規作業は Issue に集約します。
-- D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。
+- D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。root docs に加え、`agents/phases/*/AGENTS.md`、工程別 `skills/*/SKILL.md`、作業種類別 `skills/work-types/*/SKILL.md` を生成します。
+- Localization: VS Code の表示言語が `ja` の場合は Dashboard、Tree group、WebView action、Command Palette title を日本語寄りの文言にし、未対応 locale では英語へ fallback します。
 - OpenAI Prompt Guidance Sync: 拡張起動時に OpenAI 公式の latest model / prompt guidance / AGENTS.md / Skills ページを短い timeout で確認し、取得状況を cache します。ネットワーク失敗時は内蔵 fallback guidance で prompt 生成を継続します。
 - Model-Optimized Prompts: `gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` の特性に合わせ、FirstPrompt、Work Item Start、Work Item Composer の Codex 用 prompt に outcome-first、出力契約、検証条件、停止条件を差し込みます。
 - FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、アジャイル、ウォーターフォール、プロトタイピング、逐次確認、リリース一括進行、対象モデルから開始プロンプトを生成します。

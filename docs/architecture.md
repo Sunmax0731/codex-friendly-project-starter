@@ -8,7 +8,9 @@
 - `src/prompt-builder.cjs`: FirstPrompt 生成ロジック。
 - `src/openai-prompt-guidance.cjs`: OpenAI 公式 prompt guidance の URL、起動時 fetch、fallback guidance、model profile、prompt section 生成。
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
-- `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
+- `src/webview.cjs`: Starter UI、Work Dashboard、QCDS Status の Webview HTML 生成。
+- `src/markdown-webview.cjs`: Markdown / JSON WebView、link 解決、root `AGENTS.md` / `SKILL.md` の子 docs 統合表示。
+- `src/i18n.cjs`: Dashboard、Tree group、WebView action の locale 辞書と fallback。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
 - `src/work-item-start.cjs`: TODO / Issue を Codex CLI へ渡す開始プロンプト生成。
 - `src/codex-sessions.cjs`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue に記録する。
@@ -36,6 +38,12 @@ FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code wor
 
 Work Item Start Prompt は `codexFriendlyProjectStarter.codexGitWritePolicy` を読み、`preflight` または `defer` の Git 書き込み方針を VS Code Codex / Codex CLI に渡す。これにより `.git/index.lock Permission denied` が起きやすい環境では、Git 書き込みの反復ではなく未完了操作の報告へ誘導する。
 Work Item が closed にならない場合は `src/work-items.cjs` の blocked follow-up helper が原因を分類し、`Issues/*.md` に新しい follow-up Issue を作成する。Dashboard と context menu はこの helper を呼び出すだけにし、GitHub auth、Git index lock / ACL、runtime gate、tool PATH などの判定を一箇所に閉じ込める。
+
+QCDS が `A-` 以下の観点では、`src/work-items.cjs` の QCDS improvement helper が観点、grade、score、checks、linked work items を含む Issue を生成する。同じ `QCDS Improvement Axis` の Issue が存在する場合は重複作成せず、既存 Issue に再確認 notes を追記する。
+
+Markdown WebView は file path を key に WebViewPanel を再利用する。root `AGENTS.md` / `SKILL.md` の統合表示は `src/markdown-webview.cjs` が子階層 docs を読み込んで HTML に追加し、元ファイルへの link は通常の link navigation と同じ経路で扱う。
+
+UI 文言は `src/i18n.cjs` と VS Code の `package.nls*.json` に分ける。実行時 WebView / Tree label は `vscode.env.language` から `ja` または `en` を選び、Command Palette title は VS Code の package localization に任せる。
 
 ## データ
 

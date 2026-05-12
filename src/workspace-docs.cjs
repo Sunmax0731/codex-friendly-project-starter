@@ -16,6 +16,10 @@ const DOC_PATTERNS = [
   /^docs\/traceability-matrix\.md$/i,
   /^docs\/security-privacy-checklist\.md$/i
 ];
+const CHILD_AGENT_DOC_PATTERNS = [
+  /^agents\/.+\/AGENTS\.md$/i,
+  /^skills\/.+\/SKILL\.md$/i
+];
 
 const PRIORITY = new Map([
   ['AGENTS.md', 0],
@@ -35,20 +39,27 @@ function isAgentDocPath(filePath) {
   if (ROOT_AGENT_DOCS.has(base)) return true;
   const docsIndex = normalized.toLowerCase().lastIndexOf('/docs/');
   const rel = docsIndex >= 0 ? normalized.slice(docsIndex + 1) : normalized;
-  return DOC_PATTERNS.some((pattern) => pattern.test(rel));
+  const agentsIndex = normalized.toLowerCase().lastIndexOf('/agents/');
+  const skillsIndex = normalized.toLowerCase().lastIndexOf('/skills/');
+  const childRel = agentsIndex >= 0 ? normalized.slice(agentsIndex + 1) : (skillsIndex >= 0 ? normalized.slice(skillsIndex + 1) : normalized);
+  return DOC_PATTERNS.some((pattern) => pattern.test(rel)) || CHILD_AGENT_DOC_PATTERNS.some((pattern) => pattern.test(childRel));
 }
 
 function classifyAgentDoc(filePath) {
   const base = path.basename(filePath);
-  if (base === 'AGENTS.md') return { kind: 'agent-rules', label: 'Agent Rules', priority: 0 };
-  if (base === 'SKILL.md') return { kind: 'agent-skill', label: 'Agent Skill', priority: 1 };
+  const normalized = toSlash(filePath);
+  if (/\/agents\//i.test(normalized)) return { kind: 'agent-child', label: 'Agent Child Docs', group: 'agent-control', priority: 20 };
+  if (/\/skills\//i.test(normalized)) return { kind: 'skill-child', label: 'Skill Child Docs', group: 'agent-control', priority: 21 };
+  if (base === 'AGENTS.md') return { kind: 'agent-rules', label: 'Agent Rules', group: 'agent-control', priority: 0 };
+  if (base === 'SKILL.md') return { kind: 'agent-skill', label: 'Agent Skill', group: 'agent-control', priority: 1 };
   if (base === 'README.md') return { kind: 'readme', label: 'README', priority: 2 };
   if (base === 'TODO.md') return { kind: 'todo', label: 'TODO', priority: 3 };
-  if (base === 'Design.md' || base === 'Architecture.md') return { kind: 'design', label: 'Design Docs', priority: 4 };
-  if (/qcds/i.test(filePath)) return { kind: 'qcds', label: 'QCDS', priority: 10 };
-  if (/manual-test|test-plan/i.test(filePath)) return { kind: 'test', label: 'Test Docs', priority: 8 };
-  if (/design|architecture/i.test(filePath)) return { kind: 'design', label: 'Design Docs', priority: 6 };
-  return { kind: 'docs', label: 'Docs', priority: 5 };
+  if (base === 'Design.md' || base === 'Architecture.md') return { kind: 'design', label: 'Design Docs', group: 'agent-control', priority: 4 };
+  if (/qcds/i.test(filePath)) return { kind: 'qcds', label: 'QCDS', group: 'development-docs', priority: 10 };
+  if (/manual-test|test-plan/i.test(filePath)) return { kind: 'test', label: 'Test Docs', group: 'development-docs', priority: 8 };
+  if (/design|architecture/i.test(filePath)) return { kind: 'design', label: 'Design Docs', group: 'development-docs', priority: 6 };
+  if (/\/docs\//i.test(normalized)) return { kind: 'docs', label: 'Docs', group: 'development-docs', priority: 5 };
+  return { kind: 'docs', label: 'Docs', group: 'workspace-docs', priority: 5 };
 }
 
 async function scanAgentDocs(rootPath, options = {}) {

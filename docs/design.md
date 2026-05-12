@@ -10,6 +10,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - Activity Bar の `Codex Starter` に配置する。
 - 文書名、分類、相対パスを表示する。
+- `Agent Control Docs`、`Development Documentation`、`Workspace Docs` の3 group に分け、agent control docs と人が読む開発 docs を混ぜない。
 - 選択すると該当 Markdown を開く。
 - Tree title には Project Starter、D:\AI Docs 生成、refresh を icon action として置く。
 - item context から Markdown WebView、Markdown Source、Copy Path にアクセスできる。
@@ -37,12 +38,13 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - release readiness は `pass` / `missing` を一覧化する。
 - TODO / Issue / QCDS improvements の行には `Select` checkbox、`Start`、`Open`、必要に応じて `Follow-up` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item の prompt を既定では VS Code Codex sidebar へ渡し、`Open` は該当 Markdown WebView へ移動する。`Follow-up` は blocked の原因を local Issue に起こす。
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
-- 進行中操作には自然言語から Issue、GitHub Issues 取込、Issue 作成、FirstPrompt、QCDS Status、VS Code Codex、現在PromptをCodexへ、refresh を置く。
-- 進行中操作には `選択Work Itemを開始` と `全Work Itemを開始` も置き、選択した TODO / Issue だけ、または未完了 TODO / Issue 全体を Codex CLI へ渡せるようにする。
-- 初回セットアップには `D:\AI` docs 生成、Issues 初期化、Codex CLI 確認を折りたたみ領域として置く。
+- 進行中操作は2行に分ける。1行目は `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、2行目は `選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` とする。
+- `Issueを起票` は自然言語入力と手動入力を同じ Work Item Composer で扱う。`CodexにPrompt送信` は current prompt handoff と Codex sidebar open の選択へ進む。
+- 初回セットアップには FirstPrompt、`D:\AI` docs 生成、Issues 初期化、Codex CLI 確認を折りたたみ領域として置く。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues は `<details>` で折りたためるようにする。
 - TODO / Issue の priority、status、type、phase、QCDS は tag として表示し、priority や blocked / bug / release などが目視で分かる色にする。
 - Dashboard は確認と操作入口にし、詳細編集は Markdown を直接開く。
+- QCDS が `A-` 以下の観点には `改善案を調査および検討しTODOに起こす` を出し、作成済みの同観点改善 Issue があれば重複作成せず再利用する。
 
 ### Work Item Composer
 
@@ -55,7 +57,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 ### GitHub Issues 取込
 
-- Dashboard と Command Palette から `GitHub Issues 取込` を起動する。
+- Dashboard の `GitHub Issuesインポート`、Work Items title action、Command Palette から `GitHub Issues 取込` を起動する。
 - 入力欄は `owner/repo` または GitHub URL を受け付ける。workspace の `git remote -v` が GitHub を指す場合は repository 名を既定値にする。
 - GitHub Issues は QuickPick multi-select で表示し、既に local TODO / Issue に同じ URL がある issue は `imported` として分かるようにする。
 - 選択された issue は Work Item Composer と同じ Codex CLI read-only inference に渡し、local Issue の下書きへ整える。Codex CLI が使えない場合はローカル補完で継続する。
@@ -67,11 +69,15 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 表示 UI は Work Dashboard と同じデータを使い、Quality、Cost、Delivery、Satisfaction をそれぞれ独立した詳細 section として表示する。
 - 各 section には grade、score、passed/expected、checks、`QCDS:` metadata/tag がある TODO / Issue を表示する。metrics がない場合も Quality / Cost / Delivery / Satisfaction の fallback を表示する。
 - Work Items tree の QCDS 配下の各観点、または Dashboard の `Details` から該当 section を開いた状態で表示する。
+- 固定ヘッダー右上には refresh、Work Dashboard、metrics JSON、evaluation doc の icon button を置き、tooltip と aria-label を維持する。
+- `A-` 以下の観点には改善調査 / TODO 化 action を置く。
 
 ### Markdown WebView
 
 - `AGENTS.md`、`SKILL.md`、`Design.md`、`Architecture.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を読むための専用面にする。
-- 上部 toolbar は `Open Source`、`Copy Path`、`Refresh` に絞る。
+- 上部は固定ヘッダーにし、左にタイトルと path、右に `Open Source`、`Copy Path`、`Refresh` の icon button を置く。視覚表示は icon にし、操作名は tooltip と aria-label で保持する。
+- 同じ文書を再度開く場合は既存 panel を reveal し、duplicate panel を増やさない。
+- root `AGENTS.md` / `SKILL.md` は子階層の `agents/**/AGENTS.md` と `skills/**/SKILL.md` を統合表示する。各子 docs の見出しから元ファイルを開ける。
 - Markdown link は WebView 内遷移し、workspace 外へ出る link は warning にする。
 - Theme color と標準 Markdown 構造を優先し、装飾カード化しない。
 
@@ -79,7 +85,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - `Codex Starter: Scaffold D:\AI Default Docs` は QuickPick と InputBox で domain、repo name、goal、overwrite policy を選ぶ。
 - 生成後は `README.md` を Markdown WebView で表示し、Agent Docs / Work Items を refresh する。
-- root `SKILL.md` は `skills/01-requirements` から `skills/06-release` までの工程別 Skill へリンクする。
+- root `AGENTS.md` は `agents/phases/*/AGENTS.md` と作業種類別 Skill を案内し、root `SKILL.md` は `skills/01-requirements` から `skills/06-release` までの工程別 Skill と `skills/work-types/*/SKILL.md` へリンクする。
 
 ### FirstPrompt Webview
 
@@ -110,8 +116,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - GitHub Issues 取込: public GitHub Issues API 取得に失敗した場合はエラーを表示してローカルファイルを書き換えない。Codex 下書き生成だけに失敗した場合はローカル補完で import を続ける。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。
 - Tasks directory なし: 通常 UI では作成しない。既存互換の `Tasks/*.md` リンクがある場合だけ Markdown WebView のリンク解決で扱う。
-- Issue なし: Dashboard は Issue progress を 0% とし、Dashboard の `Issue を作成` または Work Item Composer を使う。
+- Issue なし: Dashboard は Issue progress を 0% とし、Dashboard の `Issueを起票` または Work Item Composer を使う。
 - QCDS metrics なし: Dashboard は QCDS を D- fallback として表示し、QCDS docs の作成を release readiness の不足として扱う。
+- Locale 未対応: UI label は英語 fallback を使い、command id と WebView message contract は locale に関係なく維持する。
 
 ## アクセシビリティ
 
@@ -120,3 +127,4 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - ボタンは明示的な操作名にする。
 - エディタ decoration は強すぎないテーマ色を使う。
 - Work Dashboard は VS Code theme color と固定行高の progress bar を使い、TODO/Issue の数が変わっても layout が大きく崩れないようにする。
+- Icon button は `aria-label` と `title` を持ち、キーボード focus 時にも hover と同じ背景を使う。

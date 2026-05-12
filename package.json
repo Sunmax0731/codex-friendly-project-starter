@@ -58,147 +58,147 @@
     "commands": [
       {
         "command": "codex-friendly-project-starter.openStarter",
-        "title": "Codex Starter: Open Project Starter",
+        "title": "%command.openStarter.title%",
         "icon": "$(rocket)"
       },
       {
         "command": "codex-friendly-project-starter.generateFirstPrompt",
-        "title": "Codex Starter: Generate FirstPrompt",
+        "title": "%command.generateFirstPrompt.title%",
         "icon": "$(sparkle)"
       },
       {
         "command": "codex-friendly-project-starter.copyFirstPrompt",
-        "title": "Codex Starter: Copy FirstPrompt for VS Code Codex",
+        "title": "%command.copyFirstPrompt.title%",
         "icon": "$(copy)"
       },
       {
         "command": "codex-friendly-project-starter.invokeCodexWithFirstPrompt",
-        "title": "Codex Starter: Send FirstPrompt to VS Code Codex",
+        "title": "%command.invokeCodexWithFirstPrompt.title%",
         "icon": "$(run)"
       },
       {
         "command": "codex-friendly-project-starter.invokeCodexWithCurrentPrompt",
-        "title": "Codex Starter: Send Current Prompt to VS Code Codex",
+        "title": "%command.invokeCodexWithCurrentPrompt.title%",
         "icon": "$(run)"
       },
       {
         "command": "codex-friendly-project-starter.checkCodexCli",
-        "title": "Codex Starter: Check Codex CLI",
+        "title": "%command.checkCodexCli.title%",
         "icon": "$(terminal)"
       },
       {
         "command": "codex-friendly-project-starter.openCodexApp",
-        "title": "Codex Starter: Open VS Code Codex",
+        "title": "%command.openCodexApp.title%",
         "icon": "$(comment-discussion)"
       },
       {
         "command": "codex-friendly-project-starter.refreshAgentDocs",
-        "title": "Codex Starter: Refresh Agent Docs",
+        "title": "%command.refreshAgentDocs.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "codex-friendly-project-starter.refreshWorkItems",
-        "title": "Codex Starter: Refresh Work Items",
+        "title": "%command.refreshWorkItems.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "codex-friendly-project-starter.refreshAll",
-        "title": "Codex Starter: Refresh Agent Docs and Work Items",
+        "title": "%command.refreshAll.title%",
         "icon": "$(sync)"
       },
       {
         "command": "codex-friendly-project-starter.openWorkDashboard",
-        "title": "Codex Starter: Open Work Dashboard",
+        "title": "%command.openWorkDashboard.title%",
         "icon": "$(dashboard)"
       },
       {
         "command": "codex-friendly-project-starter.openQcdsStatus",
-        "title": "Codex Starter: Open QCDS Status",
+        "title": "%command.openQcdsStatus.title%",
         "icon": "$(graph)"
       },
       {
         "command": "codex-friendly-project-starter.openMarkdownWebview",
-        "title": "Codex Starter: Open Markdown WebView",
+        "title": "%command.openMarkdownWebview.title%",
         "icon": "$(preview)"
       },
       {
         "command": "codex-friendly-project-starter.refreshMarkdownWebview",
-        "title": "Codex Starter: Refresh Markdown WebView",
+        "title": "%command.refreshMarkdownWebview.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "codex-friendly-project-starter.openMarkdownSource",
-        "title": "Codex Starter: Open Markdown Source",
+        "title": "%command.openMarkdownSource.title%",
         "icon": "$(go-to-file)"
       },
       {
         "command": "codex-friendly-project-starter.copyMarkdownPath",
-        "title": "Codex Starter: Copy Markdown Path",
+        "title": "%command.copyMarkdownPath.title%",
         "icon": "$(copy)"
       },
       {
         "command": "codex-friendly-project-starter.scaffoldDefaultDocs",
-        "title": "Codex Starter: Scaffold D:\\AI Default Docs",
+        "title": "%command.scaffoldDefaultDocs.title%",
         "icon": "$(repo-create)"
       },
       {
         "command": "codex-friendly-project-starter.initializeIssuesDirectory",
-        "title": "Codex Starter: Initialize Issues Directory",
+        "title": "%command.initializeIssuesDirectory.title%",
         "icon": "$(issues)"
       },
       {
         "command": "codex-friendly-project-starter.createLocalIssue",
-        "title": "Codex Starter: Create Local Issue",
+        "title": "%command.createLocalIssue.title%",
         "icon": "$(add)"
       },
       {
         "command": "codex-friendly-project-starter.openWorkItemComposer",
-        "title": "Codex Starter: Open Work Item Composer",
+        "title": "%command.openWorkItemComposer.title%",
         "icon": "$(new-file)"
       },
       {
         "command": "codex-friendly-project-starter.createWorkItemFromNaturalLanguage",
-        "title": "Codex Starter: Create Work Item from Natural Language",
+        "title": "%command.createWorkItemFromNaturalLanguage.title%",
         "icon": "$(sparkle)"
       },
       {
         "command": "codex-friendly-project-starter.importGitHubIssues",
-        "title": "Codex Starter: Import GitHub Issues",
+        "title": "%command.importGitHubIssues.title%",
         "icon": "$(github)"
       },
       {
         "command": "codex-friendly-project-starter.createBlockedFollowUpIssue",
-        "title": "Codex Starter: Create Blocked Follow-up Issue",
+        "title": "%command.createBlockedFollowUpIssue.title%",
         "icon": "$(debug-disconnect)"
       },
       {
         "command": "codex-friendly-project-starter.openAgentDoc",
-        "title": "Codex Starter: Open Agent Doc",
+        "title": "%command.openAgentDoc.title%",
         "icon": "$(go-to-file)"
       },
       {
         "command": "codex-friendly-project-starter.openWorkItem",
-        "title": "Codex Starter: Open Work Item",
+        "title": "%command.openWorkItem.title%",
         "icon": "$(go-to-file)"
       },
       {
         "command": "codex-friendly-project-starter.startWorkItemWithCodex",
-        "title": "Codex Starter: Start Work Item with Codex",
+        "title": "%command.startWorkItemWithCodex.title%",
         "icon": "$(play)"
       },
       {
         "command": "codex-friendly-project-starter.startSelectedWorkItemsWithCodex",
-        "title": "Codex Starter: Start Selected Work Items with Codex",
+        "title": "%command.startSelectedWorkItemsWithCodex.title%",
         "icon": "$(selection)"
       },
       {
         "command": "codex-friendly-project-starter.startAllWorkItemsWithCodex",
-        "title": "Codex Starter: Start All Work Items with Codex",
+        "title": "%command.startAllWorkItemsWithCodex.title%",
         "icon": "$(run-all)"
       },
       {
         "command": "codex-friendly-project-starter.clearFirstPromptHistory",
-        "title": "Codex Starter: Clear FirstPrompt History",
+        "title": "%command.clearFirstPromptHistory.title%",
         "icon": "$(clear-all)"
       }
     ],
@@ -215,11 +215,11 @@
       "codex-friendly-project-starter": [
         {
           "id": "codexFriendlyAgentDocs",
-          "name": "Agent Docs"
+          "name": "%view.agentDocs.name%"
         },
         {
           "id": "codexFriendlyWorkItems",
-          "name": "Work Items"
+          "name": "%view.workItems.name%"
         }
       ]
     },

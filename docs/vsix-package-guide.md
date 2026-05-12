@@ -49,9 +49,9 @@ code
 - `Codex Starter: Scaffold D:\AI Default Docs` が実行できる。
 - legacy Task 作成 / Tasks 初期化コマンドが Command Palette に表示されない。
 - `Codex Starter: Open Work Dashboard` と `Codex Starter: Open QCDS Status` が表示できる。
-- Dashboard で `選択Work Itemを開始` と `全Work Itemを開始` が表示される。
+- Dashboard で `選択WorkItemを開始` と `全WorkItemを開始` が表示される。
 - Work Item Start 前に model、インテリジェンス、アクセス権限の選択が表示される。
-- Dashboard または Command Palette で `GitHub Issues 取込` が表示され、public GitHub Issue を local TODO / Issue へ取り込める。legacy Task は新規作成されない。
+- Dashboard の `GitHub Issuesインポート` または Command Palette の `GitHub Issues 取込` から、public GitHub Issue を local TODO / Issue へ取り込める。legacy Task は新規作成されない。
 - `docs/codex-sessions.md` / `.jsonl` に起動履歴が記録され、blocked work item から follow-up Issue を作成できる。
 - `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 

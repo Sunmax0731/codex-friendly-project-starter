@@ -19,6 +19,7 @@ const {
   createIssueMarkdown,
   createTaskMarkdown,
   createBlockedFollowUpIssue,
+  createQcdsImprovementIssue,
   isIssueFilePath,
   isTaskFilePath,
   isWorkItemDocPath
@@ -172,7 +173,7 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
     created: '2026-05-13'
   }), 'utf8');
   const dashboard = await scanWorkItems(root);
-  const html = renderWorkDashboardWebview('nonce', dashboard);
+  const html = renderWorkDashboardWebview('nonce', dashboard, { locale: 'ja' });
   assert.match(html, /Codex Work Dashboard/);
   assert.match(html, /Project Phase/);
   assert.match(html, /Work Items by Phase/);
@@ -189,25 +190,36 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /<details class="section" open>/);
   assert.match(html, /プロジェクト進行中に使う操作/);
   assert.match(html, /初回セットアップ/);
-  assert.match(html, /Issue を作成/);
-  assert.match(html, /自然言語から Issue/);
+  assert.match(html, /Issueを起票/);
+  assert.doesNotMatch(html, /自然言語から Issue/);
   assert.doesNotMatch(html, /Legacy Task を作成/);
   assert.match(html, /D:\\AI Docs 生成/);
-  assert.match(html, /openQcdsStatus/);
   assert.match(html, /openQcdsDimension|data-qcds-axis/);
-  assert.match(html, /openCodexApp/);
-  assert.match(html, /invokeCurrentPrompt/);
-  assert.match(html, /GitHub Issues 取込/);
+  assert.match(html, /sendPromptToCodex/);
+  assert.match(html, /CodexにPrompt送信/);
+  assert.match(html, /GitHub Issuesインポート/);
   assert.match(html, /importGitHubIssues/);
-  assert.match(html, /選択Work Itemを開始/);
+  assert.match(html, /選択WorkItemを開始/);
   assert.match(html, /startSelectedWorkItems/);
-  assert.match(html, /全Work Itemを開始/);
+  assert.match(html, /全WorkItemを開始/);
   assert.match(html, /startAllWorkItems/);
   assert.match(html, /tag-priority-p1/);
   assert.match(html, /data-select-file/);
   assert.match(html, /Start/);
   assert.match(html, /startWorkItem/);
   assert.match(html, /width:0%|width:50%|width:100%/);
+});
+
+test('renderWorkDashboardWebview falls back to English for unsupported locales', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-dashboard-locale-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1] Finish release\n', 'utf8');
+  const dashboard = await scanWorkItems(root);
+  const html = renderWorkDashboardWebview('nonce', dashboard, { locale: 'fr' });
+  assert.match(html, /Daily project actions/);
+  assert.match(html, /Create Issue/);
+  assert.match(html, /Send Prompt to Codex/);
+  assert.match(html, /Start Selected Work Items/);
 });
 
 test('buildAllWorkItemsStartPrompt turns open TODO and Issues into one backlog prompt', async () => {
@@ -496,15 +508,55 @@ test('renderQcdsStatusWebview shows per-axis detail sections and work links', as
     }
   }), 'utf8');
   const dashboard = await scanWorkItems(root);
-  const html = renderQcdsStatusWebview('nonce', dashboard, { selectedAxis: 'Delivery' });
+  const html = renderQcdsStatusWebview('nonce', dashboard, { selectedAxis: 'Delivery', locale: 'ja' });
   assert.match(html, /Codex QCDS Status/);
-  assert.match(html, /Open Metrics JSON/);
-  assert.match(html, /Open Evaluation/);
+  assert.match(html, /aria-label="Open Metrics JSON"/);
+  assert.match(html, /aria-label="Open Evaluation"/);
   assert.match(html, /Delivery/);
   assert.match(html, /Release evidence exists/);
   assert.match(html, /Linked Work Items/);
   assert.match(html, /data-start-file/);
+  assert.match(html, /data-qcds-improvement-axis="Delivery"/);
+  assert.match(html, /改善案を調査および検討しTODOに起こす/);
   assert.match(html, /Release evidence/);
+});
+
+test('createQcdsImprovementIssue creates and reuses one issue per QCDS axis', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-qcds-improvement-'));
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'docs', 'qcds-strict-metrics.json'), JSON.stringify({
+    overallGrade: 'A-',
+    overallScore: 80,
+    dimensions: {
+      delivery: {
+        label: 'Delivery',
+        score: 80,
+        grade: 'A-',
+        passed: 1,
+        expected: 2,
+        checks: [{ id: 'release-evidence', description: 'Release evidence exists', pass: false, detail: 'missing release evidence' }]
+      }
+    }
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  const delivery = dashboard.qcds.dimensions.find((dimension) => dimension.label === 'Delivery');
+  const first = createQcdsImprovementIssue(root, delivery);
+  assert.equal(first.created, true);
+  assert.equal(path.basename(first.issuePath), '0001-qcds-delivery.md');
+  const issue = fs.readFileSync(first.issuePath, 'utf8');
+  const todo = fs.readFileSync(path.join(root, 'TODO.md'), 'utf8');
+  assert.match(issue, /- Source: qcds-improvement/);
+  assert.match(issue, /- QCDS Improvement Axis: Delivery/);
+  assert.match(issue, /Codex Investigation Policy/);
+  assert.match(issue, /Release evidence exists/);
+  assert.match(todo, /QCDS改善: Delivery \[Issue\]\(Issues\/0001-qcds-delivery\.md\)/);
+
+  const second = createQcdsImprovementIssue(root, delivery);
+  assert.equal(second.created, false);
+  assert.equal(second.issuePath, first.issuePath);
+  assert.match(fs.readFileSync(first.issuePath, 'utf8'), /QCDS Recheck Notes/);
 });
 
 test('createBlockedFollowUpIssue creates an Issue-only blocker task from a non-closed item', () => {

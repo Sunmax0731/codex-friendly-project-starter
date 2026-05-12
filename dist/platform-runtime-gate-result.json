@@ -151,6 +151,11 @@
       "detail": "Markdown WebView contract exists"
     },
     {
+      "id": "markdown-webview-reuse-and-icons",
+      "pass": true,
+      "detail": "Markdown WebView icon header, integrated child docs, and panel reuse exist"
+    },
+    {
       "id": "default-docs",
       "pass": true,
       "detail": "D:\\AI default docs scaffold exists"
@@ -209,6 +214,16 @@
       "id": "qcds-fallback-dimensions",
       "pass": true,
       "detail": "QCDS tree exposes fallback dimensions when metrics are missing"
+    },
+    {
+      "id": "qcds-improvement-action",
+      "pass": true,
+      "detail": "QCDS below-threshold dimensions can create or reuse improvement Issues"
+    },
+    {
+      "id": "localization",
+      "pass": true,
+      "detail": "runtime UI labels and package command titles have ja/en localization"
     },
     {
       "id": "codex-target-root",

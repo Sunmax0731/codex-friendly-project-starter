@@ -41,8 +41,10 @@
 - 開発 docs: `docs/requirements.md`、`docs/specification.md`、`docs/design.md`、`docs/architecture.md`
 - 検証 docs: `docs/test-plan.md`、`docs/manual-test.md`、`docs/qcds-evaluation.md`
 - 運用 docs: `docs/installation-guide.md`、`docs/user-guide.md`、`docs/security-privacy-checklist.md`
+- 子階層 agent docs: `agents/**/AGENTS.md`、`skills/**/SKILL.md`
 
 `node_modules`、`.git`、`dist`、`out` はスキャン対象外にする。
+Tree では root `AGENTS.md` / `SKILL.md`、root `Design.md` / `Architecture.md`、子階層 agent docs を `Agent Control Docs`、`docs/*.md` を `Development Documentation`、README / TODO などを `Workspace Docs` に分類する。
 
 ## Work Items
 
@@ -88,13 +90,13 @@ Dashboard Webview は次を表示する。
 - `Codex Starter: Open QCDS Status` は QCDS 専用 WebView を開き、Quality、Cost、Delivery、Satisfaction の各 section に grade、score、checks、linked work items を表示する。Dashboard の `Details` と Work Items tree の各 QCDS 観点からは該当 section を開いた状態で表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue の上位一覧。
-- GUI action として、日常操作には自然言語から Issue、Issue 作成、FirstPrompt 画面、QCDS Status、VS Code Codex、現在PromptをCodexへ、Dashboard refresh を提供する。
-- GUI action として、GitHub Issues 取込を日常操作に配置し、remote backlog を local work item format に同期できる。
-- 日常操作には `選択Work Itemを開始` と `全Work Itemを開始` も含め、選択した TODO / Issue だけ、または未完了 TODO / Issue 全体を開始できる。
-- 初回セットアップ / 環境確認には Issues 初期化、`D:\AI` docs 生成、Codex CLI 確認を折りたたみで提供する。
+- GUI action として、日常操作の1行目に `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信` を配置する。`Issueを起票` は Work Item Composer へ進み、自然言語入力と手動入力の両方に到達できる。`CodexにPrompt送信` は current prompt handoff と Codex sidebar open を選べる。
+- 日常操作の2行目に `選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` を配置し、選択した TODO / Issue だけ、または未完了 TODO / Issue 全体を開始できる。
+- 初回セットアップ / 環境確認には FirstPrompt 画面、`D:\AI` docs 生成、Issues 初期化、Codex CLI 確認を折りたたみで提供する。
 - QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues は折りたたみ可能な section にする。
 - TODO / Issue は priority、status、type、phase、QCDS axes を tag として表示し、priority、blocked、bug、release、docs、test、feature、ux などを色分けする。
 - 未完了 TODO、Issue、QCDS improvements の各行に `Select`、`Start`、`Open` を表示する。`Select` は複数選択開始用 checkbox、`Start` は該当 work item を `startWorkItemWithCodex` に渡し、`Open` は Markdown WebView を開く。
+- QCDS dimension の grade が `A-` 以下の場合は改善調査 / TODO 化 action を表示する。実行時は該当観点、grade、score、checks、既存 linked work items を含む `Source: qcds-improvement` の Issue を作成し、同じ観点の既存改善 Issue がある場合は重複作成せず `QCDS Recheck Notes` を追記して再利用する。
 
 ## Work Item Composer
 
@@ -115,7 +117,9 @@ Work Item Composer Webview は次を入力項目として持つ。
 ## Markdown WebView
 
 - VS Code WebViewPanel で Markdown を HTML 表示する。
-- `Open Source`、`Copy Path`、`Refresh` を提供する。`Copy Path` は Command Palette / Tree context からも利用できる。
+- 上部は固定ヘッダーとし、文書タイトル / パスを左、`Open Source`、`Copy Path`、`Refresh` の icon button を右に配置する。各 icon button は `aria-label` と `title` を持つ。`Copy Path` は Command Palette / Tree context からも利用できる。
+- 同じ file path の Markdown WebView を再度開く場合は既存 panel を reveal して再利用する。Tree item click、toolbar action、WebView link navigation は同じ再利用方針を使う。
+- root `AGENTS.md` / `SKILL.md` を開いた場合は、`agents/**/AGENTS.md` と `skills/**/SKILL.md` を統合表示し、各子 docs の元ファイルへ移動できる link を保持する。
 - Markdown link は workspace 内であれば WebView 内遷移し、workspace 外の相対リンクは拒否する。
 - `.json` は Markdown として解釈せず、`JSON.parse` 後に2スペースインデントの `<pre>` として整形表示する。parse できない場合はエラーと raw text を表示する。
 - HTML は escape し、script は実行しない。
@@ -123,10 +127,17 @@ Work Item Composer Webview は次を入力項目として持つ。
 ## D:\AI 既定 docs scaffold
 
 - `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common\*.md`、`D:\AI\IDEAS\<Domain>\AGENTS.md / SKILL.md / Design.md / Architecture.md` を参照元として列挙する。
-- root docs、`docs/*.md`、`Issues/*.md`、`skills/01-requirements` から `skills/06-release` の `SKILL.md` を生成する。
+- root docs、`docs/*.md`、`Issues/*.md`、`agents/phases/01-requirements` から `agents/phases/06-release` の `AGENTS.md`、`skills/01-requirements` から `skills/06-release` の `SKILL.md`、`skills/work-types/*/SKILL.md` を生成する。
 - 既存ファイルは既定で上書きせず、ユーザー選択時だけ上書きする。
 
 Dashboard は閲覧と主要操作の入口にし、実体の編集は Markdown WebView の `Open Source` または生成された Markdown を直接開いて行う。
+
+## ローカライズ
+
+- `vscode.env.language` を取得し、`ja` で始まる場合は日本語、それ以外は英語を UI locale とする。
+- Dashboard、QCDS Status、Markdown WebView、Agent Docs Tree group label は `src/i18n.cjs` の辞書を使う。
+- Command Palette と view name は `package.nls.json` / `package.nls.ja.json` で切り替える。command id は変更しない。
+- status message は新規追加や重要導線から段階的に辞書化し、未対応文言は既存互換として維持する。未対応 locale では英語へ fallback する。
 
 ## ハイライト
 
