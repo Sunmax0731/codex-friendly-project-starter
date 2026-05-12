@@ -80,6 +80,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 ### FirstPrompt Webview
 
 - 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針の6つの select を配置する。
+- モデル select を追加し、`gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` と設定値を選べるようにする。
 - 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - Repo 名と目的を任意入力にする。
 - `IDEAS 候補` は domain 切り替えに追従し、`D:\AI\IDEAS\<Domain>` と正式ドメイン直下の `created_idea_*` から候補を表示する。採用ボタンを押すまで入力値は変更しない。
@@ -88,6 +89,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Permission denied 回避のため、Git 書き込み方針で `Git 書き込みを保留` を選ぶと prompt は `git add` / `git commit` / `git push` を実行しないよう指示する。
 - 主導線は右側の VS Code Codex パネルへ貼り付ける運用にする。
 - Terminal で Codex CLI を直接使う環境向けには、設定 `codexHandoffTarget=terminal` で既存の `codex exec` 実行導線へ切り替える。
+- Summary には OpenAI 公式 prompt guidance の起動時確認状態と latest model を表示する。prompt 本文には選択 model に合わせた OpenAI guidance section を差し込む。
 
 ## 状態
 
@@ -98,6 +100,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 設定変更: `codexGitWritePolicy` に従い Work Item Start Prompt の Git 書き込み方針を出し分ける。
 - Codex CLI 実行前: workspace root、アクセス権限、選択した model、インテリジェンスを表示して確認する。
 - Work Item Start 実行前: `promptForCodexRunOptions` が true の場合は model、インテリジェンス、アクセス権限を QuickPick で選択する。
+- 起動直後: OpenAI 公式 prompt guidance を timeout 付きで取得し、本文保存なしの cache を作る。失敗時は fallback guidance を使い、UI と prompt には fallback と表示する。
 - VS Code 内 PowerShell の PATH が不足する場合: extension-launched Codex の launcher で `rg.exe` と `gh.exe` の候補ディレクトリを PATH 先頭に追加し、`Check Codex CLI` で同じ環境を確認する。
 - Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
 - GitHub Issues 取込: public GitHub Issues API 取得に失敗した場合はエラーを表示してローカルファイルを書き換えない。Codex 下書き生成だけに失敗した場合はローカル補完で import を続ける。

@@ -6,6 +6,7 @@ const {
   getPaceById,
   getGitWritePolicyById
 } = require('./workflows.cjs');
+const { buildOpenAiPromptGuidanceSection } = require('./openai-prompt-guidance.cjs');
 
 function buildFirstPrompt(input = {}) {
   const domain = getDomainById(input.domainId);
@@ -18,6 +19,7 @@ function buildFirstPrompt(input = {}) {
   const goal = clean(input.goal) || 'この分野の新規プロジェクトを Codex フレンドリーに開始し、実装と検証を進める。';
   const repoPath = clean(input.repositoryPath) || `${domain.domainPath}\\${projectName}`;
   const includeQcds = input.includeQcdsChecklist !== false;
+  const model = clean(input.model) || clean(input.codexModel);
 
   const lines = [
     '# FirstPrompt',
@@ -48,6 +50,11 @@ function buildFirstPrompt(input = {}) {
     `- 進行速度: ${pace.label}。${pace.instruction}`,
     `- Git 書き込み方針: ${gitWritePolicy.label}。${gitWritePolicy.instruction}`,
     `- 分野重点: ${domain.focus}`,
+    '',
+    buildOpenAiPromptGuidanceSection({
+      model,
+      guidanceState: input.openAiPromptGuidanceState
+    }),
     '',
     '## 実装ルール',
     '',

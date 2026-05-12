@@ -38,6 +38,7 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
     workflowId: 'release-run',
     paceId: 'autonomous',
     gitWritePolicyId: 'defer',
+    model: 'gpt-5.5',
     projectName: 'domain-purpose-classifier',
     goal: 'リンク整理支援を仕上げる'
   });
@@ -50,6 +51,10 @@ test('buildFirstPrompt includes selected domain, workflow, QCDS, and completion 
   assert.match(prompt, /VS Code Codex \/ Codex CLI 相当のローカル workspace agent/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Git 書き込みを保留/);
+  assert.match(prompt, /OpenAI 公式プロンプトガイド適用/);
+  assert.match(prompt, /Target model: gpt-5\.5/);
+  assert.match(prompt, /outcome-first/);
+  assert.match(prompt, /https:\/\/developers\.openai\.com\/api\/docs\/guides\/prompt-guidance\?model=gpt-5\.5/);
   assert.match(prompt, /git add/);
   assert.match(prompt, /docs\/qcds-strict-metrics\.json/);
   assert.match(prompt, /git status --short --branch/);

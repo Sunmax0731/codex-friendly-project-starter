@@ -144,6 +144,14 @@ Explorer 上では FileDecorationProvider で AI Agent 文書に `AI` badge を�
 - Git 書き込み方針: 事前確認してから Git 書き込み、Git 書き込みを保留、通常どおり Git 書き込み
 
 Starter Webview は `IDEAS 候補` と `Prompt 履歴` を持つ。`IDEAS 候補` は選択中 domain の `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` を探索した候補だけを表示し、`候補を採用` を押すまで Repo 名や目的へ反映しない。`Prompt 履歴` は workspace storage に保存した入力値だけを表示し、`履歴を復元` で各 select と Repo 名、目的を戻す。prompt 本文は保存しない。`履歴を削除` と `Codex Starter: Clear FirstPrompt History` は同じ storage の履歴を消去する。
+モデル選択は FirstPrompt と Work Item Start の両方で扱う。FirstPrompt Webview は `codexFriendlyProjectStarter.codexModelChoices` と `codexFriendlyProjectStarter.codexModel` から候補を作り、選択した model を prompt 本文と prompt 履歴に保存する。
+
+拡張は activation 時に `codexFriendlyProjectStarter.openAiPromptGuidanceOnStartup` が true の場合、次の OpenAI 公式 URL を `codexFriendlyProjectStarter.openAiPromptGuidanceTimeoutMs` 以内で確認し、本文を保存せず、取得 status、title、hash、latest model を extension global state に cache する。取得できない場合は fallback status を保存し、prompt 生成は続行する。
+
+- `https://developers.openai.com/api/docs/guides/latest-model`
+- `https://developers.openai.com/api/docs/guides/prompt-guidance?model=gpt-5.5`
+- `https://developers.openai.com/codex/guides/agents-md`
+- `https://developers.openai.com/codex/skills`
 
 生成プロンプトには次を含める。
 
@@ -155,6 +163,7 @@ Starter Webview は `IDEAS 候補` と `Prompt 履歴` を持つ。`IDEAS 候補
 - 分野別 platform runtime gate
 - QCDS と完了条件
 - VS Code 内の Codex 拡張 / Codex パネルで作業する前提
+- OpenAI 公式 prompt guidance の取得状況、公式参照 URL、選択 model に応じた prompt profile
 
 ## VS Code Codex / Codex CLI 呼び出し
 
@@ -179,6 +188,8 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File <launcher-file>
 - `codexFriendlyProjectStarter.codexModelChoices`: Work Item Start 前の model picker に表示する候補。
 - `codexFriendlyProjectStarter.codexReasoningEffort`: Work Item Start の既定インテリジェンス。指定時は `-c model_reasoning_effort="..."` を渡す。
 - `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前にモデル、インテリジェンス、アクセス権限を確認するかどうか。
+- `codexFriendlyProjectStarter.openAiPromptGuidanceOnStartup`: activation 時に OpenAI 公式 prompt guidance を確認するかどうか。
+- `codexFriendlyProjectStarter.openAiPromptGuidanceTimeoutMs`: 公式 guidance 取得の timeout。失敗時は fallback guidance を使う。
 - `codexFriendlyProjectStarter.recordCodexSessions`: VS Code Codex handoff / Codex CLI 起動履歴を project docs に記録するかどうか。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の `-p` 値。
 - `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションの `PATH` に追加するディレクトリ。
@@ -201,6 +212,7 @@ Work Item の `Start` では、選択 item の Markdown 本文とリンク先の
 `Start All Work Items` では、`TODO.md`、`Issues/*.md` の未完了項目を P0 から P4 の優先度順に並べ、件数、QCDS tag、phase、release readiness を含む開始プロンプトを生成する。完了時は TODO checkbox、Issue の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
 Work Item Start 系の 3 導線では、`promptForCodexRunOptions` が true の場合、実行確認前にモデル、インテリジェンス、アクセス権限を QuickPick で選ぶ。VS Code Codex handoff では prompt の `Codex 実行設定` に記録し、Terminal mode ではモデルは `-m`、インテリジェンスは `-c model_reasoning_effort="..."`、アクセス権限は `-s` として `codex exec` に渡す。
+選択 model に応じて Work Item Start Prompt は `OpenAI 公式プロンプトガイド適用` section を追加する。`gpt-5.5` では outcome-first と停止条件、`gpt-5.4` では出力契約と evidence gate、`gpt-5.4-mini` では明示手順と閉じた出力、`gpt-5.3-codex` 系では agentic coding、短い preamble、検証、blocked 記録を優先する。
 
 VS Code Codex handoff または Codex CLI 起動時は project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を追記する。Issue から起動した場合は対象 Markdown にも `Codex Sessions` section を追記する。`Status: blocked` の Work Item から `Create Blocked Follow-up Issue` を実行すると、GitHub auth、Git index lock / ACL、Chrome runtime gate、CLI PATH 不足などを分類した follow-up Issue を作成する。
 

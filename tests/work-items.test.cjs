@@ -221,6 +221,9 @@ test('buildAllWorkItemsStartPrompt turns open TODO and Issues into one backlog p
   assert.match(prompt, /Prompt history reuse/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Codex 実行設定/);
+  assert.match(prompt, /OpenAI 公式プロンプトガイド適用/);
+  assert.match(prompt, /Model profile: GPT-5\.4/);
+  assert.match(prompt, /出力契約/);
   assert.match(prompt, /Model: gpt-5\.4/);
   assert.match(prompt, /Intelligence: high/);
   assert.match(prompt, /Access: danger-full-access/);
@@ -268,6 +271,8 @@ test('buildSelectedWorkItemsStartPrompt scopes Codex to chosen TODO and Issues',
   assert.doesNotMatch(prompt, /Selected Legacy Tasks/);
   assert.match(prompt, /Tool PATH bootstrap/);
   assert.match(prompt, /選択外の Work Item/);
+  assert.match(prompt, /Model profile: GPT-5\.5/);
+  assert.match(prompt, /outcome-first/);
   assert.match(prompt, /Model: gpt-5\.5/);
   assert.match(prompt, /Intelligence: xhigh/);
   assert.match(prompt, /Access: workspace-write/);
@@ -302,6 +307,7 @@ test('buildWorkItemStartPrompt keeps TODO as the Codex entry point', () => {
   assert.match(prompt, /QCDS: Delivery/);
   assert.match(prompt, /Git 書き込み方針/);
   assert.match(prompt, /Git 書き込みを保留/);
+  assert.match(prompt, /OpenAI 公式プロンプトガイド適用/);
   assert.match(prompt, /Intelligence: medium/);
   assert.match(prompt, /Access: read-only/);
 });

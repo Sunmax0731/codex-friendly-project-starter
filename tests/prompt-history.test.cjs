@@ -20,6 +20,7 @@ test('prompt history stores recent FirstPrompt inputs in workspace storage', asy
     workflowId: 'release-run',
     paceId: 'autonomous',
     gitWritePolicyId: 'preflight',
+    model: 'gpt-5.5',
     projectName: 'codex-friendly-project-starter',
     goal: '作業項目を一括で開始する'
   });
@@ -30,12 +31,14 @@ test('prompt history stores recent FirstPrompt inputs in workspace storage', asy
     workflowId: 'release-run',
     paceId: 'autonomous',
     gitWritePolicyId: 'preflight',
+    model: 'gpt-5.5',
     projectName: 'codex-friendly-project-starter',
     goal: '作業項目を一括で開始する'
   });
   const history = await readPromptHistory(storageRoot);
   assert.equal(history.length, 1);
   assert.equal(history[0].input.domainId, 'VSCodeExtension');
+  assert.equal(history[0].input.model, 'gpt-5.5');
   assert.equal(history[0].input.projectName, 'codex-friendly-project-starter');
   assert.ok(fs.existsSync(promptHistoryFilePath(storageRoot)));
   await clearPromptHistory(storageRoot);
@@ -55,6 +58,7 @@ test('starter webview can restore prompt history and apply idea candidates', () 
           workflowId: 'minimal-mvp',
           paceId: 'checkpoint',
           gitWritePolicyId: 'defer',
+          model: 'gpt-5.4-mini',
           projectName: 'history-app',
           goal: '履歴から復元する'
         }
@@ -72,6 +76,8 @@ test('starter webview can restore prompt history and apply idea candidates', () 
     }
   });
   assert.match(html, /Prompt 履歴/);
+  assert.match(html, /モデル/);
+  assert.match(html, /OpenAI公式ガイド/);
   assert.match(html, /IDEAS 候補/);
   assert.match(html, /restoreSelectedHistory/);
   assert.match(html, /applySelectedIdea/);

@@ -18,7 +18,9 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Legacy Tasks: 既存プロジェクト互換のため `Tasks/*.md` の読み取りとリンク解決は残しますが、通常 UI と新規作成導線には表示しません。新規作業は Issue に集約します。
 - D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。
-- FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、アジャイル、ウォーターフォール、プロトタイピング、逐次確認、リリース一括進行などの進め方から開始プロンプトを生成します。
+- OpenAI Prompt Guidance Sync: 拡張起動時に OpenAI 公式の latest model / prompt guidance / AGENTS.md / Skills ページを短い timeout で確認し、取得状況を cache します。ネットワーク失敗時は内蔵 fallback guidance で prompt 生成を継続します。
+- Model-Optimized Prompts: `gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` の特性に合わせ、FirstPrompt、Work Item Start、Work Item Composer の Codex 用 prompt に outcome-first、出力契約、検証条件、停止条件を差し込みます。
+- FirstPrompt Generator: AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension などの分野と、Issue駆動、TODO駆動、仕様駆動、TDD、アジャイル、ウォーターフォール、プロトタイピング、逐次確認、リリース一括進行、対象モデルから開始プロンプトを生成します。
 - FirstPrompt History: 直近の選択値を workspace storage に保存し、Starter Webview から復元できます。履歴本文は保存せず、削除 command で消去できます。
 - IDEAS Candidate Suggestions: `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から候補 project name / 目的文を表示し、明示的に採用した場合だけ入力欄へ反映します。
 - Git書き込み方針: FirstPrompt で `事前確認してから Git 書き込み`、`Git 書き込みを保留`、`通常どおり Git 書き込み` を選択できます。`.git/index.lock Permission denied` を避けたい場合は `Git 書き込みを保留` を選び、commit / push は手動または権限のある環境で実施します。
@@ -38,7 +40,7 @@ Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue と関
 
 Work Item Start Prompt は設定 `codexFriendlyProjectStarter.codexGitWritePolicy` を参照します。既定は `preflight` で、Permission denied が出たら Git 書き込みを繰り返さず未完了操作を報告します。`defer` にすると Start から渡す作業でも `git add` / `git commit` / `git push` を実行しない方針になります。
 
-`Start Work Item with Codex`、`Start Selected Work Items with Codex`、`Start All Work Items with Codex` は、起動前にモデル、インテリジェンス、アクセス権限を選択します。VS Code Codex handoff ではこれらの値をプロンプト本文に記録し、Terminal mode では `codex exec -m`、`-c model_reasoning_effort=...`、`-s ...` として渡します。候補は `codexFriendlyProjectStarter.codexModelChoices` で増減できます。
+`Start Work Item with Codex`、`Start Selected Work Items with Codex`、`Start All Work Items with Codex` は、起動前にモデル、インテリジェンス、アクセス権限を選択します。VS Code Codex handoff ではこれらの値と OpenAI 公式 prompt guidance の取得状況をプロンプト本文に記録し、Terminal mode では `codex exec -m`、`-c model_reasoning_effort=...`、`-s ...` として渡します。候補は `codexFriendlyProjectStarter.codexModelChoices` で増減できます。
 
 VS Code 内 PowerShell で `rg.exe` または `gh.exe` が見つからない場合は、`Codex Starter: Check Codex CLI` を実行してください。この確認コマンドは `codex --version`、`codex exec --help`、`Get-Command rg.exe`、`Get-Command gh.exe`、`gh.exe auth status` を同じ PATH 補強付きで実行します。追加の配置先がある場合は `codexFriendlyProjectStarter.codexToolPathPrepend` にディレクトリを追加します。
 

@@ -12,12 +12,16 @@ test('buildCodexWorkItemDraftPrompt asks Codex CLI for JSON only', () => {
     mode: 'issue',
     naturalText: 'ドキュメントと実装の整合性を確認し、必要ならドキュメントを更新する。'
   }, {
-    workspaceRoot: 'D:\\AI\\ChromeExtension\\movie-loop-tool'
+    workspaceRoot: 'D:\\AI\\ChromeExtension\\movie-loop-tool',
+    model: 'gpt-5.4-mini'
   });
   assert.match(prompt, /Work Item Draft JSON Task/);
   assert.match(prompt, /回答は JSON オブジェクトだけ/);
   assert.match(prompt, /ファイル編集、コマンド実行、追加調査は不要/);
   assert.match(prompt, /05-test/);
+  assert.match(prompt, /OpenAI 公式プロンプトガイド適用/);
+  assert.match(prompt, /Model profile: GPT-5\.4 mini/);
+  assert.match(prompt, /JSON、enum、短い Markdown/);
   assert.match(prompt, /D:\\AI\\ChromeExtension\\movie-loop-tool/);
 });
 

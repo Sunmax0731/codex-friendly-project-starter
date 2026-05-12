@@ -9,8 +9,9 @@
 5. Markdown WebView を触る場合は `src/markdown-webview.cjs`、`src/webview.cjs`、`extension.js`、`tests/markdown-webview.test.cjs` を確認します。
 6. `D:\AI` 既定 docs 生成を触る場合は `src/default-docs.cjs` と `tests/default-docs.test.cjs` を確認します。
 7. Codex CLI 呼び出しを触る場合は `src/codex-cli.cjs`、`src/codex-work-item-draft.cjs`、`docs/vscode-verification-guide.md` を確認します。
-8. 実装後に `npm test` を実行し、docs/qcds-evaluation.md と docs/qcds-strict-metrics.json を再生成します。
-9. 手動確認が必要な範囲は docs/manual-test.md と docs/user-guide.md に具体手順として残します。
+8. OpenAI 公式 prompt guidance と model 別 prompt 調整を触る場合は `src/openai-prompt-guidance.cjs`、`src/prompt-builder.cjs`、`src/work-item-start.cjs`、`src/codex-work-item-draft.cjs`、`tests/openai-prompt-guidance.test.cjs` を確認します。
+9. 実装後に `npm test` を実行し、docs/qcds-evaluation.md と docs/qcds-strict-metrics.json を再生成します。
+10. 手動確認が必要な範囲は docs/manual-test.md と docs/user-guide.md に具体手順として残します。
 
 ## Lessons
 
@@ -26,6 +27,7 @@
 - Work Item Composer の自然言語反映は Codex CLI の read-only `codex exec` を優先し、JSON 解析失敗や timeout 時だけローカル heuristic にフォールバックします。
 - VS Code 内 PowerShell で起動する Codex は環境 PATH が不足することがあるため、`src/codex-cli.cjs` のランチャで Codex bundled `rg.exe` と `E:\DevEnv\GitHubCLI` などを先頭追加し、`Check Codex CLI` で `rg.exe` / `gh.exe` / `gh auth status` を確認します。
 - TODO / Issue を Codex に渡す導線は、単一、複数選択、全件の 3 種を保ち、いずれもモデル、インテリジェンス、アクセス権限の選択を起動前に通します。
+- OpenAI prompt guidance は起動時に公式 URL を確認し、本文を保存せず status と hash だけを cache します。取得失敗時は `src/openai-prompt-guidance.cjs` の fallback profile で prompt 生成を継続します。
 - VS Code Codex handoff / Codex CLI 起動時は対象プロジェクトの `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を残し、Issue から起動した場合は対象 Markdown にも参照を追記します。
 - GitHub Issues 取込は public repository の読み取り専用 import とし、GitHub Issue URL を TODO / Issue に残します。実装変更時は `tests/github-issues.test.cjs` と README / manual / user guide / release gate を同時に更新します。
 - Markdown WebView は `source` を直接開く代替ではなく、work item と docs のリンク遷移を一画面で追える確認面として扱います。

@@ -1,5 +1,6 @@
 const path = require('node:path');
 const { getGitWritePolicyById } = require('./workflows.cjs');
+const { buildOpenAiPromptGuidanceSection } = require('./openai-prompt-guidance.cjs');
 
 function buildWorkItemStartPrompt(input = {}) {
   const workspaceRoot = input.workspaceRoot || process.cwd();
@@ -56,6 +57,11 @@ function buildWorkItemStartPrompt(input = {}) {
     '',
     runConfigSection,
     '',
+    buildOpenAiPromptGuidanceSection({
+      model: input.runConfig?.model,
+      guidanceState: input.openAiPromptGuidanceState
+    }),
+    '',
     '## 選択文書',
     '',
     '```markdown',
@@ -105,6 +111,11 @@ function buildAllWorkItemsStartPrompt(input = {}) {
     '## Codex 実行設定',
     '',
     runConfigSection,
+    '',
+    buildOpenAiPromptGuidanceSection({
+      model: input.runConfig?.model,
+      guidanceState: input.openAiPromptGuidanceState
+    }),
     '',
     '## Backlog summary',
     '',
@@ -160,6 +171,11 @@ function buildSelectedWorkItemsStartPrompt(input = {}) {
     '## Codex 実行設定',
     '',
     formatCodexRunConfig(input.runConfig),
+    '',
+    buildOpenAiPromptGuidanceSection({
+      model: input.runConfig?.model,
+      guidanceState: input.openAiPromptGuidanceState
+    }),
     '',
     '## Selected summary',
     '',

@@ -21,6 +21,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:codex-friendly-project-starter.openStarter",
     "onCommand:codex-friendly-project-starter.generateFirstPrompt",
     "onCommand:codex-friendly-project-starter.invokeCodexWithFirstPrompt",
@@ -416,6 +417,18 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for model, intelligence, and access permission before starting TODO / Issue processing with Codex."
+        },
+        "codexFriendlyProjectStarter.openAiPromptGuidanceOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Fetch official OpenAI latest-model, prompt-guidance, AGENTS.md, and Skills pages on activation and cache their status for model-optimized prompt generation."
+        },
+        "codexFriendlyProjectStarter.openAiPromptGuidanceTimeoutMs": {
+          "type": "number",
+          "default": 4000,
+          "minimum": 1000,
+          "maximum": 30000,
+          "description": "Timeout in milliseconds for the startup OpenAI official prompt guidance check before falling back to bundled model guidance."
         },
         "codexFriendlyProjectStarter.recordCodexSessions": {
           "type": "boolean",

@@ -10,6 +10,8 @@
         "VS Code 内の Codex 拡張",
         "リリースまで一気に進める",
         "headless browser",
+        "OpenAI 公式プロンプトガイド適用",
+        "Model profile: GPT-5.5",
         "docs/qcds-strict-metrics.json"
       ]
     },
@@ -20,6 +22,7 @@
         "TDD",
         "プロトタイピング",
         "技術判断を逐次確認する",
+        "Model profile: GPT-5.3 Codex",
         "activation",
         "代表シナリオ"
       ]
@@ -32,6 +35,7 @@
         "ウォーターフォール",
         "最短MVP",
         "MV3 manifest",
+        "Model profile: GPT-5.4 mini",
         "調査優先"
       ]
     }

@@ -25,6 +25,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の checkbox または Command Palette の複数選択から、選択した TODO / Issue だけを VS Code Codex に渡して着手できる。
 - Dashboard または Command Palette から、未完了 TODO / Issues を優先度順に連結した一括開始プロンプトを VS Code Codex に渡せる。
 - TODO / Issue を VS Code Codex または Codex CLI に渡す前に、使用モデル、インテリジェンス、アクセス権限を選択でき、選択値を開始プロンプトに反映できる。Terminal mode では `codex exec` 引数にも反映できる。
+- 拡張起動時に OpenAI 公式の `latest-model`、`prompt-guidance?model=gpt-5.5`、Codex `AGENTS.md`、Codex `Skills` ページを確認し、取得状況を workspace ではなく extension global state に cache できる。
+- OpenAI 公式ページを取得できない場合も、内蔵 fallback guidance により `gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex`、`gpt-5.3-codex-spark` 向けの prompt 最適化を継続できる。
+- FirstPrompt、Work Item Start Prompt、Work Item Composer の Codex CLI prompt は、選択モデルに応じて outcome-first、出力契約、tool-use / 検証条件、停止条件、AGENTS / SKILL の扱いを明示する。
 - public GitHub repository の open Issues を取得し、選択した GitHub Issue を Codex CLI read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込める。
 - GitHub Issues 取込では、自由フォーマットの GitHub Issue 本文を local format の context / acceptance criteria へ再構成し、TODO / Issue に GitHub Issue 個別リンクを残す。
 - 同じ GitHub Issue URL が既に local TODO / Issue に存在する場合、重複した local work item を作成しない。
@@ -42,6 +45,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - 開発手法はアジャイル、ウォーターフォール、プロトタイピング、カンバン、スパイク先行を選択できる。
 - 生成結果を untitled Markdown で開き、Webview からは VS Code 内の Codex パネルへ貼り付けるためにコピーできる。
 - 生成 FirstPrompt は、VS Code 内の Codex 拡張 / Codex パネルで Codex CLI 相当のローカル workspace agent として作業する前提を含む。
+- FirstPrompt 生成時にも対象モデルを選択でき、Starter Webview 内にもモデル選択と OpenAI 公式ガイド取得状況が表示される。
 - Codex CLI を直接利用したい環境では、設定で handoff target を `terminal` に切り替え、生成した FirstPrompt または現在開いているプロンプトを `codex exec` に渡せる。
 - Codex CLI の存在確認と VS Code Codex sidebar 起動導線を Command Palette または GUI 導線から呼べる。
 - AndroidApp、WindowsApp、WebApp、ChromeExtension、VSCodeExtension を最低限サポートする。
@@ -69,5 +73,6 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `Start All Work Items` が、未完了 TODO / Issue の件数、優先度、QCDS、release readiness を含む一括開始プロンプトを VS Code Codex に渡せる。
 - `GitHub Issues 取込` が public GitHub Issue を複数選択で取り込み、GitHub Issue URL 付きの TODO / Issue を作成し、重複 import を防げる。
 - Work Item Start の起動前にモデル、インテリジェンス、アクセス権限を選択でき、`rg.exe` と `gh.exe` が PATH 補強後に解決される。
+- Work Item Start Prompt と FirstPrompt に、選択モデル別の OpenAI prompt guidance section と公式参照 URL が含まれる。
 - Codex session index と blocked follow-up Issue 作成が project 内で参照できる。
 - FirstPrompt と Work Item Start Prompt に Git 書き込み方針が含まれる。

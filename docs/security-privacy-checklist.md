@@ -3,6 +3,8 @@
 - [x] 秘密情報や token を保存しない。
 - [x] 生成プロンプトはユーザー入力と内蔵テンプレートだけで作る。
 - [x] Webview は外部ネットワークへ接続しない。
+- [x] 起動時の OpenAI 公式 prompt guidance 確認は VS Code extension host 側で行い、ページ本文は保存せず、status、title、hash、latest model だけを extension global state に保存する。
+- [x] OpenAI 公式 guidance 取得が失敗してもユーザー入力や workspace 内容を外部へ送信せず、内蔵 fallback guidance で継続する。
 - [x] Starter Webview message は `generate`、`copy`、`runCodex` のみ処理する。
 - [x] Work Dashboard Webview は読み取り専用で、workspace ファイルを書き換えない。
 - [x] QCDS Status は `docs/qcds-strict-metrics.json` と TODO / Issue metadata を読むだけで、外部送信しない。

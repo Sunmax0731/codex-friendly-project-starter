@@ -3,6 +3,8 @@ const { DOMAINS } = require('./domains.cjs');
 const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./workflows.cjs');
 
 function renderStarterWebview(nonce, options = {}) {
+  const modelChoices = normalizeModelChoices(options.modelChoices, options.defaultModel);
+  const openAiGuide = normalizeOpenAiGuide(options.openAiPromptGuidanceState);
   const state = JSON.stringify({
     domains: DOMAINS,
     governanceModes: GOVERNANCE_MODES,
@@ -10,6 +12,8 @@ function renderStarterWebview(nonce, options = {}) {
     workflows: WORKFLOWS,
     paces: PACES,
     gitWritePolicies: GIT_WRITE_POLICIES,
+    modelChoices,
+    openAiGuide,
     promptHistory: options.promptHistory || [],
     ideaCandidatesByDomain: options.ideaCandidatesByDomain || {}
   }).replace(/</g, '\\u003c');
@@ -47,6 +51,7 @@ function renderStarterWebview(nonce, options = {}) {
     <label>工程<select id="workflow"></select></label>
     <label>進行<select id="pace"></select></label>
     <label>Git書き込み<select id="gitWritePolicy"></select></label>
+    <label>モデル<select id="model"></select></label>
   </div>
   <label style="margin-top:12px;">Repo 名<input id="projectName" placeholder="my-new-project"></label>
   <label style="margin-top:12px;">目的<textarea id="goal" placeholder="何を作り、どこまで進めるか"></textarea></label>
@@ -69,14 +74,15 @@ function renderStarterWebview(nonce, options = {}) {
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const state = ${state};
-  const ids = ['domain', 'governance', 'developmentMethod', 'workflow', 'pace', 'gitWritePolicy'];
+  const ids = ['domain', 'governance', 'developmentMethod', 'workflow', 'pace', 'gitWritePolicy', 'model'];
   const sources = {
     domain: state.domains,
     governance: state.governanceModes,
     developmentMethod: state.developmentMethods,
     workflow: state.workflows,
     pace: state.paces,
-    gitWritePolicy: state.gitWritePolicies
+    gitWritePolicy: state.gitWritePolicies,
+    model: state.modelChoices
   };
   for (const id of ids) {
     const select = document.getElementById(id);
@@ -104,6 +110,7 @@ function renderStarterWebview(nonce, options = {}) {
       workflowId: document.getElementById('workflow').value,
       paceId: document.getElementById('pace').value,
       gitWritePolicyId: document.getElementById('gitWritePolicy').value,
+      model: document.getElementById('model').value,
       projectName: document.getElementById('projectName').value,
       goal: document.getElementById('goal').value
     };
@@ -153,7 +160,8 @@ function renderStarterWebview(nonce, options = {}) {
     const item = selectedById(state.promptHistory || [], document.getElementById('historySelect').value);
     if (!item || !item.input) return;
     for (const id of ids) {
-      if (item.input[id + 'Id']) document.getElementById(id).value = item.input[id + 'Id'];
+      const value = id === 'model' ? item.input.model : item.input[id + 'Id'];
+      if (value !== undefined) document.getElementById(id).value = value || '';
     }
     document.getElementById('projectName').value = item.input.projectName || '';
     document.getElementById('goal').value = item.input.goal || '';
@@ -173,6 +181,8 @@ function renderStarterWebview(nonce, options = {}) {
       '工程: ' + labelOf(state.workflows, input.workflowId),
       '進行: ' + labelOf(state.paces, input.paceId),
       'Git書き込み: ' + labelOf(state.gitWritePolicies, input.gitWritePolicyId),
+      'モデル: ' + labelOf(state.modelChoices, input.model),
+      'OpenAI公式ガイド: ' + (state.openAiGuide.status === 'official' ? '起動時確認済み' : 'fallback') + ' / latest=' + state.openAiGuide.latestModel,
       '標準パス: ' + domain.domainPath,
       'runtime gate: ' + domain.runtimeGate
     ].join('\\n');
@@ -184,6 +194,31 @@ function renderStarterWebview(nonce, options = {}) {
 </script>
 </body>
 </html>`;
+}
+
+function normalizeModelChoices(values, defaultModel = '') {
+  const defaults = ['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.3-codex', 'gpt-5.3-codex-spark'];
+  const seen = new Set();
+  return [
+    { id: '', label: clean(defaultModel) ? `設定値を使う (${clean(defaultModel)})` : 'Codex CLI default', instruction: '-m を渡さない場合は Codex CLI 既定値' },
+    ...[clean(defaultModel), ...(Array.isArray(values) ? values : []), ...defaults]
+      .map(clean)
+      .filter(Boolean)
+      .map((model) => ({ id: model, label: model, instruction: 'OpenAI prompt guidance を model profile に合わせて適用' }))
+  ].filter((item) => {
+    const key = item.id.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function normalizeOpenAiGuide(value = {}) {
+  return {
+    status: value.status === 'official' ? 'official' : 'fallback',
+    latestModel: clean(value.latestModel) || 'gpt-5.5',
+    fetchedAt: clean(value.fetchedAt)
+  };
 }
 
 function renderWorkDashboardWebview(nonce, dashboard) {
@@ -620,6 +655,10 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;'
   }[char]));
+}
+
+function clean(value) {
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 module.exports = { renderStarterWebview, renderWorkDashboardWebview, renderQcdsStatusWebview };

@@ -100,8 +100,9 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Generate FirstPrompt` を実行する。
 3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針を選ぶ。
-4. Repo 名と目的を入力する。
-5. 生成された FirstPrompt に `VS Code 内の Codex 拡張 / Codex パネル` と `Codex CLI 相当のローカル workspace agent` の前提が含まれることを確認する。
+4. モデルを選ぶ。
+5. Repo 名と目的を入力する。
+6. 生成された FirstPrompt に `VS Code 内の Codex 拡張 / Codex パネル` と `Codex CLI 相当のローカル workspace agent` の前提が含まれることを確認する。
 
 期待結果:
 
@@ -109,6 +110,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 選んだ分野と進め方が本文に入る。
 - VS Code の Codex パネルに貼り付ける前提が本文に入る。
 - `README.md`、`AGENTS.md`、`SKILL.md` の確認順、QCDS、runtime gate、完了条件が入る。
+- `OpenAI 公式プロンプトガイド適用` section、選択 model の profile、公式 URL、AGENTS / SKILL 適用ルールが入る。
 
 ## 4. Webview 生成
 
@@ -116,7 +118,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Open Project Starter` を実行する。
-3. Webview で分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針を切り替える。
+3. Webview で分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針、モデルを切り替える。
 4. `IDEAS 候補` を選んで `候補を採用` を押す。
 5. `FirstPrompt を開く` を押す。
 6. `Prompt 履歴` を選んで `履歴を復元` を押し、入力値が戻ることを確認する。
@@ -126,6 +128,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 期待結果:
 
 - Webview の summary が選択内容に応じて更新される。
+- Summary に OpenAI 公式 prompt guidance の起動時確認状態と latest model が表示される。
 - IDEAS 候補は採用操作をした場合だけ Repo 名と目的へ入る。
 - FirstPrompt 履歴は workspace storage から復元でき、削除できる。
 - FirstPrompt が Markdown として開く。
@@ -173,9 +176,9 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. `Ctrl+Shift+P` を開く。
 2. `Codex Starter: Send FirstPrompt to VS Code Codex` を実行する。
-3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針、Repo 名、目的を入力する。
+3. 分野、ガバナンス、開発手法、工程、進行、Git 書き込み方針、モデル、Repo 名、目的を入力する。
 4. 確認ダイアログで workspace root と access を確認する。
-5. 問題なければ `Run Codex` を選ぶ。
+5. 問題なければ既定導線では `Copy & Open Codex`、Terminal mode では `Run Codex` を選ぶ。
 
 期待結果:
 
@@ -198,7 +201,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 1. FirstPrompt の untitled Markdown、または任意の Markdown を開く。
 2. 必要なら実行したい範囲だけ選択する。
 3. `Ctrl+Shift+P` から `Codex Starter: Send Current Prompt to VS Code Codex` を実行する。
-4. 確認ダイアログで `Run Codex` を選ぶ。
+4. 確認ダイアログで既定導線では `Copy & Open Codex`、Terminal mode では `Run Codex` を選ぶ。
 
 期待結果:
 

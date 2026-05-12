@@ -24,9 +24,10 @@
 1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue を選ぶ。
 2. Dashboard の対象行にある `Start`、または Work Items Tree の inline action `Start Work Item with Codex` を押す。
 3. 起動前にモデル、インテリジェンス、アクセス権限を選ぶ。設定値、Codex CLI default、候補モデル、カスタムモデル、`workspace-write` / `read-only` / `danger-full-access` を選択できる。
-4. 確認ダイアログで workspace root、access、model、インテリジェンスを確認し、問題なければ `Run Codex` を選ぶ。
+4. 確認ダイアログで workspace root、access、model、インテリジェンスを確認し、既定導線では `Copy & Open Codex` を選ぶ。Terminal mode の場合だけ `Run Codex` を選ぶ。
 5. 既定では開始プロンプトが clipboard に入り、右側の VS Code Codex sidebar が開く。Codex 入力欄へ貼り付けて送信する。
-6. Codex 側の作業完了後、TODO / Issue の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
+6. prompt には選択 model に応じた `OpenAI 公式プロンプトガイド適用` section が入り、公式 URL、startup check の結果、AGENTS / SKILL の扱いが記録される。
+7. Codex 側の作業完了後、TODO / Issue の checkbox、`Status`、残作業が更新されていることを `Refresh` で確認する。
 
 ## TODO / Issue を選択して Codex に渡す
 
@@ -41,7 +42,7 @@
 
 1. `Codex Work Dashboard` の `全Work Itemを開始`、または Command Palette の `Codex Starter: Start All Work Items with Codex` を実行する。
 2. モデル、インテリジェンス、アクセス権限を選び、確認ダイアログで workspace root、access、model、インテリジェンスを確認する。
-3. 必要な場合だけ `Run Codex` を選ぶ。
+3. 必要な場合だけ既定導線では `Copy & Open Codex`、Terminal mode では `Run Codex` を選ぶ。
 4. 既定では未完了 TODO、Issue の件数、優先度、QCDS tag、phase、release readiness を含む一括開始 prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
 5. prompt は P0 から P4 の優先度順に処理し、完了時に TODO checkbox、Issue の `Status`、acceptance criteria、docs、tests、QCDS 証跡を同期するよう指示する。
 
@@ -108,6 +109,7 @@ Work Item の `Start` で Permission denied を避けたい場合は、Settings 
 2. Dashboard の `D:\AI Docs 生成`、または Command Palette から `Codex Starter: Scaffold D:\AI Default Docs` を実行する。
 3. 分野、Repo 名、目的、上書き可否を選択する。
 4. `D:\AI\AGENTS.md`、`D:\AI\SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の docs を参照元として、root docs、`docs/*.md`、`Issues/*.md`、`skills/*/SKILL.md` が生成される。
+5. 生成される root `AGENTS.md` と `SKILL.md` には OpenAI 公式 latest model / prompt guidance / AGENTS.md / Skills ページの参照先が含まれる。
 
 ## FirstPrompt を生成する
 
@@ -119,20 +121,27 @@ Command Palette から `Codex Starter: Generate FirstPrompt` を実行し、次�
 - 工程
 - 進行速度
 - Git 書き込み方針
+- モデル
 
 生成された Markdown を Codex への最初の指示として使う。
 
-既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。`Codex Starter: Copy FirstPrompt for VS Code Codex` を使うと、選択式に生成した FirstPrompt を直接 clipboard にコピーして Codex sidebar を開ける。FirstPrompt 本文には、作業実行が VS Code Codex / Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Source Control、Codex panel の文脈を優先することが明記される。
+既定の運用では、生成された FirstPrompt を VS Code 内の Codex 拡張 / Codex パネルに貼り付けて作業を依頼する。`Codex Starter: Copy FirstPrompt for VS Code Codex` を使うと、選択式に生成した FirstPrompt を直接 clipboard にコピーして Codex sidebar を開ける。FirstPrompt 本文には、作業実行が VS Code Codex / Codex CLI 相当のローカル workspace agent であること、VS Code の Explorer、Source Control、Codex panel の文脈を優先すること、選択 model に合わせた OpenAI 公式 prompt guidance section が明記される。
 
 Permission denied を避けたい場合は、Git 書き込み方針で `Git 書き込みを保留` を選ぶ。これは OS 権限を変更するものではなく、Codex に `git add` / `git commit` / `git push` を実行させず、未コミット差分とユーザーが実行すべきコマンドを報告させるための方針である。
 
 ## Webview で生成する
 
-Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。`VS Code Codexへコピー` または `VS Code Codexで開く` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーし、Codex sidebar を開く。
+Command Palette から `Codex Starter: Open Project Starter` を実行する。分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針、モデルを変更すると summary が更新され、`FirstPrompt を開く` で Markdown を開ける。summary には OpenAI 公式 prompt guidance の起動時確認状態と latest model が表示される。`VS Code Codexへコピー` または `VS Code Codexで開く` を押すと、右側の Codex パネルへ貼り付けるための FirstPrompt をクリップボードへコピーし、Codex sidebar を開く。
 
 `IDEAS 候補` は、選択中の分野に応じて `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>` の `created_idea_*` を確認し、文字化けを含む候補を除外して表示する。`候補を採用` を押した場合だけ Repo 名と目的に反映される。
 
-`FirstPrompt 履歴` は workspace storage に保存される入力値の履歴です。保存対象は分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針、Repo 名、目的で、prompt 本文は保存しない。`履歴を復元` で入力欄へ戻せる。`履歴を削除` または `Codex Starter: Clear FirstPrompt History` で削除できる。
+`FirstPrompt 履歴` は workspace storage に保存される入力値の履歴です。保存対象は分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針、モデル、Repo 名、目的で、prompt 本文は保存しない。`履歴を復元` で入力欄へ戻せる。`履歴を削除` または `Codex Starter: Clear FirstPrompt History` で削除できる。
+
+## OpenAI 公式 prompt guidance
+
+拡張は activation 時に OpenAI 公式の `latest-model`、`prompt-guidance?model=gpt-5.5`、Codex `AGENTS.md`、Codex `Skills` ページを確認し、取得 status、title、hash、latest model だけを extension global state に cache する。ページ本文は保存しない。取得できない場合は fallback guidance を使い、生成 prompt には fallback と記録される。
+
+`gpt-5.5` は outcome-first と停止条件、`gpt-5.4` は出力契約と evidence gate、`gpt-5.4-mini` は明示手順と閉じた出力、`gpt-5.3-codex` 系は agentic coding、短い preamble、検証、blocked 記録を優先して prompt section を組み立てる。
 
 ## AI Agent を起動する
 
@@ -155,6 +164,8 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `codexFriendlyProjectStarter.codexModelChoices`: Work Item Start 前に選べる model 候補。
 - `codexFriendlyProjectStarter.codexReasoningEffort`: Work Item Start の既定インテリジェンス。`minimal`、`low`、`medium`、`high`、`xhigh` を選べる。
 - `codexFriendlyProjectStarter.promptForCodexRunOptions`: Work Item Start 前に model、インテリジェンス、アクセス権限を選ぶか。
+- `codexFriendlyProjectStarter.openAiPromptGuidanceOnStartup`: 拡張起動時に OpenAI 公式 prompt guidance を確認するか。
+- `codexFriendlyProjectStarter.openAiPromptGuidanceTimeoutMs`: 公式 prompt guidance 取得 timeout。失敗時は fallback guidance を使う。
 - `codexFriendlyProjectStarter.codexProfile`: 任意の profile。
 - `codexFriendlyProjectStarter.codexToolPathPrepend`: extension-launched Codex PowerShell セッションで PATH 先頭に追加するディレクトリ。
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。

@@ -63,9 +63,15 @@ const {
   findExistingGitHubIssueImport,
   createLocalWorkItemsFromGitHubIssue
 } = require('./src/github-issues.cjs');
+const {
+  fetchOpenAiPromptGuidance,
+  fallbackOpenAiPromptGuidanceState,
+  normalizeOpenAiPromptGuidanceState
+} = require('./src/openai-prompt-guidance.cjs');
 
 const execFileAsync = promisify(execFile);
 let lastMarkdownWebview = null;
+const OPENAI_PROMPT_GUIDANCE_STATE_KEY = 'openAiPromptGuidanceState.v1';
 
 function activate(context) {
   const treeProvider = new AgentDocsTreeProvider();
@@ -123,27 +129,48 @@ function activate(context) {
   );
 
   updateEditorDecorations(vscode.window.activeTextEditor, headingDecoration, keywordDecoration);
+  refreshOpenAiPromptGuidanceOnStartup(context);
   treeProvider?.refresh();
   workItemsProvider?.refresh();
 }
 
 function deactivate() {}
 
+async function refreshOpenAiPromptGuidanceOnStartup(context) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  if (!config.get('openAiPromptGuidanceOnStartup', true)) return;
+  const timeoutMs = Math.max(1000, Number(config.get('openAiPromptGuidanceTimeoutMs', 4000)) || 4000);
+  try {
+    const state = await fetchOpenAiPromptGuidance(globalThis.fetch, { timeoutMs });
+    await context.globalState.update(OPENAI_PROMPT_GUIDANCE_STATE_KEY, state);
+    if (state.status === 'official') {
+      vscode.window.setStatusBarMessage(`Codex Starter: OpenAI prompt guidance checked (${state.latestModel || 'latest'})`, 3000);
+    }
+  } catch (error) {
+    const state = fallbackOpenAiPromptGuidanceState(String(error?.message || error).slice(0, 140));
+    await context.globalState.update(OPENAI_PROMPT_GUIDANCE_STATE_KEY, state);
+  }
+}
+
+function readOpenAiPromptGuidanceState(context) {
+  return normalizeOpenAiPromptGuidanceState(
+    context?.globalState?.get?.(OPENAI_PROMPT_GUIDANCE_STATE_KEY) ||
+    fallbackOpenAiPromptGuidanceState('startup check has not completed')
+  );
+}
+
 async function generateFirstPromptCommand(context) {
-  const input = await collectPromptInput();
+  const input = await collectPromptInput(vscode.workspace.getConfiguration('codexFriendlyProjectStarter'));
   if (!input) return;
-  await openPromptDocument(input);
+  await openPromptDocument(context, input);
   await rememberFirstPrompt(context, input);
 }
 
 async function copyFirstPromptCommand(context) {
-  const input = await collectPromptInput();
-  if (!input) return;
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const prompt = buildFirstPrompt({
-    ...input,
-    includeQcdsChecklist: config.get('includeQcdsChecklist', true)
-  });
+  const input = await collectPromptInput(config);
+  if (!input) return;
+  const prompt = buildFirstPromptForContext(context, input);
   await vscode.env.clipboard.writeText(prompt);
   await rememberFirstPrompt(context, input);
   await openVsCodeCodexSidebar({ silent: true });
@@ -155,7 +182,7 @@ async function clearFirstPromptHistoryCommand(context) {
   vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt history cleared', 4000);
 }
 
-async function collectPromptInput() {
+async function collectPromptInput(config) {
   const domain = await pick('分野を選択', DOMAINS, 'domain');
   if (!domain) return undefined;
   const governance = await pick('進め方の軸を選択', GOVERNANCE_MODES, 'governance');
@@ -168,9 +195,11 @@ async function collectPromptInput() {
   if (!pace) return undefined;
   const gitWritePolicy = await pick('Git 書き込み方針を選択', GIT_WRITE_POLICIES, 'gitWritePolicy');
   if (!gitWritePolicy) return undefined;
+  const model = await pickCodexModel(config, cleanString(config?.get('codexModel', '')));
+  if (model === undefined) return undefined;
   const projectName = await vscode.window.showInputBox({ prompt: 'Repo 名またはプロジェクト名', placeHolder: 'my-new-project' });
   const goal = await vscode.window.showInputBox({ prompt: '目的を短く入力', placeHolder: '何を作り、どこまで進めるか' });
-  return { domainId: domain.id, governanceId: governance.id, developmentMethodId: developmentMethod.id, workflowId: workflow.id, paceId: pace.id, gitWritePolicyId: gitWritePolicy.id, projectName, goal };
+  return { domainId: domain.id, governanceId: governance.id, developmentMethodId: developmentMethod.id, workflowId: workflow.id, paceId: pace.id, gitWritePolicyId: gitWritePolicy.id, model, projectName, goal };
 }
 
 async function pick(placeHolder, items, kind) {
@@ -183,26 +212,29 @@ async function pick(placeHolder, items, kind) {
   return selected?.item;
 }
 
-async function openPromptDocument(input) {
-  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const prompt = buildFirstPrompt({
-    ...input,
-    includeQcdsChecklist: config.get('includeQcdsChecklist', true)
-  });
+async function openPromptDocument(context, input) {
+  const prompt = buildFirstPromptForContext(context, input);
   const document = await vscode.workspace.openTextDocument({ language: 'markdown', content: prompt });
   await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
 }
 
 async function invokeCodexWithFirstPromptCommand(context) {
-  const input = await collectPromptInput();
-  if (!input) return;
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-  const prompt = buildFirstPrompt({
-    ...input,
-    includeQcdsChecklist: config.get('includeQcdsChecklist', true)
-  });
+  const input = await collectPromptInput(config);
+  if (!input) return;
+  const prompt = buildFirstPromptForContext(context, input);
   await rememberFirstPrompt(context, input);
   await invokeCodexAgent(context, prompt, 'Generated FirstPrompt', { input });
+}
+
+function buildFirstPromptForContext(context, input) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  return buildFirstPrompt({
+    ...input,
+    model: cleanString(input.model) || cleanString(config.get('codexModel', '')),
+    includeQcdsChecklist: config.get('includeQcdsChecklist', true),
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
+  });
 }
 
 async function invokeCodexWithCurrentPromptCommand(context) {
@@ -610,18 +642,23 @@ async function openStarterWebview(context) {
     }
     if (!message || !message.input) return;
     const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
-    const input = { ...message.input, includeQcdsChecklist: config.get('includeQcdsChecklist', true) };
+    const input = {
+      ...message.input,
+      includeQcdsChecklist: config.get('includeQcdsChecklist', true),
+      model: cleanString(message.input.model) || cleanString(config.get('codexModel', '')),
+      openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
+    };
     if (message.type === 'generate') {
-      await openPromptDocument(input);
+      await openPromptDocument(context, input);
       await rememberFirstPrompt(context, input);
     }
     if (message.type === 'runCodex') {
-      const prompt = buildFirstPrompt(input);
+      const prompt = buildFirstPromptForContext(context, input);
       await rememberFirstPrompt(context, input);
       await invokeCodexAgent(context, prompt, 'Webview FirstPrompt', { input });
     }
     if (message.type === 'copy') {
-      await vscode.env.clipboard.writeText(buildFirstPrompt(input));
+      await vscode.env.clipboard.writeText(buildFirstPromptForContext(context, input));
       await rememberFirstPrompt(context, input);
       await openVsCodeCodexSidebar({ silent: true });
       vscode.window.setStatusBarMessage('Codex Starter: FirstPrompt copied for VS Code Codex', 4000);
@@ -630,9 +667,16 @@ async function openStarterWebview(context) {
 }
 
 async function renderStarterHtml(context, nonce) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   const promptHistory = await readPromptHistory(storageRootForContext(context));
   const ideaCandidatesByDomain = collectIdeaCandidatesByDomain();
-  return renderStarterWebview(nonce, { promptHistory, ideaCandidatesByDomain });
+  return renderStarterWebview(nonce, {
+    promptHistory,
+    ideaCandidatesByDomain,
+    modelChoices: getCodexModelChoices(config, config.get('codexModel', '')),
+    defaultModel: config.get('codexModel', ''),
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
+  });
 }
 
 async function openWorkDashboard(context, treeProvider, workItemsProvider) {
@@ -940,7 +984,11 @@ async function inferWorkItemDraftWithCodex(context, input, workspaceRootOverride
     return { source: 'local', draft: { ...inferWorkItemDraft(input), inferenceSource: 'local' } };
   }
   const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
-  const prompt = buildCodexWorkItemDraftPrompt(input, { workspaceRoot });
+  const prompt = buildCodexWorkItemDraftPrompt(input, {
+    workspaceRoot,
+    model: config.get('codexModel', ''),
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
+  });
   const promptFilePath = await writeStorageFile(context, 'work-item-draft-prompt', '.md', prompt);
   const schemaFilePath = await writeStorageFile(context, 'work-item-draft-schema', '.json', JSON.stringify(WORK_ITEM_DRAFT_JSON_SCHEMA, null, 2) + '\n');
   const outputFilePath = await writeStorageFile(context, 'work-item-draft-output', '.json', '');
@@ -1100,7 +1148,8 @@ async function startWorkItemWithCodexCommand(context, item) {
     documentText,
     relatedDocuments,
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
-    runConfig: runOptions
+    runConfig: runOptions,
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
   });
   await invokeCodexAgent(context, prompt, `Work Item: ${resolved.title}`, { workspaceRoot, runOptions, workItems: [resolved] });
 }
@@ -1125,7 +1174,8 @@ async function startSelectedWorkItemsWithCodexCommand(context, workspaceRootOver
     items: selectedItems,
     documents,
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
-    runConfig: runOptions
+    runConfig: runOptions,
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
   });
   await invokeCodexAgent(context, prompt, `Selected Work Items (${selectedItems.length})`, { workspaceRoot, runOptions, workItems: selectedItems });
 }
@@ -1146,7 +1196,8 @@ async function startAllWorkItemsWithCodexCommand(context, workspaceRootOverride)
     workspaceRoot,
     dashboard,
     gitWritePolicyId: config.get('codexGitWritePolicy', 'preflight'),
-    runConfig: runOptions
+    runConfig: runOptions,
+    openAiPromptGuidanceState: readOpenAiPromptGuidanceState(context)
   });
   await invokeCodexAgent(context, prompt, 'All Work Items', { workspaceRoot, runOptions, workItems: openWorkItemsFromDashboard(dashboard) });
 }

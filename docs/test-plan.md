@@ -12,6 +12,8 @@ npm test
 - 分野テンプレートに主要 domain が含まれる。
 - Issue駆動、TODO駆動、仕様駆動、TDD、逐次確認、リリース一括進行を選べる。
 - FirstPrompt に選択した分野、進め方、Git 書き込み方針、runtime gate、QCDS、完了条件が入る。
+- FirstPrompt、Work Item Start、Work Item Composer prompt に、選択 model に応じた OpenAI 公式 prompt guidance section が入る。
+- 起動時の OpenAI 公式 guidance fetch は本文を保存せず、取得 status、title、hash、latest model だけを cache し、失敗時は fallback guidance へ戻る。
 - Codex CLI command builder が prompt file と `.ps1` launcher を使い、UTF-8 の stdin 経由で `codex exec` に渡す。
 - VS Code Codex sidebar handoff と CLI check の command builder が使え、Terminal mode では設定された CLI path、`rg.exe` と `gh.exe` の PATH 補強と確認を行う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
@@ -21,6 +23,7 @@ npm test
 - Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue、QCDS、Git 書き込み方針が含まれる。
 - Work Dashboard に `Select` checkbox と `選択Work Itemを開始` があり、選択 TODO / Issue だけの開始 prompt を生成できる。
 - Work Item Start Prompt に model、インテリジェンス、アクセス権限の `Codex 実行設定` が含まれ、既定で VS Code Codex sidebar handoff になる。
+- `gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex` 系の model profile が異なる prompt tuning を返す。
 - `Start All Work Items` が未完了 TODO / Issue を一括開始 prompt に変換できる。
 - VS Code Codex handoff / Codex CLI session が `docs/codex-sessions.md` / `.jsonl` に記録され、blocked work item から follow-up Issue を作成できる。
 - FirstPrompt 履歴が workspace storage に保存、復元、削除できる。

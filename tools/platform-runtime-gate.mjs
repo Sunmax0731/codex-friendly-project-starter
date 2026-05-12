@@ -21,6 +21,7 @@ function runVsCodeExtensionGate() {
   const codexCli = readText('src/codex-cli.cjs');
   const codexSessions = readText('src/codex-sessions.cjs');
   const githubIssues = readText('src/github-issues.cjs');
+  const openAiPromptGuidance = readText('src/openai-prompt-guidance.cjs');
   const markdownWebview = readText('src/markdown-webview.cjs');
   const defaultDocs = readText('src/default-docs.cjs');
   const commands = new Set((pkg.contributes?.commands || []).map((item) => item.command));
@@ -63,6 +64,7 @@ function runVsCodeExtensionGate() {
     check('work-item-scan', extension.includes('scanWorkItems') && workItems.includes('parseTodoMarkdown') && workItems.includes('parseIssueMarkdown') && workItems.includes('parseTaskMarkdown') && workItems.includes('buildQcdsStatus') && workItems.includes('appendTodoWorkItemLink'), 'work item, task, TODO sync, and QCDS scan wired'),
     check('codex-exec-terminal', extension.includes('buildCodexExecScript') && extension.includes('writeLauncherFile') && codexCli.includes('@codexArgs') && codexCli.includes('$OutputEncoding') && codexCli.includes('$codexToolPathCandidates') && codexCli.includes('Get-Command rg.exe') && codexCli.includes('Get-Command gh.exe') && codexCli.includes('PYTHONIOENCODING') && codexCli.includes('--- Codex CLI output ---'), 'Codex exec UTF-8 launcher, readable output, and tool PATH bootstrap command exists'),
     check('codex-run-options', extension.includes('pickCodexRunOptions') && extension.includes('pickCodexSandboxMode') && extension.includes('codexReasoningEffort') && workItemStart.includes('Access:') && workItemStart.includes('Blocked handling:'), 'Work Item Codex model, intelligence, access, and blocked handling selection exists'),
+    check('openai-prompt-guidance', openAiPromptGuidance.includes('OFFICIAL_OPENAI_GUIDE_URLS') && openAiPromptGuidance.includes('gpt-5.5') && openAiPromptGuidance.includes('gpt-5.4-mini') && extension.includes('refreshOpenAiPromptGuidanceOnStartup') && promptHistory.includes('model: clean(input.model)') && workItemStart.includes('buildOpenAiPromptGuidanceSection') && codexWorkItemDraft.includes('buildOpenAiPromptGuidanceSection') && JSON.stringify(pkg.contributes?.configuration || {}).includes('openAiPromptGuidanceOnStartup'), 'OpenAI official guidance startup check and model-optimized prompt sections exist'),
     check('codex-session-records', extension.includes('recordCodexSession') && codexSessions.includes('codex-sessions.md') && codexSessions.includes('codex-sessions.jsonl'), 'Codex handoff and CLI sessions are recorded in the target project'),
     check('qcds-fallback-dimensions', workItems.includes('buildUnavailableQcdsStatus') && workItems.includes('missing-qcds-metrics'), 'QCDS tree exposes fallback dimensions when metrics are missing'),
     check('codex-target-root', extension.includes('resolveInvocationTarget') && readText('src/invocation-target.cjs').includes('nearestExistingDirectory'), 'Codex target root resolver exists')

@@ -6,6 +6,7 @@
 - `src/domains.cjs`: 分野ごとのパス、runtime gate、参照 docs、重点項目。
 - `src/workflows.cjs`: ガバナンス、開発手法、工程、進行速度、Git 書き込み方針の選択肢。
 - `src/prompt-builder.cjs`: FirstPrompt 生成ロジック。
+- `src/openai-prompt-guidance.cjs`: OpenAI 公式 prompt guidance の URL、起動時 fetch、fallback guidance、model profile、prompt section 生成。
 - `src/workspace-docs.cjs`: Agent docs の判定、分類、スキャン。
 - `src/webview.cjs`: Starter UI と Dashboard の Webview HTML 生成。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
@@ -24,6 +25,8 @@ VS Code API は `extension.js` に閉じ、生成ロジックとスキャンロ�
 Codex CLI 呼び出しも VS Code API から分離し、`src/codex-cli.cjs` で launcher script と command string を生成する。拡張本体は一時 prompt file と `.ps1` launcher の作成、実行前確認、terminal 起動または background 実行だけを担当する。launcher は Windows PowerShell 5 系でも日本語が壊れないように、console encoding と `$OutputEncoding` を UTF-8 にしてから prompt を stdin へ流す。
 
 Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` が JSON 専用 prompt と JSON schema を作り、拡張本体が `codex exec -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を background 実行して last-message file から JSON を取り出す。Codex CLI の失敗、timeout、JSON 不正時は `src/work-item-composer.cjs` のローカル補完に戻す。
+
+OpenAI prompt guidance は `src/openai-prompt-guidance.cjs` に閉じ込める。`extension.js` は activation 時に official URL を timeout 付きで fetch し、本文を保存せず status、title、content hash、latest model だけを global state に cache する。生成系 helper は cache と選択 model を受け取り、`gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex` 系ごとの prompt tuning section を FirstPrompt、Work Item Start、Work Item Composer prompt へ差し込む。fetch 失敗時も fallback guidance で同じ interface を維持する。
 
 GitHub Issues 取込は `src/github-issues.cjs` が public GitHub Issues API と local work item 書き込みの境界を担当する。拡張本体は repository 入力、issue 選択、進捗表示、Codex inference 呼び出しだけを担い、GitHub Issue の内容を local `Issues/*.md` / `TODO.md` に書く処理は helper に閉じ込める。GitHub 側への書き込みは行わない。
 

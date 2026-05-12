@@ -26,8 +26,11 @@ test('renderDefaultDocs includes D:\\AI source docs, phase skills, and Issues', 
   assert.ok(paths.has('Issues/0003-qcds-release-readiness.md'));
   for (const phase of PHASE_SKILLS) assert.ok(paths.has(`skills/${phase.directory}/SKILL.md`));
   const rootSkill = rendered.files.find((file) => file.relativePath === 'SKILL.md').content;
+  const rootAgents = rendered.files.find((file) => file.relativePath === 'AGENTS.md').content;
   assert.match(rootSkill, /skills\/01-requirements\/SKILL\.md/);
   assert.match(rootSkill, /Phase Skills/);
+  assert.match(rootSkill, /OpenAI 公式 prompt guidance/);
+  assert.match(rootAgents, /developers\.openai\.com\/api\/docs\/guides\/latest-model/);
 });
 
 test('ensureDefaultProjectDocs writes missing files and preserves existing files by default', () => {

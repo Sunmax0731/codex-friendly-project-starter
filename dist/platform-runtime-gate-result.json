@@ -196,6 +196,11 @@
       "detail": "Work Item Codex model, intelligence, access, and blocked handling selection exists"
     },
     {
+      "id": "openai-prompt-guidance",
+      "pass": true,
+      "detail": "OpenAI official guidance startup check and model-optimized prompt sections exist"
+    },
+    {
       "id": "codex-session-records",
       "pass": true,
       "detail": "Codex handoff and CLI sessions are recorded in the target project"

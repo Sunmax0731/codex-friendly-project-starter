@@ -66,6 +66,7 @@ function normalizePromptInput(input = {}) {
     workflowId: clean(input.workflowId) || 'phase-by-phase',
     paceId: clean(input.paceId) || 'checkpoint',
     gitWritePolicyId: clean(input.gitWritePolicyId) || 'preflight',
+    model: clean(input.model),
     projectName: clean(input.projectName),
     goal: clean(input.goal),
     repositoryPath: clean(input.repositoryPath)
@@ -86,6 +87,7 @@ function promptHistoryKey(input = {}) {
     normalized.workflowId,
     normalized.paceId,
     normalized.gitWritePolicyId,
+    normalized.model,
     normalized.projectName,
     normalized.goal,
     normalized.repositoryPath

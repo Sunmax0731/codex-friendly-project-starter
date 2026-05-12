@@ -2,6 +2,7 @@ const {
   WORK_ITEM_FORM_OPTIONS,
   inferWorkItemDraft
 } = require('./work-item-composer.cjs');
+const { buildOpenAiPromptGuidanceSection } = require('./openai-prompt-guidance.cjs');
 
 const WORK_ITEM_DRAFT_JSON_SCHEMA = {
   type: 'object',
@@ -76,6 +77,11 @@ function buildCodexWorkItemDraftPrompt(input = {}, options = {}) {
     '- acceptance は実装完了を判定できる具体条件を 1 から 5 件にしてください。',
     '- prose は入力が英語でない限り日本語で書いてください。',
     '- Markdown fence、説明文、前置き、後書きは出力しないでください。',
+    '',
+    buildOpenAiPromptGuidanceSection({
+      model: options.model,
+      guidanceState: options.openAiPromptGuidanceState
+    }),
     '',
     '## workspaceRoot',
     '',
