@@ -1,3 +1,4 @@
+const path = require('node:path');
 const { DOMAINS } = require('./domains.cjs');
 const { GOVERNANCE_MODES, DEVELOPMENT_METHODS, WORKFLOWS, PACES, GIT_WRITE_POLICIES } = require('./workflows.cjs');
 
@@ -336,6 +337,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       kind: button.getAttribute('data-kind') || ''
     }));
   }
+  for (const button of document.querySelectorAll('button[data-qcds-axis]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'openQcdsDimension',
+      axis: button.getAttribute('data-qcds-axis')
+    }));
+  }
   const selectedStart = document.querySelector('button[data-selected-start]');
   if (selectedStart) {
     selectedStart.addEventListener('click', () => vscode.postMessage({
@@ -356,6 +363,149 @@ function renderWorkDashboardWebview(nonce, dashboard) {
 </script>
 </body>
 </html>`;
+}
+
+function renderQcdsStatusWebview(nonce, dashboard, options = {}) {
+  const selectedAxis = String(options.selectedAxis || '').toLowerCase();
+  const metricsPath = dashboard.qcds.metricsPath || '';
+  const evaluationPath = path.join(dashboard.rootPath, 'docs', 'qcds-evaluation.md');
+  return `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex QCDS Status</title>
+  <style>
+    body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 18px; }
+    main { max-width: 1040px; }
+    h1 { font-size: 20px; margin: 0 0 6px; font-weight: 600; }
+    h2 { font-size: 16px; margin: 0; }
+    h3 { font-size: 13px; margin: 14px 0 6px; }
+    .root, .path, .detail { color: var(--vscode-descriptionForeground); font-size: 12px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; }
+    button { border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); padding: 5px 8px; border-radius: 3px; cursor: pointer; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 12px 0 16px; }
+    .metric, .dimension, .check, .work-item { border: 1px solid var(--vscode-panel-border); background: var(--vscode-sideBar-background); border-radius: 4px; padding: 10px; }
+    .metric strong { display: block; font-size: 18px; margin-top: 4px; }
+    .dimension { margin-bottom: 12px; }
+    .dimension-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+    .score { font-size: 18px; font-weight: 600; }
+    .bar { height: 9px; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-panel-border); margin: 10px 0; overflow: hidden; }
+    .fill { display: block; height: 100%; background: var(--vscode-charts-green); }
+    .fill.needs { background: var(--vscode-charts-yellow); }
+    .badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; margin: 5px 0; }
+    .tag { border: 1px solid var(--vscode-panel-border); padding: 1px 6px; border-radius: 999px; white-space: nowrap; font-size: 11px; line-height: 18px; background: var(--vscode-editorWidget-background); }
+    .tag-pass, .status-pass, .tag-status-closed, .tag-status-done { color: var(--vscode-charts-green); }
+    .tag-needs-improvement, .tag-status-blocked { color: var(--vscode-errorForeground); }
+    .tag-qcds { color: var(--vscode-charts-foreground); }
+    .tag-priority-p0 { color: var(--vscode-errorForeground); border-color: var(--vscode-errorForeground); }
+    .tag-priority-p1 { color: var(--vscode-charts-red); border-color: var(--vscode-charts-red); }
+    .tag-priority-p2 { color: var(--vscode-charts-yellow); border-color: var(--vscode-charts-yellow); }
+    .checks, .work-list { display: grid; gap: 8px; }
+    .check-pass { color: var(--vscode-charts-green); }
+    .check-fail { color: var(--vscode-errorForeground); }
+    .work-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+    .work-title { display: block; overflow-wrap: anywhere; margin: 3px 0; }
+    .row-actions { display: inline-flex; gap: 6px; justify-content: end; }
+    .empty { color: var(--vscode-descriptionForeground); border: 1px dashed var(--vscode-panel-border); padding: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Codex QCDS Status</h1>
+  <div class="root">${escapeHtml(dashboard.rootPath)}</div>
+  <div class="toolbar">
+    <button data-action="refreshQcdsStatus">Refresh</button>
+    <button data-action="openWorkDashboard">Work Dashboard</button>
+    ${metricsPath ? `<button data-file="${escapeHtml(metricsPath)}" data-line="1">Open Metrics JSON</button>` : ''}
+    <button data-file="${escapeHtml(evaluationPath)}" data-line="1">Open Evaluation</button>
+  </div>
+  <section class="summary">
+    ${qcdsMetricSummaryHtml('Overall', dashboard.qcds.overallGrade || 'missing', String(dashboard.qcds.overallScore ?? 0))}
+    ${qcdsMetricSummaryHtml('Checks', `${dashboard.qcds.summary.passedChecks} / ${dashboard.qcds.summary.totalChecks}`, `${dashboard.qcds.summary.percent}%`)}
+    ${qcdsMetricSummaryHtml('Below A-', dashboard.qcds.summary.belowAMinus.length ? dashboard.qcds.summary.belowAMinus.join(', ') : 'none', dashboard.qcds.available ? 'metrics available' : 'fallback')}
+  </section>
+  <section>
+    ${dashboard.qcds.dimensions.length ? dashboard.qcds.dimensions.map((dimension) => qcdsDetailHtml(dimension, selectedAxis)).join('') : '<div class="empty">QCDS metrics が見つかりません。</div>'}
+  </section>
+</main>
+<script nonce="${nonce}">
+  const vscode = acquireVsCodeApi();
+  for (const button of document.querySelectorAll('button[data-file]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'openMarkdown',
+      filePath: button.getAttribute('data-file'),
+      lineNumber: Number(button.getAttribute('data-line') || '1')
+    }));
+  }
+  for (const button of document.querySelectorAll('button[data-start-file]')) {
+    button.addEventListener('click', () => vscode.postMessage({
+      type: 'startWorkItem',
+      filePath: button.getAttribute('data-start-file'),
+      lineNumber: Number(button.getAttribute('data-start-line') || '1'),
+      kind: button.getAttribute('data-kind') || ''
+    }));
+  }
+  for (const button of document.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => vscode.postMessage({ type: button.getAttribute('data-action') }));
+  }
+</script>
+</body>
+</html>`;
+}
+
+function qcdsMetricSummaryHtml(label, value, detail) {
+  return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="path">${escapeHtml(detail)}</span></div>`;
+}
+
+function qcdsDetailHtml(dimension, selectedAxis = '') {
+  const isSelected = selectedAxis && selectedAxis === String(dimension.label || dimension.id || '').toLowerCase();
+  const percent = percentOf(dimension.passed, dimension.expected);
+  return `<details class="dimension" ${!selectedAxis || isSelected ? 'open' : ''}>
+    <summary class="dimension-head">
+      <span>
+        <h2>${escapeHtml(dimension.label)}</h2>
+        <span class="badges">${badge(dimension.grade, 'tag-qcds')} ${badge(dimension.status, 'tag-' + dimension.status)}</span>
+        <span class="path">${dimension.passed}/${dimension.expected} checks / ${dimension.linkedItems.length} linked work items</span>
+      </span>
+      <span class="score">${escapeHtml(String(dimension.score))}</span>
+    </summary>
+    <div class="bar" aria-label="${escapeHtml(dimension.label)} ${percent}%"><span class="fill ${dimension.status === 'pass' ? '' : 'needs'}" style="width:${percent}%"></span></div>
+    <h3>Checks</h3>
+    <div class="checks">${dimension.checks.length ? dimension.checks.map(qcdsCheckHtml).join('') : '<div class="empty">Check はありません。</div>'}</div>
+    <h3>Linked Work Items</h3>
+    <div class="work-list">${dimension.linkedItems.length ? dimension.linkedItems.map(qcdsLinkedWorkItemHtml).join('') : '<div class="empty">紐づく Work Item はありません。</div>'}</div>
+  </details>`;
+}
+
+function qcdsCheckHtml(check) {
+  return `<div class="check">
+    <div class="${check.pass ? 'check-pass' : 'check-fail'}">${check.pass ? 'pass' : 'needs review'}</div>
+    <div>${escapeHtml(check.description || check.id)}</div>
+    ${check.detail ? `<div class="detail">${escapeHtml(check.detail)}</div>` : ''}
+  </div>`;
+}
+
+function qcdsLinkedWorkItemHtml(item) {
+  return `<div class="work-item">
+    <div>
+      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${typeBadge(item.kind)}${qcdsBadges(item.qcdsAxes)}</div>
+      <span class="work-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber}</span>
+    </div>
+    ${qcdsWorkActions(item)}
+  </div>`;
+}
+
+function qcdsWorkActions(item) {
+  if (!item.filePath) return '';
+  const lineNumber = Number(item.lineNumber || 1);
+  return `<span class="row-actions"><button data-start-file="${escapeHtml(item.filePath)}" data-start-line="${lineNumber}" data-kind="${escapeHtml(item.kind || '')}">Start</button><button data-file="${escapeHtml(item.filePath)}" data-line="${lineNumber}">Open</button></span>`;
+}
+
+function percentOf(done, total) {
+  return total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
 }
 
 function metricHtml(label, value, percent, subtext) {
@@ -412,7 +562,7 @@ function qcdsDimensionHtml(item) {
       <span class="row-title">${escapeHtml(item.label)}</span>
       <span class="path">${item.passed}/${item.expected} checks / ${item.linkedItems.length} linked work items</span>
     </div>
-    <span class="${cls}">${item.score}</span>
+    <span class="row-actions"><span class="${cls}">${item.score}</span><button class="open-doc" data-qcds-axis="${escapeHtml(item.label)}">Details</button></span>
   </div>`;
 }
 
@@ -476,4 +626,4 @@ function escapeHtml(value) {
   }[char]));
 }
 
-module.exports = { renderStarterWebview, renderWorkDashboardWebview };
+module.exports = { renderStarterWebview, renderWorkDashboardWebview, renderQcdsStatusWebview };

@@ -23,7 +23,7 @@ const {
   isTaskFilePath,
   isWorkItemDocPath
 } = require('../src/work-items.cjs');
-const { renderWorkDashboardWebview } = require('../src/webview.cjs');
+const { renderWorkDashboardWebview, renderQcdsStatusWebview } = require('../src/webview.cjs');
 const {
   buildWorkItemStartPrompt,
   buildAllWorkItemsStartPrompt,
@@ -174,6 +174,7 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /Legacy Task を作成/);
   assert.match(html, /D:\\AI Docs 生成/);
   assert.match(html, /openQcdsStatus/);
+  assert.match(html, /openQcdsDimension|data-qcds-axis/);
   assert.match(html, /openCodexApp/);
   assert.match(html, /invokeCurrentPrompt/);
   assert.match(html, /GitHub Issues 取込/);
@@ -443,6 +444,42 @@ test('buildQcdsStatus reads grade-only strict metrics schema', async () => {
   assert.equal(dashboard.qcds.summary.totalChecks, 4);
   assert.equal(dashboard.qcds.summary.passedChecks, 4);
   assert.equal(dashboard.qcds.dimensions.some((item) => item.label === 'Delivery' && item.linkedItems.length > 0), true);
+});
+
+test('renderQcdsStatusWebview shows per-axis detail sections and work links', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-qcds-webview-'));
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1][QCDS:Delivery] Add release evidence\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-release.md'), createIssueMarkdown({
+    title: 'Release evidence',
+    priority: 'P1',
+    qcdsAxes: ['Delivery']
+  }), 'utf8');
+  fs.writeFileSync(path.join(root, 'docs', 'qcds-strict-metrics.json'), JSON.stringify({
+    overallGrade: 'A-',
+    overallScore: 80,
+    dimensions: {
+      delivery: {
+        label: 'Delivery',
+        score: 80,
+        grade: 'A-',
+        passed: 1,
+        expected: 1,
+        checks: [{ id: 'release-evidence', description: 'Release evidence exists', pass: true, detail: 'ok' }]
+      }
+    }
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  const html = renderQcdsStatusWebview('nonce', dashboard, { selectedAxis: 'Delivery' });
+  assert.match(html, /Codex QCDS Status/);
+  assert.match(html, /Open Metrics JSON/);
+  assert.match(html, /Open Evaluation/);
+  assert.match(html, /Delivery/);
+  assert.match(html, /Release evidence exists/);
+  assert.match(html, /Linked Work Items/);
+  assert.match(html, /data-start-file/);
+  assert.match(html, /Release evidence/);
 });
 
 test('createBlockedFollowUpIssue creates an Issue-only blocker task from a non-closed item', () => {

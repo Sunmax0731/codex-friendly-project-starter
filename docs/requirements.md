@@ -32,7 +32,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - VS Code Codex handoff または Codex CLI 起動時に対象 project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を残せる。
 - Work Item が closed にならない場合、blocked 原因を調査する follow-up Issue を作成できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
-- `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / legacy Task を可視化する。metrics が未生成でも4観点の fallback を表示する。
+- `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / legacy Task を専用 WebView で項目別に可視化する。metrics が未生成でも4観点の fallback を表示する。
 - `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。JSON は元ファイルを変更せず整形表示できる。
 - `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
@@ -61,7 +61,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
 - Work Items Tree と Work Dashboard が `TODO.md`、`Issues/*.md`、legacy `Tasks/*.md` を読み取り、release readiness を表示できる。
-- QCDS Status が現在の grade と `QCDS:` metadata/tag で紐づいた TODO / Issue / legacy Task を表示できる。
+- QCDS Status が現在の grade、check、`QCDS:` metadata/tag で紐づいた TODO / Issue / legacy Task を4観点別に表示できる。
 - Dashboard の中段セクションを折りたたみでき、Issue / legacy Task / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
 - Work Item Composer が Codex CLI で自然言語から Issue の下書きを作り、必要な場合は legacy Task も作成し、作成後に Tree View と Dashboard が更新される。
 - Work Item の `Start` が、選択 work item と関連 Issue / legacy Task を含む開始プロンプトを VS Code Codex に渡せる。

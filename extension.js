@@ -25,7 +25,7 @@ const {
   buildAllWorkItemsStartPrompt,
   buildSelectedWorkItemsStartPrompt
 } = require('./src/work-item-start.cjs');
-const { renderStarterWebview, renderWorkDashboardWebview } = require('./src/webview.cjs');
+const { renderStarterWebview, renderWorkDashboardWebview, renderQcdsStatusWebview } = require('./src/webview.cjs');
 const {
   inferWorkItemDraft,
   renderWorkItemComposerWebview
@@ -100,7 +100,7 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.copyMarkdownPath', (item) => copyMarkdownPathCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context, treeProvider, workItemsProvider)),
-    vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', () => openQcdsStatus(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', (item) => openQcdsStatus(context, treeProvider, workItemsProvider, qcdsAxisFromCommandArgument(item))),
     vscode.commands.registerCommand('codex-friendly-project-starter.scaffoldDefaultDocs', () => scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeTasksDirectory', () => initializeTasksDirectoryCommand(workItemsProvider)),
@@ -655,7 +655,13 @@ async function openWorkDashboard(context, treeProvider, workItemsProvider) {
   }, undefined, context.subscriptions);
 }
 
-async function openQcdsStatus(context, treeProvider, workItemsProvider) {
+function qcdsAxisFromCommandArgument(item) {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  return item.qcdsAxis || item.axis || (item.kind === 'qcds-dimension' ? item.label : '');
+}
+
+async function openQcdsStatus(context, treeProvider, workItemsProvider, selectedAxis = '') {
   const workspaceRoot = pickWorkspaceRoot();
   const panel = vscode.window.createWebviewPanel(
     'codexFriendlyQcdsStatus',
@@ -664,15 +670,39 @@ async function openQcdsStatus(context, treeProvider, workItemsProvider) {
     { enableScripts: true, retainContextWhenHidden: false }
   );
   const nonce = String(Date.now()) + String(Math.random()).slice(2);
-  await renderDashboardPanel(panel, nonce, workspaceRoot);
+  await renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis);
   panel.webview.onDidReceiveMessage(async (message) => {
-    await handleDashboardMessage({ context, panel, nonce, workspaceRoot, treeProvider, workItemsProvider, message });
+    await handleQcdsStatusMessage({ context, panel, nonce, workspaceRoot, selectedAxis, treeProvider, workItemsProvider, message });
   }, undefined, context.subscriptions);
 }
 
 async function renderDashboardPanel(panel, nonce, workspaceRoot) {
   const dashboard = await scanWorkItems(workspaceRoot);
   panel.webview.html = renderWorkDashboardWebview(nonce, dashboard);
+}
+
+async function renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis = '') {
+  const dashboard = await scanWorkItems(workspaceRoot);
+  panel.webview.html = renderQcdsStatusWebview(nonce, dashboard, { selectedAxis });
+}
+
+async function handleQcdsStatusMessage(args) {
+  const { context, panel, nonce, workspaceRoot, selectedAxis, workItemsProvider, message } = args;
+  if (message?.type === 'openMarkdown' && message.filePath) {
+    await openMarkdownWebview(context, message.filePath, message.lineNumber);
+    return;
+  }
+  if (message?.type === 'startWorkItem' && message.filePath) {
+    await startWorkItemWithCodexCommand(context, message);
+    return;
+  }
+  if (message?.type === 'refreshQcdsStatus') {
+    await renderQcdsStatusPanel(panel, nonce, workspaceRoot, selectedAxis);
+    return;
+  }
+  if (message?.type === 'openWorkDashboard') {
+    await openWorkDashboard(context, undefined, workItemsProvider);
+  }
 }
 
 async function handleDashboardMessage(args) {
@@ -709,6 +739,10 @@ async function handleDashboardMessage(args) {
   }
   if (message?.type === 'openQcdsStatus') {
     openQcdsStatus(context, treeProvider, workItemsProvider);
+    return;
+  }
+  if (message?.type === 'openQcdsDimension') {
+    openQcdsStatus(context, treeProvider, workItemsProvider, message.axis || '');
     return;
   }
   if (message?.type === 'invokeCurrentPrompt') {
@@ -1428,12 +1462,21 @@ class WorkItemsTreeProvider {
   }
 
   getTreeItem(item) {
-    const treeItem = new vscode.TreeItem(item.label, item.children ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
+    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+    const treeItem = new vscode.TreeItem(item.label, hasChildren ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
     treeItem.description = item.description;
     treeItem.tooltip = item.tooltip || item.filePath;
     treeItem.iconPath = item.icon;
     if (item.filePath) treeItem.resourceUri = vscode.Uri.file(item.filePath);
     if (item.filePath && ['todo', 'issue', 'task'].includes(item.kind)) treeItem.contextValue = 'codexWorkItem';
+    if (item.kind === 'qcds-dimension') {
+      treeItem.command = {
+        command: 'codex-friendly-project-starter.openQcdsStatus',
+        title: 'Open QCDS Status',
+        arguments: [item]
+      };
+      return treeItem;
+    }
     if (item.filePath) {
       treeItem.command = {
         command: 'codex-friendly-project-starter.openWorkItem',
@@ -1478,11 +1521,11 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
     icon: new vscode.ThemeIcon(item.status === 'pass' ? 'pass' : 'warning')
   }));
   const qcdsDimensions = dashboard.qcds.dimensions.map((dimension) => ({
+    kind: 'qcds-dimension',
+    qcdsAxis: dimension.label,
     label: dimension.label,
     description: dimension.grade + ' ' + dimension.score,
     tooltip: dimension.passed + '/' + dimension.expected + ' checks',
-    filePath: dashboard.qcds.metricsPath,
-    lineNumber: 1,
     icon: new vscode.ThemeIcon(dimension.status === 'pass' ? 'pass' : 'warning'),
     children: dimension.linkedItems.filter((item) => !item.done).slice(0, 8).map((item) => ({
       ...item,

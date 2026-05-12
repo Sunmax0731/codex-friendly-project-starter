@@ -83,6 +83,7 @@ Dashboard Webview は次を表示する。
 - QCDS overall grade / score と check pass 数。
 - QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。`docs/qcds-strict-metrics.json` は `dimensions` 形式と `grades` 形式を読み取り、metrics が無い場合または未対応形式の場合も4観点の D- fallback を表示する。
 - QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue / legacy Task を表示する。
+- `Codex Starter: Open QCDS Status` は QCDS 専用 WebView を開き、Quality、Cost、Delivery、Satisfaction の各 section に grade、score、checks、linked work items を表示する。Dashboard の `Details` と Work Items tree の各 QCDS 観点からは該当 section を開いた状態で表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 legacy Task の上位一覧。
 - GUI action として、日常操作には自然言語から Issue、Issue 作成、legacy Task 作成、FirstPrompt 画面、QCDS Status、VS Code Codex、現在PromptをCodexへ、Dashboard refresh を提供する。

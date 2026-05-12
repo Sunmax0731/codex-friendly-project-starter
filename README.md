@@ -11,7 +11,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Work Item Start: Dashboard または Work Items Tree の TODO / Issue / legacy Task から `Start` を押すと、その作業単位を入口にした開始プロンプトを Codex CLI へ渡せます。
 - Start Selected Work Items: Dashboard の checkbox または Command Palette の複数選択から、選んだ TODO / Issues / legacy Tasks だけを連結した作業範囲として Codex CLI へ渡せます。
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues / legacy Tasks を優先度順の一括バックログとして Codex CLI へ渡せます。
-- QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction の grade と改善 TODO / Issue を可視化します。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。
+- QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。JSON は元ファイルを変更せずに整形表示します。
 - Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。legacy compatibility が必要な場合だけ `Tasks/*.md` または Issue + Legacy Task を選べます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。
 - GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込みます。`codexFriendlyProjectStarter.workItemDetailMode` を `issues-and-tasks` にした場合だけ legacy `Tasks/*.md` も作成します。取り込んだ local Issue / TODO には GitHub Issue の個別リンクを残します。

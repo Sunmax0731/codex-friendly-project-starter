@@ -40,7 +40,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Work Items` を開く。
 3. `TODO`、`Issues`、legacy `Tasks`、`QCDS`、`Release readiness` の group を確認する。
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
-5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行する。
+5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
 6. Dashboard の `Issues 初期化` を実行する。
 7. Dashboard の `Issue を作成` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
 8. Dashboard の `Legacy Task を作成` を押し、Work Item Composer で title、priority、phase、QCDS、acceptance criteria を入力して互換用 Task を作成する。
@@ -61,6 +61,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Dashboard 上部に `Issue を作成`、`Legacy Task を作成`、`自然言語から Issue`、`Issues 初期化`、`Tasks 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示される。
 - Dashboard 上部と Work Items title action から `GitHub Issues 取込` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
+- QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。
 - QCDS に紐づいた TODO / Issue / legacy Task がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
 - legacy `Tasks/README.md` と `Tasks/000x-*.md` が UTF-8 Markdown として作成される。

@@ -62,8 +62,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 ### QCDS Status
 
 - `Codex Starter: Open QCDS Status` で開く。
-- 表示 UI は Work Dashboard と同じデータを使い、QCDS Current Status と QCDS Improvements を最初に確認できるようにする。
-- `QCDS:` metadata/tag がある TODO / Issue / legacy Task を改善候補として紐づける。metrics がない場合も Quality / Cost / Delivery / Satisfaction の fallback を表示する。
+- 表示 UI は Work Dashboard と同じデータを使い、Quality、Cost、Delivery、Satisfaction をそれぞれ独立した詳細 section として表示する。
+- 各 section には grade、score、passed/expected、checks、`QCDS:` metadata/tag がある TODO / Issue / legacy Task を表示する。metrics がない場合も Quality / Cost / Delivery / Satisfaction の fallback を表示する。
+- Work Items tree の QCDS 配下の各観点、または Dashboard の `Details` から該当 section を開いた状態で表示する。
 
 ### Markdown WebView
 
