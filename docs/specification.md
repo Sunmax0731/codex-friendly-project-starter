@@ -81,7 +81,7 @@ Dashboard Webview は次を表示する。
 - Issue closed 数 / 総数の progress bar。
 - Legacy Task closed 数 / 総数の progress bar。
 - QCDS overall grade / score と check pass 数。
-- QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。metrics が無い場合も4観点の D- fallback を表示する。
+- QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。`docs/qcds-strict-metrics.json` は `dimensions` 形式と `grades` 形式を読み取り、metrics が無い場合または未対応形式の場合も4観点の D- fallback を表示する。
 - QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue / legacy Task を表示する。
 - release readiness の pass / missing。
 - 未完了 TODO、未完了 Issue、未完了 legacy Task の上位一覧。

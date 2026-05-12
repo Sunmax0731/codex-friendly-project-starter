@@ -409,6 +409,42 @@ test('buildQcdsStatus exposes fallback dimensions when strict metrics are missin
   assert.equal(dashboard.qcds.dimensions.some((item) => item.label === 'Delivery' && item.linkedItems.length > 0), true);
 });
 
+test('buildQcdsStatus reads grade-only strict metrics schema', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-qcds-grades-'));
+  fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1][QCDS:Delivery] Add release evidence\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-release.md'), createIssueMarkdown({
+    title: 'Release evidence',
+    priority: 'P1',
+    qcdsAxes: ['Delivery']
+  }), 'utf8');
+  fs.writeFileSync(path.join(root, 'docs', 'qcds-strict-metrics.json'), JSON.stringify({
+    repository: 'sample',
+    qcdsDefinition: {
+      Quality: 'Quality evidence',
+      Cost: 'Cost evidence',
+      Delivery: 'Delivery evidence',
+      Satisfaction: 'Satisfaction evidence'
+    },
+    grades: {
+      Quality: 'A-',
+      Cost: 'A-',
+      Delivery: 'A-',
+      Satisfaction: 'A-'
+    },
+    lastCheckedAt: '2026-05-12T20:30:00+09:00'
+  }), 'utf8');
+  const dashboard = await scanWorkItems(root);
+  assert.equal(dashboard.qcds.available, true);
+  assert.equal(dashboard.qcds.overallGrade, 'A-');
+  assert.equal(dashboard.qcds.overallScore, 80);
+  assert.equal(dashboard.qcds.dimensions.length, 4);
+  assert.equal(dashboard.qcds.summary.totalChecks, 4);
+  assert.equal(dashboard.qcds.summary.passedChecks, 4);
+  assert.equal(dashboard.qcds.dimensions.some((item) => item.label === 'Delivery' && item.linkedItems.length > 0), true);
+});
+
 test('createBlockedFollowUpIssue creates an Issue-only blocker task from a non-closed item', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-blocked-followup-'));
   fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });

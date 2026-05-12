@@ -387,41 +387,22 @@ function buildQcdsStatus(rootPath, workItems = {}) {
   }
 
   const work = [...(workItems.todos || []), ...(workItems.issues || []), ...(workItems.tasks || [])];
-  const dimensions = Object.entries(metrics.dimensions || {}).map(([id, dimension]) => {
-    const label = dimension.label || labelFromDimensionId(id);
-    const checks = (dimension.checks || []).map((check) => {
-      const linkedItems = linkQcdsWorkItems(label, check, work);
-      return {
-        id: check.id || '',
-        description: check.description || '',
-        pass: check.pass === true,
-        detail: check.detail || '',
-        linkedItems
-      };
-    });
-    const linkedItems = uniqueLinkedItems(checks.flatMap((check) => check.linkedItems).concat(linkQcdsWorkItems(label, { id, description: label }, work)));
-    return {
-      id,
-      label,
-      score: Number(dimension.score || 0),
-      grade: dimension.grade || gradeFromScore(Number(dimension.score || 0)),
-      passed: Number(dimension.passed || checks.filter((check) => check.pass).length),
-      expected: Number(dimension.expected || checks.length),
-      status: isGradeAtLeast(dimension.grade, 'A-') ? 'pass' : 'needs-improvement',
-      checks,
-      linkedItems
-    };
-  });
+  const dimensions = normalizeQcdsDimensions(metrics, work);
+  if (!dimensions.length) {
+    return buildUnavailableQcdsStatus(rootPath, workItems, metricsPath, 'docs/qcds-strict-metrics.json does not contain QCDS dimensions or grades.');
+  }
   const totalChecks = dimensions.reduce((sum, item) => sum + item.expected, 0);
   const passedChecks = dimensions.reduce((sum, item) => sum + item.passed, 0);
   const failedChecks = Math.max(0, totalChecks - passedChecks);
   const belowAMinus = dimensions.filter((item) => !isGradeAtLeast(item.grade, 'A-')).map((item) => item.label);
   const improvements = buildQcdsImprovements(dimensions, work);
+  const explicitOverallScore = numberOrUndefined(metrics.overallScore ?? metrics.score);
+  const overallScore = explicitOverallScore ?? averageQcdsScore(dimensions);
   return {
     available: true,
     metricsPath,
-    overallGrade: metrics.overallGrade || gradeFromScore(Number(metrics.overallScore || 0)),
-    overallScore: Number(metrics.overallScore || 0),
+    overallGrade: normalizeGrade(metrics.overallGrade || metrics.overall || metrics.grade) || lowestQcdsGrade(dimensions) || gradeFromScore(overallScore),
+    overallScore,
     dimensions,
     improvements,
     summary: {
@@ -431,6 +412,77 @@ function buildQcdsStatus(rootPath, workItems = {}) {
       percent: percent(passedChecks, totalChecks),
       belowAMinus
     }
+  };
+}
+
+function normalizeQcdsDimensions(metrics, work) {
+  const dimensionEntries = Object.entries(metrics.dimensions || {});
+  if (dimensionEntries.length) {
+    return dimensionEntries.map(([id, dimension]) => buildQcdsDimensionFromStrictMetrics(id, dimension || {}, work));
+  }
+
+  const grades = metrics.grades || metrics.qcdsGrades;
+  if (!grades || typeof grades !== 'object') return [];
+  const scores = metrics.scores && typeof metrics.scores === 'object' ? metrics.scores : {};
+  const definitions = metrics.qcdsDefinition && typeof metrics.qcdsDefinition === 'object' ? metrics.qcdsDefinition : {};
+  return QCDS_AXES.map((axis) => buildQcdsDimensionFromGrade(axis, grades, scores, definitions, metrics, work));
+}
+
+function buildQcdsDimensionFromStrictMetrics(id, dimension, work) {
+  const label = dimension.label || labelFromDimensionId(id);
+  const score = numberOrUndefined(dimension.score) ?? 0;
+  const grade = normalizeGrade(dimension.grade) || gradeFromScore(score);
+  const checks = (dimension.checks || []).map((check) => {
+    const linkedItems = linkQcdsWorkItems(label, check, work);
+    return {
+      id: check.id || '',
+      description: check.description || '',
+      pass: check.pass === true,
+      detail: check.detail || '',
+      linkedItems
+    };
+  });
+  const linkedItems = uniqueLinkedItems(checks.flatMap((check) => check.linkedItems).concat(linkQcdsWorkItems(label, { id, description: label }, work)));
+  return {
+    id,
+    label,
+    score,
+    grade,
+    passed: numberOrUndefined(dimension.passed) ?? checks.filter((check) => check.pass).length,
+    expected: numberOrUndefined(dimension.expected) ?? checks.length,
+    status: isGradeAtLeast(grade, 'A-') ? 'pass' : 'needs-improvement',
+    checks,
+    linkedItems
+  };
+}
+
+function buildQcdsDimensionFromGrade(axis, grades, scores, definitions, metrics, work) {
+  const grade = normalizeGrade(grades[axis] || grades[axis.toLowerCase()]) || 'D-';
+  const score = numberOrUndefined(scores[axis] ?? scores[axis.toLowerCase()]) ?? scoreFromGrade(grade);
+  const pass = isGradeAtLeast(grade, 'A-');
+  const description = definitions[axis] || definitions[axis.toLowerCase()] || axis + ' grade is recorded in docs/qcds-strict-metrics.json.';
+  const detail = [
+    'grade: ' + grade,
+    metrics.lastCheckedAt ? 'lastCheckedAt: ' + metrics.lastCheckedAt : ''
+  ].filter(Boolean).join('; ');
+  const check = {
+    id: axis.toLowerCase() + '-grade',
+    description,
+    pass,
+    detail
+  };
+  const linkedItems = uniqueLinkedItems(linkQcdsWorkItems(axis, check, work).concat(linkQcdsWorkItems(axis, { id: axis, description: axis }, work)));
+  check.linkedItems = linkedItems;
+  return {
+    id: axis.toLowerCase(),
+    label: axis,
+    score,
+    grade,
+    passed: pass ? 1 : 0,
+    expected: 1,
+    status: pass ? 'pass' : 'needs-improvement',
+    checks: [check],
+    linkedItems
   };
 }
 
@@ -551,8 +603,51 @@ function gradeFromScore(score) {
   return 'D-';
 }
 
+function scoreFromGrade(grade) {
+  const normalized = normalizeGrade(grade);
+  const scores = {
+    'S+': 95,
+    'S-': 90,
+    'A+': 85,
+    'A-': 80,
+    'B+': 75,
+    'B-': 70,
+    'C+': 65,
+    'C-': 60,
+    'D+': 55,
+    'D-': 0
+  };
+  return scores[normalized] ?? 0;
+}
+
+function normalizeGrade(value) {
+  const grade = String(value || '').trim().toUpperCase();
+  return GRADE_RANK.has(grade) ? grade : '';
+}
+
 function isGradeAtLeast(value, floor) {
-  return (GRADE_RANK.get(value) ?? -1) >= (GRADE_RANK.get(floor) ?? -1);
+  return (GRADE_RANK.get(normalizeGrade(value)) ?? -1) >= (GRADE_RANK.get(normalizeGrade(floor)) ?? -1);
+}
+
+function numberOrUndefined(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : undefined;
+}
+
+function averageQcdsScore(dimensions) {
+  if (!dimensions.length) return 0;
+  const total = dimensions.reduce((sum, item) => sum + Number(item.score || 0), 0);
+  return Math.round(total / dimensions.length);
+}
+
+function lowestQcdsGrade(dimensions) {
+  let lowest = '';
+  for (const dimension of dimensions) {
+    const grade = normalizeGrade(dimension.grade);
+    if (!grade) continue;
+    if (!lowest || (GRADE_RANK.get(grade) ?? -1) < (GRADE_RANK.get(lowest) ?? -1)) lowest = grade;
+  }
+  return lowest;
 }
 
 function readiness(id, label, pass, detail) {
