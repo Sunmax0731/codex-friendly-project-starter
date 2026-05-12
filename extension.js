@@ -1523,16 +1523,29 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
   const openTodos = dashboard.todos.filter((item) => !item.done).slice(0, 20).map((item) => ({
     ...item,
     label: item.title,
-    description: item.priority + ' ' + item.relativePath + ':' + item.lineNumber,
+    description: [item.priority, item.workStateLabel || item.status, item.phaseLabel || item.phase, item.relativePath + ':' + item.lineNumber].filter(Boolean).join(' '),
     tooltip: item.section,
     icon: new vscode.ThemeIcon('checklist')
   }));
   const openIssues = dashboard.issues.filter((item) => item.status !== 'closed').slice(0, 20).map((item) => ({
     ...item,
     label: item.title,
-    description: item.priority + ' ' + item.status,
+    description: [item.priority, item.workStateLabel || item.status, item.phaseLabel || item.phase, item.created ? 'Created ' + item.created : ''].filter(Boolean).join(' '),
     tooltip: item.relativePath,
     icon: new vscode.ThemeIcon(item.status === 'blocked' ? 'error' : 'issues')
+  }));
+  const phaseChildren = (dashboard.phaseGroups || []).map((group) => ({
+    label: group.label,
+    description: `${group.open}/${group.total} open`,
+    tooltip: `${group.id} / 未着手 ${group.notStarted} / 着手済み ${group.started} / 解決済み ${group.resolved}`,
+    icon: new vscode.ThemeIcon(group.open ? 'milestone' : 'pass'),
+    children: group.items.filter((item) => item.kind !== 'task').slice(0, 10).map((item) => ({
+      ...item,
+      label: item.title,
+      description: [item.priority, item.workStateLabel || item.status, item.created ? 'Created ' + item.created : item.relativePath].filter(Boolean).join(' '),
+      tooltip: item.relativePath,
+      icon: new vscode.ThemeIcon(item.kind === 'issue' ? 'issues' : 'checklist')
+    }))
   }));
   const readiness = dashboard.releaseReadiness.map((item) => ({
     label: item.label,
@@ -1557,6 +1570,13 @@ function buildWorkItemTreeRoots(folderName, dashboard) {
   }));
   const prefix = vscode.workspace.workspaceFolders?.length > 1 ? folderName + ' ' : '';
   return [
+    {
+      label: prefix + 'Project Phase ' + (dashboard.projectPhase?.currentLabel || '未整理'),
+      description: dashboard.projectPhase?.current || '00-inbox',
+      tooltip: dashboard.projectPhase?.detail,
+      children: phaseChildren,
+      icon: new vscode.ThemeIcon('milestone')
+    },
     {
       label: prefix + 'TODO ' + dashboard.stats.todos.done + '/' + dashboard.stats.todos.total,
       description: dashboard.stats.todos.percent + '%',

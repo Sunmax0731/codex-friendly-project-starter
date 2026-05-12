@@ -65,7 +65,9 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 - QCDS: Quality, Delivery
 ```
 
-`Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。Markdown link は `Tasks/*.md`、`Issues/*.md`、`docs/*.md`、`TODO.md` を workspace root 基準でも解決できる。
+`Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。表示上の3状態は `open` または未完了 TODO checkbox を未着手、`in-progress` と `blocked` を着手済み、`closed` または完了 TODO checkbox を解決済みとする。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。Markdown link は `Tasks/*.md`、`Issues/*.md`、`docs/*.md`、`TODO.md` を workspace root 基準でも解決できる。
+
+`Phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` に正規化し、表示名は未整理、要件定義、仕様検討、設計、実装、検証、リリース、リリース後保守とする。TODO は section 名または本文から工程を推定し、該当しない場合は `00-inbox` とする。Issue の `Created` は起票日として Dashboard と Tree の一覧に出す。
 
 Issue を Work Item Composer から作成した場合は、`TODO.md` の `## Work Items` section に未完了 checkbox を追加し、作成した `Issues/*.md` への Markdown link を残す。既に同じ link を持つ TODO がある場合は重複追加しない。
 
@@ -77,6 +79,9 @@ Dashboard Webview は次を表示する。
 
 - TODO 完了数 / 総数の progress bar。
 - Issue closed 数 / 総数の progress bar。
+- Project Phase として、未完了 TODO / Issue のうち最も早い工程を一般的な工程名で表示する。open work item が無い場合は最終工程または未整理を表示する。
+- Work Items by Phase として、TODO / Issue を工程別にまとめ、各工程の未着手、着手済み、解決済み件数と、Issue の `Created` 起票日を表示する。
+- source Markdown は既存の `TODO.md` checkbox と `Issues/*.md` metadata を維持し、工程別整理と3状態は WebView / Tree の表示モデルで行う。
 - QCDS overall grade / score と check pass 数。
 - QCDS Current Status として Quality、Cost、Delivery、Satisfaction の grade、score、passed/expected を表示する。`docs/qcds-strict-metrics.json` は `dimensions` 形式と `grades` 形式を読み取り、metrics が無い場合または未対応形式の場合も4観点の D- fallback を表示する。
 - QCDS Improvements として `QCDS:` metadata/tag で紐づいた未完了 TODO / Issue を表示する。

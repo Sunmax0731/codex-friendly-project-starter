@@ -8,6 +8,17 @@ const ISSUE_README_NAMES = new Set(['README.md', 'readme.md']);
 const IGNORED_DIRECTORIES = new Set(['.git', 'node_modules', 'dist', 'out', '.vscode-test']);
 const QCDS_AXES = ['Quality', 'Cost', 'Delivery', 'Satisfaction'];
 const GRADE_RANK = new Map(['D-', 'D+', 'C-', 'C+', 'B-', 'B+', 'A-', 'A+', 'S-', 'S+'].map((grade, index) => [grade, index]));
+const PHASES = [
+  { id: '00-inbox', label: '未整理', order: 0 },
+  { id: '01-requirements', label: '要件定義', order: 1 },
+  { id: '02-specification', label: '仕様検討', order: 2 },
+  { id: '03-design', label: '設計', order: 3 },
+  { id: '04-implementation', label: '実装', order: 4 },
+  { id: '05-test', label: '検証', order: 5 },
+  { id: '06-release', label: 'リリース', order: 6 },
+  { id: '07-maintenance', label: 'リリース後保守', order: 7 }
+];
+const PHASE_BY_ID = new Map(PHASES.map((phase) => [phase.id, phase]));
 
 function toSlash(value) {
   return value.replace(/\\/g, '/');
@@ -116,6 +127,7 @@ function parseTodoMarkdown(content, context = {}) {
       done,
       title,
       section,
+      phase: detectPhase(section + ' ' + title),
       priority: detectPriority(title),
       qcdsAxes: detectQcdsAxes(title),
       links: parseMarkdownLinks(task[3], { rootPath, filePath, lineNumber: index + 1 }),
@@ -156,7 +168,7 @@ function parseIssueMarkdown(content, context = {}) {
     source: metadata.source || 'local',
     draftSource: metadata.draftsource || '',
     created: metadata.created || '',
-    phase: metadata.phase || '',
+    phase: normalizePhaseId(metadata.phase),
     links,
     linkedTasks,
     filePath,
@@ -188,7 +200,7 @@ function parseTaskMarkdown(content, context = {}) {
     type: metadata.type || 'task',
     source: metadata.source || '',
     draftSource: metadata.draftsource || '',
-    phase: metadata.phase || '',
+    phase: normalizePhaseId(metadata.phase),
     filePath,
     relativePath,
     lineNumber: 1,
@@ -243,6 +255,50 @@ function detectQcdsAxes(value) {
   const explicit = /\[?QCDS:([^\]\n]+)\]?/i.exec(text);
   const source = explicit ? explicit[1] : text;
   return QCDS_AXES.filter((axis) => new RegExp('\\b' + axis + '\\b', 'i').test(source));
+}
+
+function detectPhase(value) {
+  const text = String(value || '').toLowerCase();
+  const explicit = /(?:phase|工程)\s*[:=]\s*([0-9]{2}-[a-z-]+)/i.exec(text);
+  if (explicit) return normalizePhaseId(explicit[1]);
+  for (const phase of PHASES) {
+    if (text.includes(phase.id)) return phase.id;
+  }
+  if (/(requirement|要件)/i.test(text)) return '01-requirements';
+  if (/(specification|仕様)/i.test(text)) return '02-specification';
+  if (/(design|設計)/i.test(text)) return '03-design';
+  if (/(implementation|実装|開発)/i.test(text)) return '04-implementation';
+  if (/(test|検証|テスト|qa)/i.test(text)) return '05-test';
+  if (/(release|リリース|publish|公開)/i.test(text)) return '06-release';
+  if (/(maintenance|保守|運用)/i.test(text)) return '07-maintenance';
+  return '00-inbox';
+}
+
+function normalizePhaseId(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (PHASE_BY_ID.has(text)) return text;
+  const numeric = /^([0-7])[-_\s]*/.exec(text);
+  if (numeric) {
+    const phase = PHASES.find((item) => item.order === Number(numeric[1]));
+    if (phase) return phase.id;
+  }
+  return text ? detectPhase(text) : '00-inbox';
+}
+
+function phaseInfo(value) {
+  const id = normalizePhaseId(value);
+  return PHASE_BY_ID.get(id) || PHASE_BY_ID.get('00-inbox');
+}
+
+function workState(item = {}) {
+  const status = String(item.status || '').toLowerCase();
+  if (item.done || status === 'closed' || status === 'done') {
+    return { id: 'resolved', label: '解決済み', detail: 'Issue status: closed / TODO checkbox: checked' };
+  }
+  if (status === 'in-progress' || status === 'blocked') {
+    return { id: 'started', label: '着手済み', detail: 'Issue status: in-progress or blocked' };
+  }
+  return { id: 'not-started', label: '未着手', detail: 'Issue status: open / TODO checkbox: unchecked' };
 }
 
 function parseMarkdownLinks(content, context = {}) {
@@ -336,16 +392,107 @@ function buildWorkItemDashboard({ rootPath, todos, issues, tasks = [] }) {
     issues: { total: issues.length, closed: issueClosed, open: issueOpen, active: issueActive, blocked: issueBlocked, percent: percent(issueClosed, issues.length) },
     tasks: { total: tasks.length, closed: taskClosed, open: taskOpen, active: taskActive, blocked: taskBlocked, percent: percent(taskClosed, tasks.length) }
   };
+  const sortedTodos = sortWorkItems(todos.map(enrichWorkItemForPhase));
+  const sortedIssues = sortWorkItems(issues.map(enrichWorkItemForPhase));
+  const sortedTasks = sortWorkItems(tasks.map(enrichWorkItemForPhase));
+  const phaseGroups = buildPhaseGroups([...sortedTodos, ...sortedIssues]);
+  const projectPhase = buildProjectPhaseSummary(phaseGroups);
   const qcds = buildQcdsStatus(rootPath, { todos, issues, tasks });
   return {
     rootPath,
     generatedAt: new Date().toISOString(),
-    todos: sortWorkItems(todos),
-    issues: sortWorkItems(issues),
-    tasks: sortWorkItems(tasks),
+    todos: sortedTodos,
+    issues: sortedIssues,
+    tasks: sortedTasks,
+    projectPhase,
+    phaseGroups,
     stats,
     qcds,
     releaseReadiness: buildReleaseReadiness(rootPath, stats)
+  };
+}
+
+function enrichWorkItemForPhase(item) {
+  const phase = phaseInfo(item.phase || item.section || '');
+  const state = workState(item);
+  return {
+    ...item,
+    phase: phase.id,
+    phaseLabel: phase.label,
+    phaseOrder: phase.order,
+    workState: state.id,
+    workStateLabel: state.label,
+    workStateDetail: state.detail
+  };
+}
+
+function buildPhaseGroups(items = []) {
+  const groups = new Map(PHASES.map((phase) => [phase.id, {
+    id: phase.id,
+    label: phase.label,
+    order: phase.order,
+    total: 0,
+    notStarted: 0,
+    started: 0,
+    resolved: 0,
+    open: 0,
+    items: []
+  }]));
+  for (const item of items) {
+    if (item.kind === 'task') continue;
+    const phase = phaseInfo(item.phase);
+    const group = groups.get(phase.id);
+    const state = workState(item);
+    const enriched = { ...item, phase: phase.id, phaseLabel: phase.label, phaseOrder: phase.order, workState: state.id, workStateLabel: state.label, workStateDetail: state.detail };
+    group.total++;
+    group.items.push(enriched);
+    if (state.id === 'resolved') group.resolved++;
+    else if (state.id === 'started') {
+      group.started++;
+      group.open++;
+    } else {
+      group.notStarted++;
+      group.open++;
+    }
+  }
+  return Array.from(groups.values())
+    .filter((group) => group.total > 0)
+    .map((group) => ({ ...group, items: sortWorkItems(group.items) }))
+    .sort((a, b) => a.order - b.order);
+}
+
+function buildProjectPhaseSummary(phaseGroups = []) {
+  const activeGroup = phaseGroups.find((group) => group.open > 0) || phaseGroups[phaseGroups.length - 1] || {
+    id: '00-inbox',
+    label: '未整理',
+    order: 0,
+    total: 0,
+    notStarted: 0,
+    started: 0,
+    resolved: 0,
+    open: 0,
+    items: []
+  };
+  const totals = phaseGroups.reduce((sum, group) => ({
+    total: sum.total + group.total,
+    notStarted: sum.notStarted + group.notStarted,
+    started: sum.started + group.started,
+    resolved: sum.resolved + group.resolved,
+    open: sum.open + group.open
+  }), { total: 0, notStarted: 0, started: 0, resolved: 0, open: 0 });
+  return {
+    current: activeGroup.id,
+    currentLabel: activeGroup.label,
+    currentOrder: activeGroup.order,
+    detail: activeGroup.open > 0
+      ? `${activeGroup.id} / ${activeGroup.open} open work items`
+      : 'open work item はありません',
+    statePolicy: [
+      { id: 'not-started', label: '未着手', source: 'Issue: open / TODO: unchecked' },
+      { id: 'started', label: '着手済み', source: 'Issue: in-progress or blocked' },
+      { id: 'resolved', label: '解決済み', source: 'Issue: closed / TODO: checked' }
+    ],
+    totals
   };
 }
 

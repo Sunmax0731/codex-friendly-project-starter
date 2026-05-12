@@ -228,6 +228,8 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   const qcdsStatus = dashboard.qcds.overallGrade
     ? `${dashboard.qcds.overallGrade} / ${dashboard.qcds.overallScore}`
     : 'missing';
+  const projectPhase = dashboard.projectPhase || { currentLabel: '未整理', detail: 'open work item はありません', statePolicy: [] };
+  const phaseGroups = Array.isArray(dashboard.phaseGroups) ? dashboard.phaseGroups : [];
   return `<!doctype html>
 <html lang="ja">
 <head>
@@ -248,6 +250,12 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     .action.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
     .action.subtle { background: transparent; color: var(--vscode-foreground); border-color: var(--vscode-panel-border); }
     .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .project-phase { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; margin: 12px 0; background: var(--vscode-sideBar-background); }
+    .project-phase-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+    .project-phase strong { font-size: 18px; }
+    .phase-grid { display: grid; gap: 8px; }
+    .phase-group { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; background: var(--vscode-sideBar-background); }
+    .phase-group summary { cursor: pointer; font-weight: 600; }
     .metric, .row, .readiness { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 10px; background: var(--vscode-sideBar-background); }
     .metric-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
     .metric strong { font-size: 18px; }
@@ -271,6 +279,9 @@ function renderWorkDashboardWebview(nonce, dashboard) {
     .tag-status-in-progress { color: var(--vscode-charts-blue); }
     .tag-status-blocked { color: var(--vscode-errorForeground); }
     .tag-status-closed, .tag-status-done, .tag-status-pass { color: var(--vscode-charts-green); }
+    .tag-work-state-not-started { color: var(--vscode-charts-yellow); }
+    .tag-work-state-started { color: var(--vscode-charts-blue); }
+    .tag-work-state-resolved { color: var(--vscode-charts-green); }
     .tag-type-bug { color: var(--vscode-errorForeground); }
     .tag-type-feature, .tag-type-ux { color: var(--vscode-charts-blue); }
     .tag-type-docs { color: var(--vscode-charts-purple); }
@@ -312,6 +323,17 @@ function renderWorkDashboardWebview(nonce, dashboard) {
       <button class="action secondary" data-action="checkCodexCli">Codex CLI 確認</button>
     </div>
   </details>
+  <section class="project-phase" aria-label="Project phase">
+    <div class="project-phase-head">
+      <span>
+        <span class="path">Project Phase</span>
+        <strong>${escapeHtml(projectPhase.currentLabel)}</strong>
+        <span class="path">${escapeHtml(projectPhase.detail || '')}</span>
+      </span>
+      <span class="badges">${(projectPhase.statePolicy || []).map((item) => badge(item.label, 'tag-work-state-' + item.id)).join('')}</span>
+    </div>
+    <div class="path">状態方針: 未着手 = open / unchecked、着手済み = in-progress / blocked、解決済み = closed / checked。source Markdown は既存 metadata と checkbox を維持します。</div>
+  </section>
   <section class="metrics" aria-label="Work item summary">
     ${metricHtml('TODO', dashboard.stats.todos.done + ' / ' + dashboard.stats.todos.total, dashboard.stats.todos.percent, dashboard.stats.todos.open + ' open')}
     ${metricHtml('Issues', dashboard.stats.issues.closed + ' / ' + dashboard.stats.issues.total, dashboard.stats.issues.percent, dashboard.stats.issues.open + dashboard.stats.issues.active + dashboard.stats.issues.blocked + ' active')}
@@ -328,6 +350,10 @@ function renderWorkDashboardWebview(nonce, dashboard) {
   <details class="section" open>
     <summary>Release Readiness</summary>
     ${dashboard.releaseReadiness.map(readinessHtml).join('')}
+  </details>
+  <details class="section" open>
+    <summary>Work Items by Phase</summary>
+    <div class="phase-grid">${phaseGroups.length ? phaseGroups.map(phaseGroupHtml).join('') : '<div class="empty">工程に紐づく Work Item はありません。</div>'}</div>
   </details>
   <details class="section" open>
     <summary>Open TODO</summary>
@@ -555,7 +581,7 @@ function readinessHtml(item) {
 function todoHtml(item) {
   return `<div class="row">
     <div class="row-main">
-      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${qcdsBadges(item.qcdsAxes)}</div>
+      <div class="badges">${priorityBadge(item.priority)}${workStateBadge(item)}${statusBadge(item.status)}${phaseBadge(item.phase, item.phaseLabel)}${qcdsBadges(item.qcdsAxes)}</div>
       <span class="row-title">${escapeHtml(item.title)}</span>
       <span class="path">${escapeHtml(item.relativePath)}:${item.lineNumber} / ${escapeHtml(item.section)}</span>
     </div>
@@ -566,9 +592,9 @@ function todoHtml(item) {
 function issueHtml(item) {
   return `<div class="row">
     <div class="row-main">
-      <div class="badges">${priorityBadge(item.priority)}${statusBadge(item.status)}${typeBadge(item.type)}${phaseBadge(item.phase)}${qcdsBadges(item.qcdsAxes)}</div>
+      <div class="badges">${priorityBadge(item.priority)}${workStateBadge(item)}${statusBadge(item.status)}${typeBadge(item.type)}${phaseBadge(item.phase, item.phaseLabel)}${createdBadge(item.created)}${qcdsBadges(item.qcdsAxes)}</div>
       <span class="row-title">${escapeHtml(item.title)}</span>
-      <span class="path">${escapeHtml(item.relativePath)} / task ${item.progress.done}/${item.progress.total}</span>
+      <span class="path">${escapeHtml(item.relativePath)} / created ${escapeHtml(item.created || 'unknown')} / task ${item.progress.done}/${item.progress.total}</span>
     </div>
     ${openButton(item)}
   </div>`;
@@ -609,6 +635,30 @@ function qcdsImprovementHtml(item) {
   </div>`;
 }
 
+function phaseGroupHtml(group) {
+  const visible = visibleWorkItems(group.items || []);
+  const openItems = visible.filter((item) => !item.done && item.status !== 'closed');
+  return `<details class="phase-group" ${openItems.length ? 'open' : ''}>
+    <summary>${escapeHtml(group.label)} <span class="path">${escapeHtml(group.id)} / open ${group.open} / total ${group.total}</span></summary>
+    <div class="badges" style="margin:8px 0;">${badge('未着手 ' + group.notStarted, 'tag-work-state-not-started')}${badge('着手済み ' + group.started, 'tag-work-state-started')}${badge('解決済み ' + group.resolved, 'tag-work-state-resolved')}</div>
+    <div class="list">${visible.length ? visible.map(phaseItemHtml).join('') : '<div class="empty">この工程の Work Item はありません。</div>'}</div>
+  </details>`;
+}
+
+function phaseItemHtml(item) {
+  const meta = item.kind === 'issue'
+    ? `${item.relativePath} / created ${item.created || 'unknown'}`
+    : `${item.relativePath}:${item.lineNumber} / ${item.section || 'TODO'}`;
+  return `<div class="row">
+    <div class="row-main">
+      <div class="badges">${typeBadge(item.kind)}${priorityBadge(item.priority)}${workStateBadge(item)}${statusBadge(item.status)}${typeBadge(item.type)}${createdBadge(item.created)}${qcdsBadges(item.qcdsAxes)}</div>
+      <span class="row-title">${escapeHtml(item.title)}</span>
+      <span class="path">${escapeHtml(meta)}</span>
+    </div>
+    ${openButton(item)}
+  </div>`;
+}
+
 function openButton(item) {
   if (!item.filePath) return `<span class="${item.status === 'blocked' ? 'status-blocked' : 'status-open'}">${escapeHtml(item.status || '')}</span>`;
   const lineNumber = Number(item.lineNumber || 1);
@@ -633,14 +683,25 @@ function statusBadge(status) {
   return badge(value, 'tag-status-' + String(value).replace(/\s+/g, '-').toLowerCase());
 }
 
+function workStateBadge(item) {
+  const value = item?.workStateLabel || (item?.done || item?.status === 'closed' ? '解決済み' : (item?.status === 'in-progress' || item?.status === 'blocked' ? '着手済み' : '未着手'));
+  const id = item?.workState || (value === '解決済み' ? 'resolved' : (value === '着手済み' ? 'started' : 'not-started'));
+  return badge(value, 'tag-work-state-' + id);
+}
+
 function typeBadge(type) {
   if (!type) return '';
   return badge(type, 'tag-type-' + String(type).replace(/\s+/g, '-').toLowerCase());
 }
 
-function phaseBadge(phase) {
+function phaseBadge(phase, label) {
   if (!phase) return '';
-  return badge(phase, 'tag-phase');
+  return badge(label ? `${label} ${phase}` : phase, 'tag-phase');
+}
+
+function createdBadge(created) {
+  if (!created) return '';
+  return badge('Created ' + created, 'tag-created');
 }
 
 function qcdsBadges(axes = []) {

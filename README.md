@@ -6,8 +6,8 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 
 - Agent Docs Tree: ワークスペース内の `AGENTS.md`、`SKILL.md`、`README.md`、`TODO.md`、主要 `docs/` を一覧化します。
 - Agent Doc Highlight: Agent 向け文書を開いたとき、重要見出しと制約語をエディタ上でハイライトします。
-- Work Items Tree: `TODO.md`、`Issues/*.md` を読み取り、未完了 TODO、local Issue、QCDS、release readiness を常設 Tree View で確認できます。既存互換の `Tasks/*.md` は内部読み取りだけに残し、通常 UI には表示しません。
-- Work Dashboard: TODO、Issue、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、日常操作と初回セットアップを分けた GUI ボタンから主要操作を実行できます。中段の QCDS、release readiness、Open TODO / Issues は折りたためます。
+- Work Items Tree: `TODO.md`、`Issues/*.md` を読み取り、現在の Project Phase、未完了 TODO、local Issue、QCDS、release readiness を常設 Tree View で確認できます。既存互換の `Tasks/*.md` は内部読み取りだけに残し、通常 UI には表示しません。
+- Work Dashboard: TODO、Issue、QCDS の進捗を progress bar と未完了一覧でグラフィカルに表示し、現在工程、工程別 Work Items、Issue 起票日、未着手 / 着手済み / 解決済みの状態方針を確認できます。日常操作と初回セットアップを分けた GUI ボタンから主要操作を実行でき、中段の QCDS、release readiness、Open TODO / Issues は折りたためます。
 - Work Item Start: Dashboard または Work Items Tree の TODO / Issue から `Start` を押すと、その作業単位を入口にした開始プロンプトを Codex CLI へ渡せます。
 - Start Selected Work Items: Dashboard の checkbox または Command Palette の複数選択から、選んだ TODO / Issues だけを連結した作業範囲として Codex CLI へ渡せます。
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues を優先度順の一括バックログとして Codex CLI へ渡せます。

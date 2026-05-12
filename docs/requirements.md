@@ -16,6 +16,9 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `TODO.md` の checkbox を解析し、未完了 TODO と進捗率を Tree View と Webview で可視化する。
 - `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の local Issue backlog を管理できる。
 - `Issues/*.md` の status、priority、acceptance criteria を解析し、TODO と同じ dashboard で可視化する。
+- Work Items Tree と Dashboard で、未完了 Work Item のうち最も早い工程を現在の Project Phase として、要件定義、仕様検討、設計、実装、検証、リリース、リリース後保守の一般的な工程名で表示する。
+- TODO / Issue は工程別に整理して表示し、Issue は `Created` metadata を起票日として一覧上に表示する。source Markdown の既存 `Status`、`Phase`、`Created`、checkbox 形式は互換維持する。
+- 状態表現は、`open` / unchecked を未着手、`in-progress` / `blocked` を着手済み、`closed` / checked を解決済みとして表示する。
 - `Tasks/*.md` は legacy compatibility として内部読み取りと Markdown link 解決だけを残し、通常 UI、Dashboard、Agent Docs、新規作成導線には表示しない。
 - Work Dashboard から Issue 作成、自然言語から Issue 作成、QCDS Status、VS Code Codex sidebar、現在PromptをCodexへ、Issues 初期化、FirstPrompt 画面、Codex CLI 確認などの主要操作を GUI で実行できる。
 - GUI で提供する主要操作は Command Palette からも呼び出せる。Command Palette にある主要操作は Dashboard、Tree title、Tree item context、Markdown WebView toolbar のいずれかの GUI 導線から到達できる。
@@ -65,6 +68,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - `docs/qcds-strict-metrics.json` の全観点が A- 以上になる。
 - VSCodeExtension platform runtime gate が activation、command、Tree View、webview、decoration の契約を確認する。
 - Work Items Tree と Work Dashboard が `TODO.md`、`Issues/*.md`、QCDS、release readiness を表示し、legacy `Tasks/*.md` を通常 UI に出さない。
+- Work Items Tree と Work Dashboard が Project Phase、工程別 Work Items、Issue 起票日、未着手 / 着手済み / 解決済みの状態方針を表示できる。
 - QCDS Status が現在の grade、check、`QCDS:` metadata/tag で紐づいた TODO / Issue を4観点別に表示できる。
 - Dashboard の中段セクションを折りたたみでき、Issue / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
 - Work Item Composer が Codex CLI で自然言語から Issue の下書きを作り、作成後に Tree View と Dashboard が更新される。

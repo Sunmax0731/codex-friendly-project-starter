@@ -13,10 +13,10 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 1. VS Code の Activity Bar に `Codex Starter` が表示されることを確認する。
 2. `Codex Starter` の `Agent Docs` に `AGENTS.md`、`SKILL.md`、`README.md` が表示されることを確認する。
 3. `AGENTS.md` を開き、見出しと `QCDS` などの語がハイライトされることを確認する。
-4. `Codex Starter` の `Work Items` に `TODO`、`Issues`、`QCDS`、`Release readiness` が表示され、legacy `Tasks` group が表示されないことを確認する。
+4. `Codex Starter` の `Work Items` に `Project Phase`、`TODO`、`Issues`、`QCDS`、`Release readiness` が表示され、legacy `Tasks` group が表示されないことを確認する。
 5. `Agent Docs` と `Work Items` の title action に主要操作の icon button が表示され、item context menu から Markdown WebView、source 表示、path copy、Work Item start にアクセスできることを確認する。
 6. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を実行し、TODO / Issue / QCDS の progress bar と、`プロジェクト進行中に使う操作`、`初回セットアップ` の2系統の GUI action が表示されることを確認する。
-7. Dashboard 中段の `QCDS Current Status`、`QCDS Improvements`、`Release Readiness`、`Open TODO`、`Open Issues` が折りたたみ可能で、Issue / TODO の priority、status、type、phase、QCDS tags が色分けされることを確認する。`Open Legacy Tasks` は表示されないことを確認する。
+7. Dashboard 上部に `Project Phase` が一般的な工程名で表示され、状態方針が未着手、着手済み、解決済みとして説明されることを確認する。中段の `QCDS Current Status`、`QCDS Improvements`、`Release Readiness`、`Work Items by Phase`、`Open TODO`、`Open Issues` が折りたたみ可能で、Issue / TODO の priority、status、type、phase、created、QCDS tags が色分けされることを確認する。`Open Legacy Tasks` は表示されないことを確認する。
 8. Command Palette から `Codex Starter: Open QCDS Status` を実行し、QCDS 専用 WebView に Quality / Cost / Delivery / Satisfaction の各 section、grade、score、checks、linked work items が表示されることを確認する。`docs/qcds-strict-metrics.json` が無い対象でも4観点の D- fallback が表示され、QCDS group が空にならないことを確認する。
 9. Work Items tree の QCDS 配下にある `Quality`、`Cost`、`Delivery`、`Satisfaction`、または Dashboard の QCDS Current Status の `Details` を開き、該当 section が開いた状態の QCDS Status WebView が表示されることを確認する。
 10. Command Palette から `Codex Starter: Open Markdown WebView` を実行し、現在の Markdown が WebView 表示されることを確認する。

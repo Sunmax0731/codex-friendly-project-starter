@@ -42,12 +42,13 @@ test('parseTodoMarkdown extracts status, section, priority, and line number', ()
   assert.equal(items.length, 2);
   assert.equal(items[0].status, 'open');
   assert.equal(items[0].section, 'Release');
+  assert.equal(items[0].phase, '06-release');
   assert.equal(items[0].priority, 'P1');
   assert.equal(items[1].done, true);
 });
 
 test('parseIssueMarkdown reads local issue metadata and acceptance progress', () => {
-  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- Source: local\n- Draft source: codex-cli\n- QCDS: Quality, Satisfaction\n- Tasks: [Dashboard task](../Tasks/0001-dashboard.md)\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
+  const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- Source: local\n- Draft source: codex-cli\n- Phase: 03-design\n- Created: 2026-05-13\n- QCDS: Quality, Satisfaction\n- Tasks: [Dashboard task](../Tasks/0001-dashboard.md)\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
     rootPath: 'D:/repo',
     filePath: 'D:/repo/Issues/0001-work-dashboard.md'
   });
@@ -56,6 +57,8 @@ test('parseIssueMarkdown reads local issue metadata and acceptance progress', ()
   assert.equal(issue.priority, 'P2');
   assert.equal(issue.source, 'local');
   assert.equal(issue.draftSource, 'codex-cli');
+  assert.equal(issue.phase, '03-design');
+  assert.equal(issue.created, '2026-05-13');
   assert.deepEqual(issue.qcdsAxes, ['Quality', 'Satisfaction']);
   assert.equal(issue.progress.done, 1);
   assert.equal(issue.progress.total, 2);
@@ -89,6 +92,8 @@ test('scanWorkItems combines TODO.md and Issues markdown into dashboard stats', 
   assert.equal(dashboard.stats.todos.done, 1);
   assert.equal(dashboard.stats.issues.total, 1);
   assert.equal(dashboard.stats.tasks.total, 1);
+  assert.equal(dashboard.projectPhase.currentLabel, '未整理');
+  assert.equal(dashboard.phaseGroups.some((group) => group.id === '00-inbox' && group.open === 2), true);
   assert.equal(dashboard.releaseReadiness.some((item) => item.id === 'issues-dir'), true);
 });
 
@@ -157,10 +162,25 @@ test('createIssueMarkdown and createTaskMarkdown record Codex draft source when 
 
 test('renderWorkDashboardWebview includes graphical summary and open work sections', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-dashboard-'));
+  fs.mkdirSync(path.join(root, 'Issues'), { recursive: true });
   fs.writeFileSync(path.join(root, 'TODO.md'), '# TODO\n\n- [ ] [P1] Finish release\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'Issues', '0001-dashboard.md'), createIssueMarkdown({
+    title: 'Dashboard phase grouping',
+    priority: 'P1',
+    type: 'ux',
+    phase: '03-design',
+    created: '2026-05-13'
+  }), 'utf8');
   const dashboard = await scanWorkItems(root);
   const html = renderWorkDashboardWebview('nonce', dashboard);
   assert.match(html, /Codex Work Dashboard/);
+  assert.match(html, /Project Phase/);
+  assert.match(html, /Work Items by Phase/);
+  assert.match(html, /設計/);
+  assert.match(html, /Created 2026-05-13/);
+  assert.match(html, /未着手/);
+  assert.match(html, /着手済み/);
+  assert.match(html, /解決済み/);
   assert.match(html, /QCDS Current Status/);
   assert.match(html, /QCDS Improvements/);
   assert.match(html, /Release Readiness/);

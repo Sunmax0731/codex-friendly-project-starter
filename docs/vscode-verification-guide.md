@@ -38,7 +38,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 1. Activity Bar の `Codex Starter` を開く。
 2. `Work Items` を開く。
-3. `TODO`、`Issues`、`QCDS`、`Release readiness` の group を確認し、legacy `Tasks` group が表示されないことを確認する。
+3. `Project Phase`、`TODO`、`Issues`、`QCDS`、`Release readiness` の group を確認し、legacy `Tasks` group が表示されないことを確認する。
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
 6. Dashboard の `Issues 初期化` を実行する。
@@ -56,8 +56,10 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - `TODO.md` の未完了 task が `Work Items` に表示される。
 - `Issues/*.md` の open / in-progress / blocked Issue が表示される。
+- `Project Phase` に最も早い未完了工程が一般的な工程名で表示され、配下の工程別 group で未着手 / 着手済み / 解決済み件数と Issue 起票日を確認できる。
 - legacy `Tasks/*.md` は通常 UI に表示されない。
 - Dashboard に TODO と Issue の progress bar が表示される。
+- Dashboard に `Project Phase` と `Work Items by Phase` が表示され、Issue の `Created`、TODO / Issue の工程、未着手 / 着手済み / 解決済み状態が同じ方針で表示される。
 - Dashboard 上部に `Issue を作成`、`自然言語から Issue`、`Issues 初期化`、`D:\AI Docs 生成`、`FirstPrompt`、`選択Work Itemを開始`、`全Work Itemを開始`、`Codex CLI 確認` が表示され、legacy Task 作成 / Tasks 初期化ボタンは表示されない。
 - Dashboard 上部と Work Items title action から `GitHub Issues 取込` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。

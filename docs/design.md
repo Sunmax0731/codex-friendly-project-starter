@@ -17,9 +17,11 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 ### Work Items Tree
 
 - Activity Bar の `Codex Starter` に `Agent Docs` と並べて配置する。
+- Project Phase group を先頭に置き、未完了 Work Item の最も早い工程を要件定義、仕様検討、設計、実装、検証、リリース、リリース後保守の一般的な語句で表示する。
+- Project Phase 配下には工程別 group を置き、各工程の open / total、未着手、着手済み、解決済み件数、Issue の起票日を確認できるようにする。
 - `TODO done/total`、`Issues closed/total`、`QCDS`、`Release readiness` を group として表示する。
-- 未完了 TODO は priority、相対パス、line number を description に出す。
-- 未完了 Issue は priority と status を description に出す。
+- 未完了 TODO は priority、状態、工程、相対パス、line number を description に出す。
+- 未完了 Issue は priority、状態、工程、起票日を description に出す。
 - 選択すると該当 Markdown を WebView で開き、必要に応じて source に戻れる。
 - 未完了 TODO / Issue には inline action として Codex 着手ボタンを出す。
 - Tree title には Work Dashboard、Work Item Composer、GitHub Issues 取込、Start Selected、Start All、refresh all を icon action として置く。
@@ -29,6 +31,8 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 
 - `Codex Starter: Open Work Dashboard` で開く。
 - TODO、Issue の進捗は progress bar で表示する。
+- Dashboard 上部に Project Phase を置き、状態方針として未着手 = open / unchecked、着手済み = in-progress / blocked、解決済み = closed / checked を明示する。
+- `Work Items by Phase` section では、source Markdown を並べ替えずに表示モデルだけで TODO / Issue を工程別に分類し、Issue の `Created` を表示する。
 - QCDS は overall grade、dimension 別 grade、linked improvements を表示する。
 - release readiness は `pass` / `missing` を一覧化する。
 - TODO / Issue / QCDS improvements の行には `Select` checkbox、`Start`、`Open`、必要に応じて `Follow-up` ボタンを置く。`Select` は複数 Work Item 開始用、`Start` は選択 work item の prompt を既定では VS Code Codex sidebar へ渡し、`Open` は該当 Markdown WebView へ移動する。`Follow-up` は blocked の原因を local Issue に起こす。
