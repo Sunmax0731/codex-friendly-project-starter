@@ -33,7 +33,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Work Item が closed にならない場合、blocked 原因を調査する follow-up Issue を作成できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。
 - `docs/qcds-strict-metrics.json` の QCDS 現在値を読み取り、Quality、Cost、Delivery、Satisfaction の grade、score、check、改善 TODO / Issue / legacy Task を可視化する。metrics が未生成でも4観点の fallback を表示する。
-- `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。
+- `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を Markdown WebView で読める。JSON は元ファイルを変更せず整形表示できる。
 - `D:\AI` の共通 docs と `D:\AI\IDEAS\<Domain>` docs から、既定の root docs、`docs/*.md`、工程別 `skills/*/SKILL.md` を生成できる。
 - `AGENTS.md` や `SKILL.md` を開いたとき、見出しと重要語をハイライトする。
 - 分野、ガバナンス、開発手法、工程、進行速度、Git 書き込み方針を選択して FirstPrompt を生成する。

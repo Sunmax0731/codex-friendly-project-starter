@@ -116,6 +116,7 @@ Work Item Composer Webview は次を入力項目として持つ。
 - VS Code WebViewPanel で Markdown を HTML 表示する。
 - `Open Source`、`Copy Path`、`Refresh` を提供する。`Copy Path` は Command Palette / Tree context からも利用できる。
 - Markdown link は workspace 内であれば WebView 内遷移し、workspace 外の相対リンクは拒否する。
+- `.json` は Markdown として解釈せず、`JSON.parse` 後に2スペースインデントの `<pre>` として整形表示する。parse できない場合はエラーと raw text を表示する。
 - HTML は escape し、script は実行しない。
 
 ## D:\AI 既定 docs scaffold

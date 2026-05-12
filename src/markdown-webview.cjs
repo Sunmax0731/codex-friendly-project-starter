@@ -9,7 +9,7 @@ function buildMarkdownDocumentModel(input = {}) {
     rootPath,
     filePath,
     relativePath: filePath ? toSlash(path.relative(rootPath, filePath)) : '',
-    html: markdownToHtml(content, { rootPath, filePath })
+    html: documentToHtml(content, { rootPath, filePath })
   };
 }
 
@@ -41,6 +41,8 @@ function renderMarkdownDocumentWebview(nonce, model) {
     code { background: var(--vscode-textCodeBlock-background); padding: 1px 4px; border-radius: 3px; }
     pre { background: var(--vscode-textCodeBlock-background); padding: 12px; overflow: auto; border-radius: 4px; border: 1px solid var(--vscode-panel-border); }
     pre code { padding: 0; background: transparent; }
+    .json-view { white-space: pre-wrap; word-break: break-word; tab-size: 2; }
+    .json-error { color: var(--vscode-errorForeground); margin: 0 0 10px; }
     blockquote { border-left: 3px solid var(--vscode-panel-border); margin-left: 0; padding-left: 12px; color: var(--vscode-descriptionForeground); }
     table { border-collapse: collapse; width: 100%; margin: 12px 0; }
     th, td { border: 1px solid var(--vscode-panel-border); padding: 6px 8px; text-align: left; }
@@ -72,6 +74,25 @@ function renderMarkdownDocumentWebview(nonce, model) {
   </script>
 </body>
 </html>`;
+}
+
+function documentToHtml(content, context = {}) {
+  if (/\.json$/i.test(context.filePath || '')) {
+    return jsonToHtml(content);
+  }
+  return markdownToHtml(content, context);
+}
+
+function jsonToHtml(content) {
+  try {
+    const formatted = JSON.stringify(JSON.parse(String(content || '')), null, 2);
+    return `<pre class="json-view"><code class="language-json">${escapeHtml(formatted)}</code></pre>`;
+  } catch (error) {
+    return [
+      '<p class="json-error">JSON parse error: ' + escapeHtml(error.message) + '</p>',
+      '<pre class="json-view"><code class="language-json">' + escapeHtml(String(content || '')) + '</code></pre>'
+    ].join('\n');
+  }
 }
 
 function markdownToHtml(markdown, context = {}) {

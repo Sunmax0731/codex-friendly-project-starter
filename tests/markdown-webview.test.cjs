@@ -42,3 +42,15 @@ test('renderMarkdownDocumentWebview includes toolbar actions and model payload',
   assert.match(html, /acquireVsCodeApi/);
   assert.match(html, /README/);
 });
+
+test('buildMarkdownDocumentModel pretty prints JSON documents in the webview', () => {
+  const filePath = path.join('D:\\repo', 'docs', 'qcds-strict-metrics.json');
+  const model = buildMarkdownDocumentModel({
+    rootPath: 'D:\\repo',
+    filePath,
+    content: '{"repository":"sample","grades":{"Quality":"A-","Delivery":"A-"}}'
+  });
+  assert.match(model.html, /class="json-view"/);
+  assert.match(model.html, /\{\n  &quot;repository&quot;: &quot;sample&quot;/);
+  assert.match(model.html, /\n    &quot;Quality&quot;: &quot;A-&quot;/);
+});

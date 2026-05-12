@@ -50,7 +50,8 @@
 1. Command Palette から `Codex Starter: Open QCDS Status` を実行する。
 2. `QCDS Current Status` で Quality、Cost、Delivery、Satisfaction の grade と score を確認する。`docs/qcds-strict-metrics.json` は `dimensions` 形式と `grades` 形式のどちらも読み取る。未生成または未対応形式の場合も4観点が D- fallback として表示される。
 3. `QCDS Improvements` で QCDS 観点に紐づく未完了 TODO / Issue / legacy Task を確認する。
-4. TODO、Issue、legacy Task に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
+4. `docs/qcds-strict-metrics.json` などの JSON を Markdown WebView で開くと、元ファイルを変更せずに整形表示される。
+5. TODO、Issue、legacy Task に紐づけを追加する場合は、本文に `[QCDS:Delivery,Satisfaction]`、または metadata に `- QCDS: Delivery, Satisfaction` を追加する。
 
 ## Local Issue を管理する
 
