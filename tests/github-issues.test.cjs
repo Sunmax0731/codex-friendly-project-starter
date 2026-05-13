@@ -105,6 +105,7 @@ test('createLocalWorkItemsFromGitHubIssue writes TODO and Issue by default', () 
 
   const todo = fs.readFileSync(path.join(root, 'TODO.md'), 'utf8');
   const issue = fs.readFileSync(result.issuePath, 'utf8');
+  assert.match(todo, /\[Phase:04-implementation\]/);
   assert.match(todo, /\[GitHub #99\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/99\)/);
   assert.match(issue, /- GitHub Issue: \[#99\]\(https:\/\/github\.com\/Sunmax0731\/sample\/issues\/99\)/);
   assert.doesNotMatch(issue, /Tasks\/0001-remote-backlog-item\.md/);

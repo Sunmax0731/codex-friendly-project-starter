@@ -124,6 +124,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}, o
   const source = `GitHub Issue #${issue.number || ''}`.trim();
   const draftSource = draft.draftSource || draft.inferenceSource || 'codex-cli';
   const priority = draft.priority || 'P3';
+  const phase = draft.phase || '04-implementation';
   const qcdsAxes = Array.isArray(draft.qcdsAxes) ? draft.qcdsAxes : [];
   const issuePath = nextIssueFilePath(rootPath, title);
   const issueRelative = toSlash(path.relative(rootPath, issuePath));
@@ -139,6 +140,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}, o
       ...draft,
       title,
       priority,
+      phase,
       qcdsAxes,
       acceptance,
       source,
@@ -152,6 +154,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}, o
     ...draft,
     title,
     priority,
+    phase,
     qcdsAxes,
     acceptance,
     source,
@@ -164,6 +167,7 @@ function createLocalWorkItemsFromGitHubIssue(rootPath, issue = {}, draft = {}, o
   const todo = appendTodoWorkItemLink(rootPath, {
     title,
     priority,
+    phase,
     qcdsAxes,
     links: [
       { label: 'Issue', href: issueRelative },

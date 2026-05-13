@@ -118,7 +118,8 @@ function parseTodoMarkdown(content, context = {}) {
     if (heading) section = heading[2].trim();
     const task = /^(\s*)[-*]\s+\[([ xX])\]\s+(.+?)\s*$/.exec(line);
     if (!task) continue;
-    const title = stripMarkdown(task[3]);
+    const rawTitle = task[3];
+    const title = cleanTodoTitle(rawTitle);
     const done = task[2].toLowerCase() === 'x';
     items.push({
       id: relativePath + ':' + (index + 1),
@@ -127,9 +128,9 @@ function parseTodoMarkdown(content, context = {}) {
       done,
       title,
       section,
-      phase: detectPhase(section + ' ' + title),
-      priority: detectPriority(title),
-      qcdsAxes: detectQcdsAxes(title),
+      phase: detectPhase(section + ' ' + rawTitle),
+      priority: detectPriority(rawTitle),
+      qcdsAxes: detectQcdsAxes(rawTitle),
       links: parseMarkdownLinks(task[3], { rootPath, filePath, lineNumber: index + 1 }),
       filePath,
       relativePath,
@@ -245,6 +246,16 @@ function stripMarkdown(value) {
   return value.replace(/`([^`]+)`/g, '$1').replace(/\*\*(.*?)\*\*/g, '$1').trim();
 }
 
+function cleanTodoTitle(value) {
+  const raw = String(value || '');
+  const withoutGeneratedLinks = raw.replace(/\[(?:Issue|Task|Original|GitHub\s+#?\d+)\]\([^)]+\)/gi, '');
+  const withoutTags = withoutGeneratedLinks
+    .replace(/\[(?:P[0-4]|Phase:[^\]]+|工程:[^\]]+|QCDS:[^\]]+)\]/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return stripMarkdown(withoutTags) || stripMarkdown(raw);
+}
+
 function detectPriority(value) {
   const text = String(value || '');
   const match = /\bP([0-4])\b/i.exec(text) || /\[P([0-4])\]/i.exec(text);
@@ -265,13 +276,13 @@ function detectPhase(value) {
   for (const phase of PHASES) {
     if (text.includes(phase.id)) return phase.id;
   }
-  if (/(requirement|要件)/i.test(text)) return '01-requirements';
-  if (/(specification|仕様)/i.test(text)) return '02-specification';
-  if (/(design|設計)/i.test(text)) return '03-design';
-  if (/(implementation|実装|開発)/i.test(text)) return '04-implementation';
-  if (/(test|検証|テスト|qa)/i.test(text)) return '05-test';
-  if (/(release|リリース|publish|公開)/i.test(text)) return '06-release';
-  if (/(maintenance|保守|運用)/i.test(text)) return '07-maintenance';
+  if (/(release|リリース|publish|公開|配布|vsix|marketplace|prerelease|docs zip)/i.test(text)) return '06-release';
+  if (/(test|検証|テスト|qa|runtime gate|smoke|coverage|回帰|手動テスト|自動テスト)/i.test(text)) return '05-test';
+  if (/(requirement|requirements|要件|要求|スコープ|受け入れ条件)/i.test(text)) return '01-requirements';
+  if (/(specification|spec|仕様|api|契約|入出力|制約|criteria|基準)/i.test(text)) return '02-specification';
+  if (/(design|設計|ui|ux|画面|表示|導線|レイアウト|分類|振り分け|tag|タグ|label|ラベル|tree|dashboard|webview|composer|使いやす)/i.test(text)) return '03-design';
+  if (/(maintenance|保守|運用|依存更新|メンテナンス|cleanup|整理|chore)/i.test(text)) return '07-maintenance';
+  if (/(implementation|implement|実装|開発|修正|追加|対応|feature|bug|不具合|performance|security|refactor)/i.test(text)) return '04-implementation';
   return '00-inbox';
 }
 
@@ -847,13 +858,15 @@ function ensureTodoFile(rootPath) {
 function createTodoWorkItemLine(input = {}) {
   const title = input.title || 'Untitled Work Item';
   const priority = input.priority || 'P3';
+  const phase = input.phase ? normalizePhaseId(input.phase) : '';
   const links = Array.isArray(input.links) ? input.links.filter((item) => item?.href) : [];
   const qcdsAxes = Array.isArray(input.qcdsAxes) ? input.qcdsAxes : detectQcdsAxes(input.qcds || '');
+  const phaseText = phase ? ' [Phase:' + phase + ']' : '';
   const linkText = links.length
     ? ' ' + links.map((item) => `[${item.label || item.href}](${item.href})`).join(' ')
     : '';
   const qcdsText = qcdsAxes.length ? ' [QCDS:' + qcdsAxes.join(',') + ']' : '';
-  return `- [ ] [${priority}] ${title}${linkText}${qcdsText}`;
+  return `- [ ] [${priority}]${phaseText} ${title}${linkText}${qcdsText}`;
 }
 
 function appendTodoWorkItemLink(rootPath, input = {}) {
@@ -1001,6 +1014,7 @@ function createBlockedFollowUpIssue(rootPath, item = {}, options = {}) {
     terminalText: options.terminalText || '',
     sessionText: options.sessionText || ''
   });
+  const phase = followUpPhase(item.phase, blocker);
   const title = 'Blocked: ' + (item.title || titleFromFile(item.filePath || '') || 'Work item');
   const issuePath = nextIssueFilePath(rootPath, title);
   const issueRelative = toSlash(path.relative(rootPath, issuePath));
@@ -1014,6 +1028,7 @@ function createBlockedFollowUpIssue(rootPath, item = {}, options = {}) {
     priority,
     type: blocker.type,
     source: 'blocked-follow-up',
+    phase,
     qcdsAxes,
     context: [
       `元の Work Item が \`closed\` にならなかったため、blocked 原因を切り出した follow-up Issue です。`,
@@ -1035,6 +1050,7 @@ function createBlockedFollowUpIssue(rootPath, item = {}, options = {}) {
   const todo = appendTodoWorkItemLink(rootPath, {
     title,
     priority,
+    phase,
     qcdsAxes,
     links: [
       { label: 'Issue', href: issueRelative },
@@ -1108,6 +1124,7 @@ function createQcdsImprovementIssue(rootPath, dimension = {}, options = {}) {
   const todo = appendTodoWorkItemLink(rootPath, {
     title,
     priority: 'P1',
+    phase: '04-implementation',
     qcdsAxes,
     links: [{ label: 'Issue', href: issueRelative }]
   });
@@ -1119,6 +1136,14 @@ function createQcdsImprovementIssue(rootPath, dimension = {}, options = {}) {
     todoCreated: todo.created,
     axis
   };
+}
+
+function followUpPhase(currentPhase, blocker) {
+  const normalized = normalizePhaseId(currentPhase);
+  if (normalized && normalized !== '00-inbox') return normalized;
+  if (blocker?.id === 'runtime-gate') return '05-test';
+  if (blocker?.type === 'chore') return '07-maintenance';
+  return '04-implementation';
 }
 
 function findExistingQcdsImprovementIssue(rootPath, axis) {

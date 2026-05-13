@@ -24,8 +24,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 12. 同じ Markdown を Tree item、Command Palette、WebView link から複数回開いても既存 WebView panel が再利用されることを確認する。root `AGENTS.md` / `SKILL.md` では子階層 docs の統合表示と元ファイル link を確認する。
 13. Dashboard の `Issues 初期化` または Command Palette から `Codex Starter: Initialize Issues Directory` を実行し、`Issues/README.md` が Markdown WebView で開くことを確認する。
 14. Dashboard と Command Palette に `Legacy Task を作成`、`Codex Starter: Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
-15. Dashboard の `Issueを起票`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` で自然言語メモを入力し、`Codexで自然言語から反映` により Codex CLI 由来の下書きが title、priority、type、phase、QCDS、acceptance criteria に反映されることを確認する。その後 `作成して開く` により Issue が作成されることを確認する。
-16. 作成後に `TODO.md` へ Issue へのリンク付き checkbox が追加されることを確認する。
+15. Dashboard の `Issueを起票`、`Codex Starter: Open Work Item Composer`、または `Codex Starter: Create Work Item from Natural Language` で自然言語メモを入力し、`Codexで自然言語から反映` により Codex CLI 由来の下書きが title、priority、type、phase、QCDS、acceptance criteria に反映されることを確認する。その後 `作成して開く` により Issue が作成されることを確認する。release、test、design など判断できるメモでは phase が `00-inbox` ではなく該当工程になることも確認する。
+16. 作成後に `TODO.md` へ Issue へのリンク付き checkbox と `[Phase:xx]` tag が追加され、Dashboard の Work Items by Phase で TODO が同じ工程に表示されることを確認する。
 17. Dashboard の未完了 TODO / Issue 行に `Select`、`Start`、`Open` が表示されることを確認する。
 18. `Start` を押し、モデル、インテリジェンス、アクセス権限の QuickPick が表示されることを確認する。確認ダイアログで workspace root、access、選択 model、選択インテリジェンスが表示されることを確認する。実行する場合は `Copy & Open Codex` を選び、右側の VS Code Codex sidebar が開き、clipboard に選択 Work Item 起点の prompt が入ることを確認する。prompt に Git 書き込み方針、`Codex 実行設定`、`Blocked handling` が含まれることを確認する。
 19. prompt に `OpenAI 公式プロンプトガイド適用`、選択 model の `Model profile`、公式 URL、AGENTS / SKILL 適用ルールが含まれることを確認する。

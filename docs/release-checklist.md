@@ -12,7 +12,7 @@
 - [ ] `tools/vsix-readiness.mjs` が package metadata、docs、必須 command を確認する。
 - [ ] `Work Items` Tree と `Open Work Dashboard` で TODO / Issue / release readiness を確認し、legacy Task group が表示されないことを確認する。
 - [ ] `Start Selected Work Items` と `Start All Work Items` の model / インテリジェンス / アクセス権限選択を確認する。
-- [ ] `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue に取り込み、GitHub Issue URL を保持し、legacy Task を新規作成しないことを確認する。
+- [ ] `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue に取り込み、GitHub Issue URL と phase tag を保持し、legacy Task を新規作成しないことを確認する。
 - [ ] `docs/codex-sessions.md` / `.jsonl` と blocked follow-up Issue 作成導線を確認する。
 - [ ] `Codex Starter: Check Codex CLI` で `rg.exe`、`gh.exe`、`gh auth status` の確認手順が残っている。
 - [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。

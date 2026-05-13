@@ -19,7 +19,7 @@ function inferWorkItemDraft(input = {}) {
   const title = input.title || inferTitle(source, mode);
   const type = input.type || inferType(source, mode);
   const priority = input.priority || inferPriority(source, type);
-  const phase = input.phase || inferPhase(source, type);
+  const phase = resolvePhase(input, source, type);
   const qcdsAxes = normalizeAxes(input.qcdsAxes).length ? normalizeAxes(input.qcdsAxes) : inferQcdsAxes(source, type);
   const acceptanceItems = normalizeAcceptance(input.acceptance).length
     ? normalizeAcceptance(input.acceptance)
@@ -85,14 +85,37 @@ function inferType(text, mode) {
 
 function inferPhase(text, type) {
   const value = String(text || '');
-  if (/(requirement|要件|要求)/i.test(value)) return '01-requirements';
-  if (/(spec|仕様)/i.test(value)) return '02-specification';
-  if (/(design|設計|UI|UX|画面)/i.test(value)) return '03-design';
-  if (/(release|publish|公開|配布|VSIX|Marketplace|リリース)/i.test(value) || type === 'release') return '06-release';
-  if (/(test|検証|テスト|確認|QA)/i.test(value)) return '05-test';
-  if (/(maintenance|保守|運用|依存更新|メンテナンス)/i.test(value) || type === 'chore') return '07-maintenance';
-  if (/(inbox|未整理|あとで分類)/i.test(value)) return '00-inbox';
+  const explicit = /(?:phase|工程)\s*[:=]\s*([0-9]{2}-[a-z-]+)/i.exec(value);
+  if (explicit) return normalizePhase(explicit[1]) || '00-inbox';
+  if (/(?:phase|工程)\s*[:=]\s*(?:inbox|未整理)|あとで分類|後で分類/i.test(value)) return '00-inbox';
+  if (/(release|publish|公開|配布|VSIX|Marketplace|リリース|prerelease|release evidence|docs zip)/i.test(value) || type === 'release') return '06-release';
+  if (/(test|検証|テスト|確認|QA|runtime gate|smoke|coverage|回帰|手動テスト|自動テスト)/i.test(value) || type === 'test') return '05-test';
+  if (/(requirement|requirements|要件|要求|目的|スコープ|受け入れ条件|acceptance)/i.test(value)) return '01-requirements';
+  if (/(spec|specification|仕様|API|契約|入出力|制約|criteria|基準)/i.test(value)) return '02-specification';
+  if (/(design|設計|UI|UX|画面|表示|導線|レイアウト|分類|振り分け|tag|タグ|label|ラベル|tree|dashboard|webview|composer|使いやす)/i.test(value) || type === 'ux') return '03-design';
+  if (/(maintenance|保守|運用|依存更新|メンテナンス|cleanup|整理|chore)/i.test(value) || type === 'chore') return '07-maintenance';
+  if (/(implement|implementation|実装|開発|修正|追加|対応|feature|bug|不具合|performance|security|refactor)/i.test(value)) return '04-implementation';
   return '04-implementation';
+}
+
+function resolvePhase(input = {}, source, type) {
+  const selected = normalizePhase(input.phase);
+  const inferred = inferPhase(source, type);
+  const phaseTouched = input.phaseTouched === true || input.phaseTouched === 'true';
+  if (phaseTouched && selected) return selected;
+  if (!selected) return inferred;
+  if (selected === '00-inbox') return inferPhaseExplicitlyRequestsInbox(source) ? selected : inferred;
+  if (selected === '04-implementation' && inferred !== '00-inbox' && inferred !== '04-implementation') return inferred;
+  return selected;
+}
+
+function normalizePhase(value) {
+  const text = String(value || '').trim().toLowerCase();
+  return WORK_ITEM_FORM_OPTIONS.phases.includes(text) ? text : '';
+}
+
+function inferPhaseExplicitlyRequestsInbox(text) {
+  return /(?:phase|工程)\s*[:=]\s*(?:00-inbox|inbox|未整理)|あとで分類|後で分類/i.test(String(text || ''));
 }
 
 function inferQcdsAxes(text, type) {
@@ -231,9 +254,17 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + axis + '">' + axis;
     document.getElementById('qcds').append(label);
   }
+  let phaseTouched = false;
   let draftSource = state.initial.inferenceSource || state.initial.draftSource || '';
   applyDraft(state.initial);
-  for (const id of fields) document.getElementById(id).addEventListener('input', renderSummary);
+  for (const id of fields) {
+    if (id === 'phase') continue;
+    document.getElementById(id).addEventListener('input', renderSummary);
+  }
+  document.getElementById('phase').addEventListener('input', () => {
+    phaseTouched = true;
+    renderSummary();
+  });
   for (const box of document.querySelectorAll('#qcds input')) box.addEventListener('change', renderSummary);
   document.getElementById('infer').addEventListener('click', () => {
     setBusy(true, 'Codex CLI で構造化中...');
@@ -267,6 +298,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
       priority: document.getElementById('priority').value,
       type: document.getElementById('type').value,
       phase: document.getElementById('phase').value,
+      phaseTouched,
       context: document.getElementById('context').value,
       acceptance: document.getElementById('acceptance').value,
       qcdsAxes: Array.from(document.querySelectorAll('#qcds input:checked')).map((box) => box.value),

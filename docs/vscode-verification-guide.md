@@ -42,7 +42,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
 6. Dashboard の `Issues 初期化` を実行する。
-7. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、acceptance criteria を入力して Issue を作成する。
+7. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力して Issue を作成する。
 8. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
 9. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
 10. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
@@ -66,11 +66,11 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。
 - QCDS に紐づいた TODO / Issue がある場合、改善候補として表示される。metrics が無い場合も4観点の D- fallback が表示される。grade が `A-` 以下の観点では改善調査 / TODO 化 action から同観点の改善 Issue を作成または再利用できる。
 - `Issues/README.md` と `Issues/000x-*.md` が UTF-8 Markdown として作成される。
-- Work Item Composer の `Codexで自然言語から反映` で Codex CLI が priority、type、phase、QCDS、acceptance criteria を補完し、完了後に `Codex CLI の下書き` 由来であることが status text に表示される。
+- Work Item Composer の `Codexで自然言語から反映` で Codex CLI が priority、type、phase、QCDS、acceptance criteria を補完し、完了後に `Codex CLI の下書き` 由来であることが status text に表示される。release、test、design など判断できる入力では `00-inbox` ではなく該当 phase が選ばれる。
 - Codex CLI 由来の下書きから `作成して開く` を実行すると、作成された `Issues/*.md` に `Draft source: codex-cli` が記録される。
 - Codex CLI が利用できない場合でもローカル補完へフォールバックし、Issue 作成操作は継続できる。
-- Issue 作成後、`TODO.md` にリンク付き checkbox が追加される。
-- GitHub Issues 取込で作成した TODO / Issue には GitHub Issue 個別リンクが残り、同じ URL は重複 import されない。legacy Task は作成されない。
+- Issue 作成後、`TODO.md` にリンク付き checkbox と `[Phase:xx]` tag が追加される。
+- GitHub Issues 取込で作成した TODO / Issue には GitHub Issue 個別リンクと phase tag が残り、同じ URL は重複 import されない。legacy Task は作成されない。
 - Dashboard と Work Items Tree から `Start Work Item with Codex` を実行でき、選択 work item 起点の prompt が clipboard に入り、右側の VS Code Codex sidebar が開く。
 - Work Item Start 系では model、インテリジェンス、アクセス権限を選べ、prompt に `Codex 実行設定`、`Access`、`Blocked handling` が含まれる。
 - Codex 起動後、対象 project に `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` が作成され、Issue には `Codex Sessions` セクションが追記される。

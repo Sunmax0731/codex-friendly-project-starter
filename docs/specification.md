@@ -69,11 +69,11 @@ TODO の task は Markdown 見出しを section として保持し、`[P1]` ま�
 
 `Status` は `open`、`in-progress`、`blocked`、`closed` に正規化する。表示上の3状態は `open` または未完了 TODO checkbox を未着手、`in-progress` と `blocked` を着手済み、`closed` または完了 TODO checkbox を解決済みとする。`Acceptance Criteria` の checkbox は Issue の進捗率として扱う。Markdown link は `Tasks/*.md`、`Issues/*.md`、`docs/*.md`、`TODO.md` を workspace root 基準でも解決できる。
 
-`Phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` に正規化し、表示名は未整理、要件定義、仕様検討、設計、実装、検証、リリース、リリース後保守とする。TODO は section 名または本文から工程を推定し、該当しない場合は `00-inbox` とする。Issue の `Created` は起票日として Dashboard と Tree の一覧に出す。
+`Phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` に正規化し、表示名は未整理、要件定義、仕様検討、設計、実装、検証、リリース、リリース後保守とする。TODO は `[Phase:04-implementation]` 形式の tag、section 名、本文から工程を推定し、該当しない場合は `00-inbox` とする。Issue の `Created` は起票日として Dashboard と Tree の一覧に出す。
 
-Issue を Work Item Composer から作成した場合は、`TODO.md` の `## Work Items` section に未完了 checkbox を追加し、作成した `Issues/*.md` への Markdown link を残す。既に同じ link を持つ TODO がある場合は重複追加しない。
+Issue を Work Item Composer から作成した場合は、`TODO.md` の `## Work Items` section に未完了 checkbox を追加し、作成した `Issues/*.md` への Markdown link と同じ phase tag を残す。既に同じ link を持つ TODO がある場合は重複追加しない。
 
-GitHub Issues 取込では、入力された `owner/repo`、GitHub HTTPS URL、GitHub SSH remote を public repository として解決し、GitHub Issues API から open issue を取得する。`pull_request` を持つ item は PR として除外する。QuickPick で選択された issue は Codex CLI read-only inference に渡し、title、priority、type、phase、QCDS axes、context、acceptance criteria を local work item format に再構成する。`TODO.md` と `Issues/*.md` に GitHub Issue の個別 URL を Markdown link として残す。同じ URL が既に `TODO.md`、`Issues/`、`Tasks/` に存在する場合は import 済みとして扱い、重複作成しない。
+GitHub Issues 取込では、入力された `owner/repo`、GitHub HTTPS URL、GitHub SSH remote を public repository として解決し、GitHub Issues API から open issue を取得する。`pull_request` を持つ item は PR として除外する。QuickPick で選択された issue は Codex CLI read-only inference に渡し、title、priority、type、phase、QCDS axes、context、acceptance criteria を local work item format に再構成する。`TODO.md` と `Issues/*.md` に GitHub Issue の個別 URL を Markdown link として残し、TODO には同じ phase tag を付ける。同じ URL が既に `TODO.md`、`Issues/`、`Tasks/` に存在する場合は import 済みとして扱い、重複作成しない。
 
 ## Work Dashboard
 
@@ -108,11 +108,11 @@ Work Item Composer Webview は次を入力項目として持つ。
 
 `issue type` は `feature`、`bug`、`docs`、`release`、`test`、`task`、`ux`、`security`、`performance`、`refactor`、`chore` を選択できる。`task phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` を選択できる。
 
-`Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。Codex CLI 由来の下書きは WebView 内で `draftSource` として保持し、`作成して開く` で生成する Markdown に `Draft source: codex-cli` を記録する。`作成して開く` は次のいずれかを実行する。
+`Codexで自然言語から反映` は Codex CLI の read-only `codex exec` を呼び出し、自然言語メモと既存 GUI 入力を JSON 下書きへ構造化する。JSON は `mode`、`title`、`priority`、`type`、`phase`、`qcdsAxes`、`context`、`acceptance` だけを受け付け、enum 外の値は破棄して安全に正規化する。Codex CLI が未設定、タイムアウト、JSON 解析失敗の場合はローカル heuristic にフォールバックし、作業を止めない。既定の `04-implementation` は release、test、design、requirements などの強い自然言語シグナルがある場合に補正し、`00-inbox` は明示的に未整理またはあとで分類と指定された場合だけ使う。Codex CLI 由来の下書きは WebView 内で `draftSource` として保持し、`作成して開く` で生成する Markdown に `Draft source: codex-cli` を記録する。`作成して開く` は次のいずれかを実行する。
 
 - Issue: `Issues/000x-slug.md` を作成する。
 
-いずれの作成先でも、作成後に `TODO.md` へ linked TODO checkbox を同期する。これにより、Issue や Task を起点に起票しても、以後の着手入口は TODO に集約できる。
+いずれの作成先でも、作成後に `TODO.md` へ linked TODO checkbox と `[Phase:xx]` tag を同期する。これにより、Issue を起点に起票しても、以後の着手入口は TODO に集約でき、Dashboard の工程別表示でも該当 phase に入る。
 
 ## Markdown WebView
 

@@ -13,8 +13,8 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues を優先度順の一括バックログとして Codex CLI へ渡せます。
 - QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。A- 以下の観点には改善調査 / TODO 化 action を表示し、同じ観点の改善 Issue は再利用します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。既に同じ文書の WebView がある場合は既存 panel を active にし、上部操作は tooltip / aria-label 付き icon button に統一します。root `AGENTS.md` / `SKILL.md` は子階層 docs を統合表示し、JSON は元ファイルを変更せずに整形表示します。
-- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。
-- GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込みます。取り込んだ local Issue / TODO には GitHub Issue の個別リンクを残します。
+- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。作成した TODO には Issue と同じ phase tag を残し、未整理へ落ちにくくします。
+- GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込みます。取り込んだ local Issue / TODO には GitHub Issue の個別リンクと phase tag を残します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Legacy Tasks: 既存プロジェクト互換のため `Tasks/*.md` の読み取りとリンク解決は残しますが、通常 UI と新規作成導線には表示しません。新規作業は Issue に集約します。
 - D:\AI Default Docs: `D:\AI` の共通 `AGENTS.md` / `SKILL.md`、`D:\AI\Common`、`D:\AI\IDEAS\<Domain>` の `Design.md` / `Architecture.md` を参照した既定ドキュメント一式を生成できます。root docs に加え、`agents/phases/*/AGENTS.md`、工程別 `skills/*/SKILL.md`、作業種類別 `skills/work-types/*/SKILL.md` を生成します。
@@ -37,7 +37,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 Work Item Composer の `Codexで自然言語から反映` は、設定 `codexFriendlyProjectStarter.codexCliPath` の Codex CLI を使い、read-only `codex exec` で自然言語メモを JSON 下書きへ変換します。`codexFriendlyProjectStarter.useCodexForWorkItemInference` を `false` にすると従来のローカル補完だけを使います。Codex CLI 由来の下書きから作成した Issue には `Draft source: codex-cli` を記録します。
 `GitHub Issues 取込` も同じ下書き変換を使います。入力は `owner/repo` または GitHub URL で、現在の Git remote が GitHub の場合は既定値として補完します。public Issues API から open issue を取得し、複数選択した issue だけを local format に再構成します。既に同じ GitHub Issue URL を含む TODO / Issue がある場合は重複作成しません。
 
-Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue と関連リンクをまとめた Work Item Start Prompt を作り、既定では clipboard にコピーして VS Code Codex sidebar を開きます。Terminal に出したい場合だけ `codexFriendlyProjectStarter.codexHandoffTarget=terminal` に変更します。Issue を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox が追加され、TODO を入口にして作業を進められます。
+Dashboard と Work Items Tree の `Start` は、選択した TODO / Issue と関連リンクをまとめた Work Item Start Prompt を作り、既定では clipboard にコピーして VS Code Codex sidebar を開きます。Terminal に出したい場合だけ `codexFriendlyProjectStarter.codexHandoffTarget=terminal` に変更します。Issue を GUI で作成した場合は、`TODO.md` にも同じ作業へのリンク付き checkbox と `[Phase:xx]` tag が追加され、TODO を入口にして作業を進められます。
 
 Work Item Start Prompt は設定 `codexFriendlyProjectStarter.codexGitWritePolicy` を参照します。既定は `preflight` で、Permission denied が出たら Git 書き込みを繰り返さず未完了操作を報告します。`defer` にすると Start から渡す作業でも `git add` / `git commit` / `git push` を実行しない方針になります。
 

@@ -15,10 +15,10 @@
     "command": "npx --yes @vscode/vsce package --out dist\\codex-friendly-project-starter-0.1.0.vsix",
     "npmCache": "E:\\DevEnv\\npm-cache",
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 75375,
-    "sha256": "4D369325DF0CD0849C9E3921F46A75D1DBC1F91B4DCDE98239385FAA4D24ED92",
-    "packagedAt": "2026-05-12T05:04:17+09:00",
-    "note": ".vscodeignore を維持し、tests/tools/docs/dist などの開発用ファイルを VSIX から除外した。Codex tool PATH、model / インテリジェンス選択、選択 Work Items 起動、GitHub Issues 取込を含む。"
+    "sizeBytes": 102052,
+    "sha256": "D2574D70BD68FA7FAD5579B387C92B318DEA874A64E589BF5E421A2FF700C951",
+    "packagedAt": "2026-05-14T06:25:42+09:00",
+    "note": ".vscodeignore を維持し、tests/tools/docs/dist などの開発用ファイルを VSIX から除外した。Codex tool PATH、model / インテリジェンス選択、選択 Work Items 起動、GitHub Issues 取込、Issue/TODO の phase-aware 作成を含む。"
   },
   "evidence": {
     "automatedValidation": "npm test",

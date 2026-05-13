@@ -74,7 +74,7 @@
 3. `owner/repo` または GitHub URL を入力する。現在の Git remote が GitHub の場合は repository 名が既定値として入る。
 4. QuickPick で取り込む GitHub Issue を複数選択する。既に同じ URL が local TODO / Issue にある item は `imported` として表示される。
 5. 選択した issue は Codex CLI read-only inference で title、priority、type、phase、QCDS、acceptance criteria に整理され、`Issues/*.md` と `TODO.md` に作成される。
-6. 取り込まれた local Issue / TODO には GitHub Issue の個別リンクが残る。GitHub 側の issue は作成、編集、close されない。
+6. 取り込まれた local Issue / TODO には GitHub Issue の個別リンクと phase tag が残る。GitHub 側の issue は作成、編集、close されない。
 
 ## 自然言語から Issue を作る
 
@@ -83,7 +83,7 @@
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
 5. `作成して開く` を押す。`Issues/*.md` が作成される。
-6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue へのリンクが記録される。
+6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue へのリンクと `[Phase:xx]` tag が記録される。
 7. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
 8. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 

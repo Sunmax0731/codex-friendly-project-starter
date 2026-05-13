@@ -48,6 +48,18 @@ test('parseTodoMarkdown extracts status, section, priority, and line number', ()
   assert.equal(items[1].done, true);
 });
 
+test('parseTodoMarkdown uses explicit phase tag without leaking tags into title', () => {
+  const items = parseTodoMarkdown('# TODO\n\n## Work Items\n\n- [ ] [P2] [Phase:03-design] Dashboard phase routing [Issue](Issues/0001-routing.md) [QCDS:Satisfaction]\n', {
+    rootPath: 'D:/repo',
+    filePath: 'D:/repo/TODO.md'
+  });
+  assert.equal(items.length, 1);
+  assert.equal(items[0].title, 'Dashboard phase routing');
+  assert.equal(items[0].phase, '03-design');
+  assert.equal(items[0].priority, 'P2');
+  assert.deepEqual(items[0].qcdsAxes, ['Satisfaction']);
+});
+
 test('parseIssueMarkdown reads local issue metadata and acceptance progress', () => {
   const issue = parseIssueMarkdown('# Add work dashboard\n\n- Status: in-progress\n- Priority: P2\n- Type: feature\n- Source: local\n- Draft source: codex-cli\n- Phase: 03-design\n- Created: 2026-05-13\n- QCDS: Quality, Satisfaction\n- Tasks: [Dashboard task](../Tasks/0001-dashboard.md)\n\n## Acceptance Criteria\n\n- [x] Parse TODO\n- [ ] Render graph\n', {
     rootPath: 'D:/repo',
@@ -119,6 +131,7 @@ test('appendTodoWorkItemLink creates TODO entry linked to issue and task files',
   const result = appendTodoWorkItemLink(root, {
     title: 'QCDS evaluation',
     priority: 'P2',
+    phase: '04-implementation',
     qcdsAxes: ['Quality', 'Delivery'],
     links: [
       { label: 'Issue', href: 'Issues/0001-qcds.md' },
@@ -129,7 +142,10 @@ test('appendTodoWorkItemLink creates TODO entry linked to issue and task files',
   assert.equal(result.created, true);
   assert.match(todo, /\[Issue\]\(Issues\/0001-qcds\.md\)/);
   assert.match(todo, /\[Task\]\(Tasks\/0001-qcds\.md\)/);
+  assert.match(todo, /\[Phase:04-implementation\]/);
   assert.match(todo, /\[QCDS:Quality,Delivery\]/);
+  const parsed = parseTodoMarkdown(todo, { rootPath: root, filePath: path.join(root, 'TODO.md') });
+  assert.equal(parsed[0].phase, '04-implementation');
   const duplicate = appendTodoWorkItemLink(root, {
     title: 'QCDS evaluation',
     priority: 'P2',
@@ -355,6 +371,23 @@ test('inferWorkItemDraft turns natural language into issue fields', () => {
   assert.equal(draft.phase, '06-release');
   assert.equal(draft.qcdsAxes.includes('Delivery'), true);
   assert.equal(draft.acceptance.length > 0, true);
+});
+
+test('inferWorkItemDraft reroutes default implementation phase from natural language cues', () => {
+  const designDraft = inferWorkItemDraft({
+    mode: 'issue',
+    phase: '04-implementation',
+    naturalText: 'Dashboard の表示で未整理に落ちる TODO を各 phase に振り分けたい。'
+  });
+  assert.equal(designDraft.phase, '03-design');
+
+  const explicitDraft = inferWorkItemDraft({
+    mode: 'issue',
+    phase: '05-test',
+    phaseTouched: true,
+    naturalText: 'リリース前の VSIX package を確認する。'
+  });
+  assert.equal(explicitDraft.phase, '05-test');
 });
 
 test('renderWorkItemComposerWebview exposes GUI creation controls', () => {

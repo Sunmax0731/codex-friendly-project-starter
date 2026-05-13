@@ -1101,6 +1101,7 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     const todo = appendTodoWorkItemLink(workspaceRoot, {
       title: draft.title,
       priority: draft.priority,
+      phase: draft.phase,
       qcdsAxes: draft.qcdsAxes,
       links: [{ label: 'Task', href: taskRelative }]
     });
@@ -1116,6 +1117,7 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     const todo = appendTodoWorkItemLink(workspaceRoot, {
       title: draft.title,
       priority: draft.priority,
+      phase: draft.phase,
       qcdsAxes: draft.qcdsAxes,
       links: [
         { label: 'Issue', href: issueRelative },
@@ -1130,6 +1132,7 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
   const todo = appendTodoWorkItemLink(workspaceRoot, {
     title: draft.title,
     priority: draft.priority,
+    phase: draft.phase,
     qcdsAxes: draft.qcdsAxes,
     links: [{ label: 'Issue', href: issueRelative }]
   });

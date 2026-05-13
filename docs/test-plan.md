@@ -18,8 +18,8 @@ npm test
 - VS Code Codex sidebar handoff と CLI check の command builder が使え、Terminal mode では設定された CLI path、`rg.exe` と `gh.exe` の PATH 補強と確認を行う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
 - Agent docs 判定とスキャンが `node_modules` を除外し、agent control docs、Development Documentation、子階層 `agents/**/AGENTS.md` / `skills/**/SKILL.md` を分類する。
-- Issue 作成時に `TODO.md` へリンク付き checkbox を同期できる。
-- GitHub Issues 取込が public GitHub Issue URL を保持したまま `TODO.md` と `Issues/*.md` を生成し、legacy `Tasks/*.md` を新規生成せず、重複 URL を再 import しない。
+- Issue 作成時に `TODO.md` へリンク付き checkbox と phase tag を同期できる。
+- GitHub Issues 取込が public GitHub Issue URL と phase tag を保持したまま `TODO.md` と `Issues/*.md` を生成し、legacy `Tasks/*.md` を新規生成せず、重複 URL を再 import しない。
 - Work Dashboard に `Start` ボタンがあり、Work Item Start Prompt に TODO 入口、関連 Issue、QCDS、Git 書き込み方針が含まれる。
 - Work Dashboard の日常操作が `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` に整理され、FirstPrompt は初回セットアップ側にある。
 - Work Dashboard に `Select` checkbox と `選択WorkItemを開始` があり、選択 TODO / Issue だけの開始 prompt を生成できる。
