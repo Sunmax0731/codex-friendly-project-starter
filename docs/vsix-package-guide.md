@@ -51,6 +51,7 @@ code
 - `Codex Starter: Open Work Dashboard` と `Codex Starter: Open QCDS Status` が表示できる。
 - Dashboard で `選択WorkItemを開始` と `全WorkItemを開始` が表示される。
 - Work Item Start 前に model、インテリジェンス、アクセス権限の選択が表示される。
+- Work Item Composer で clipboard 画像を `Ctrl+V` 貼り付けでき、Issue 作成後に `Issues/assets/<issue-stem>/` と Markdown image link が作られる。
 - Dashboard の `GitHub Issuesインポート` または Command Palette の `GitHub Issues 取込` から、public GitHub Issue を local TODO / Issue へ取り込める。legacy Task は新規作成されない。
 - `docs/codex-sessions.md` / `.jsonl` に起動履歴が記録され、blocked work item から follow-up Issue を作成できる。
 - `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。

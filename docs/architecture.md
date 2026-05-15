@@ -12,6 +12,7 @@
 - `src/markdown-webview.cjs`: Markdown / JSON WebView、link 解決、root `AGENTS.md` / `SKILL.md` の子 docs 統合表示。
 - `src/i18n.cjs`: Dashboard、Tree group、WebView action の locale 辞書と fallback。
 - `src/work-item-composer.cjs`: Work Item Composer の Webview HTML とローカル補完。
+- `src/work-item-attachments.cjs`: Work Item Composer から渡された画像 data URL の検証、repo-local attachment 保存、Issue Markdown 用 link 生成。
 - `src/work-item-start.cjs`: TODO / Issue を Codex CLI へ渡す開始プロンプト生成。
 - `src/codex-sessions.cjs`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` と対象 Issue に記録する。
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
@@ -27,6 +28,8 @@ VS Code API は `extension.js` に閉じ、生成ロジックとスキャンロ�
 Codex CLI 呼び出しも VS Code API から分離し、`src/codex-cli.cjs` で launcher script と command string を生成する。拡張本体は一時 prompt file と `.ps1` launcher の作成、実行前確認、terminal 起動または background 実行だけを担当する。launcher は Windows PowerShell 5 系でも日本語が壊れないように、console encoding と `$OutputEncoding` を UTF-8 にしてから prompt を stdin へ流す。
 
 Work Item Composer の自然言語反映は、`src/codex-work-item-draft.cjs` が JSON 専用 prompt と JSON schema を作り、拡張本体が `codex exec -s read-only --output-schema <schema> -o <last-message> --color never --ephemeral -` を background 実行して last-message file から JSON を取り出す。Codex CLI の失敗、timeout、JSON 不正時は `src/work-item-composer.cjs` のローカル補完に戻す。
+
+Work Item Composer の画像添付は、WebView 側では clipboard の画像 File を data URL として保持し、preview と削除だけを行う。保存時は `src/work-item-attachments.cjs` が MIME type、base64、size、件数を検証し、`Issues/assets/<issue-stem>/` 配下に書き込む。Markdown へは相対 image link だけを残し、GitHub Issue や外部ストレージには送信しない。
 
 OpenAI prompt guidance は `src/openai-prompt-guidance.cjs` に閉じ込める。`extension.js` は activation 時に official URL を timeout 付きで fetch し、本文を保存せず status、title、content hash、latest model だけを global state に cache する。生成系 helper は cache と選択 model を受け取り、`gpt-5.5`、`gpt-5.4`、`gpt-5.4-mini`、`gpt-5.3-codex` 系ごとの prompt tuning section を FirstPrompt、Work Item Start、Work Item Composer prompt へ差し込む。fetch 失敗時も fallback guidance で同じ interface を維持する。
 

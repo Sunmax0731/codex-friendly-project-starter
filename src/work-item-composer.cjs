@@ -193,7 +193,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'nonce-${nonce}';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codex Work Item Composer</title>
   <style>
@@ -212,6 +212,13 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
     .checks { display: flex; gap: 10px; flex-wrap: wrap; padding: 8px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; }
     .checks label { display: inline-flex; gap: 5px; align-items: center; color: var(--vscode-foreground); }
+    .attachment-paste { margin-top: 8px; padding: 12px; border: 1px dashed var(--vscode-input-border, var(--vscode-panel-border)); border-radius: 4px; color: var(--vscode-descriptionForeground); background: var(--vscode-sideBar-background); outline: none; }
+    .attachment-paste:focus { border-color: var(--vscode-focusBorder); color: var(--vscode-foreground); }
+    .attachment-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; margin-top: 8px; }
+    .attachment-card { border: 1px solid var(--vscode-panel-border); border-radius: 4px; padding: 8px; display: grid; gap: 6px; min-width: 0; }
+    .attachment-card img { width: 100%; height: 96px; object-fit: contain; background: var(--vscode-editor-background); border: 1px solid var(--vscode-panel-border); }
+    .attachment-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--vscode-foreground); font-size: 12px; }
+    .attachment-meta { color: var(--vscode-descriptionForeground); font-size: 11px; }
     .summary { margin-top: 14px; padding: 10px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; background: var(--vscode-sideBar-background); white-space: pre-wrap; }
     .status { margin-top: 10px; color: var(--vscode-descriptionForeground); min-height: 18px; }
   </style>
@@ -238,12 +245,18 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
   <label class="wide">Acceptance Criteria<textarea id="acceptance" placeholder="1行に1つずつ完了条件を書く"></textarea></label>
   <label class="wide">QCDS</label>
   <div id="qcds" class="checks"></div>
+  <label class="wide">画像添付</label>
+  <div id="attachmentPaste" class="attachment-paste" tabindex="0" role="group" aria-label="画像添付">Ctrl+V で clipboard の画像を貼り付け</div>
+  <div id="attachments" class="attachment-list"></div>
   <div id="summary" class="summary"></div>
 </main>
 <script nonce="${nonce}">
   const vscode = acquireVsCodeApi();
   const state = ${state};
   const fields = ['naturalText', 'mode', 'priority', 'type', 'phase', 'title', 'context', 'acceptance'];
+  const maxAttachments = 5;
+  const maxAttachmentBytes = 5 * 1024 * 1024;
+  const imageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
   fillSelect('mode', state.options.modes, 'id', 'label');
   fillSelect('priority', state.options.priorities);
   fillSelect('type', state.options.issueTypes);
@@ -255,6 +268,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     document.getElementById('qcds').append(label);
   }
   let phaseTouched = false;
+  let attachments = [];
   let draftSource = state.initial.inferenceSource || state.initial.draftSource || '';
   applyDraft(state.initial);
   for (const id of fields) {
@@ -266,6 +280,10 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     renderSummary();
   });
   for (const box of document.querySelectorAll('#qcds input')) box.addEventListener('change', renderSummary);
+  document.addEventListener('paste', handlePaste);
+  document.getElementById('attachmentPaste').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') event.currentTarget.focus();
+  });
   document.getElementById('infer').addEventListener('click', () => {
     setBusy(true, 'Codex CLI で構造化中...');
     vscode.postMessage({ type: 'inferWorkItem', input: currentInput() });
@@ -302,6 +320,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
       context: document.getElementById('context').value,
       acceptance: document.getElementById('acceptance').value,
       qcdsAxes: Array.from(document.querySelectorAll('#qcds input:checked')).map((box) => box.value),
+      attachments: attachments.slice(),
       draftSource
     };
   }
@@ -315,6 +334,87 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
     for (const box of document.querySelectorAll('#qcds input')) box.checked = (draft.qcdsAxes || []).includes(box.value);
     renderSummary();
   }
+  function handlePaste(event) {
+    const items = Array.from(event.clipboardData?.items || []);
+    const files = items
+      .filter((item) => imageTypes.includes(item.type))
+      .map((item) => item.getAsFile())
+      .filter(Boolean);
+    if (!files.length) return;
+    event.preventDefault();
+    for (const file of files) addAttachment(file);
+  }
+  function addAttachment(file) {
+    if (attachments.length >= maxAttachments) {
+      setAttachmentStatus('添付画像は最大 ' + maxAttachments + ' 件です。');
+      return;
+    }
+    if (!imageTypes.includes(file.type)) {
+      setAttachmentStatus('未対応の画像形式です: ' + (file.type || 'unknown'));
+      return;
+    }
+    if (file.size > maxAttachmentBytes) {
+      setAttachmentStatus('画像が大きすぎます: ' + formatBytes(file.size));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      attachments.push({
+        name: file.name || 'clipboard-image.' + extensionForMime(file.type),
+        mimeType: file.type,
+        sizeBytes: file.size,
+        dataUrl: String(reader.result || '')
+      });
+      renderAttachments();
+      renderSummary();
+      setAttachmentStatus('画像を添付しました。');
+    };
+    reader.onerror = () => setAttachmentStatus('画像の読み込みに失敗しました。');
+    reader.readAsDataURL(file);
+  }
+  function renderAttachments() {
+    const container = document.getElementById('attachments');
+    container.textContent = '';
+    attachments.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'attachment-card';
+      const image = document.createElement('img');
+      image.src = item.dataUrl;
+      image.alt = item.name || 'attachment';
+      const name = document.createElement('div');
+      name.className = 'attachment-name';
+      name.textContent = item.name || 'clipboard-image';
+      const meta = document.createElement('div');
+      meta.className = 'attachment-meta';
+      meta.textContent = (item.mimeType || 'image') + ' / ' + formatBytes(item.sizeBytes || 0);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'secondary';
+      remove.textContent = '削除';
+      remove.addEventListener('click', () => {
+        attachments.splice(index, 1);
+        renderAttachments();
+        renderSummary();
+      });
+      card.append(image, name, meta, remove);
+      container.append(card);
+    });
+  }
+  function setAttachmentStatus(message) {
+    document.getElementById('draftStatus').textContent = message || '';
+  }
+  function extensionForMime(value) {
+    if (value === 'image/jpeg') return 'jpg';
+    if (value === 'image/webp') return 'webp';
+    if (value === 'image/gif') return 'gif';
+    return 'png';
+  }
+  function formatBytes(value) {
+    const bytes = Number(value) || 0;
+    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    if (bytes >= 1024) return Math.round(bytes / 1024) + ' KB';
+    return bytes + ' B';
+  }
   function setBusy(busy, message) {
     document.getElementById('infer').disabled = busy;
     document.getElementById('draftStatus').textContent = message || '';
@@ -327,6 +427,7 @@ function renderWorkItemComposerWebview(nonce, initial = {}) {
       'Type: ' + input.type,
       'Phase: ' + input.phase,
       'QCDS: ' + (input.qcdsAxes.join(', ') || '未選択'),
+      'Attachments: ' + input.attachments.length,
       'Title: ' + (input.title || '未入力')
     ].join('\\n');
   }

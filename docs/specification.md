@@ -105,6 +105,7 @@ Work Item Composer Webview は次を入力項目として持つ。
 - 作成先: `Issue`。
 - 自然言語メモ。
 - title、priority、issue type、task phase、context、acceptance criteria、QCDS axes。
+- 画像添付: clipboard の `image/png`、`image/jpeg`、`image/webp`、`image/gif` を `Ctrl+V` で受け付け、preview と削除を行う。上限は 5 件、1 件 5 MB とする。
 
 `issue type` は `feature`、`bug`、`docs`、`release`、`test`、`task`、`ux`、`security`、`performance`、`refactor`、`chore` を選択できる。`task phase` は `00-inbox`、`01-requirements`、`02-specification`、`03-design`、`04-implementation`、`05-test`、`06-release`、`07-maintenance` を選択できる。
 
@@ -113,6 +114,8 @@ Work Item Composer Webview は次を入力項目として持つ。
 - Issue: `Issues/000x-slug.md` を作成する。
 
 いずれの作成先でも、作成後に `TODO.md` へ linked TODO checkbox と `[Phase:xx]` tag を同期する。これにより、Issue を起点に起票しても、以後の着手入口は TODO に集約でき、Dashboard の工程別表示でも該当 phase に入る。
+
+画像添付がある場合は、Issue Markdown の保存前に `Issues/assets/<issue-stem>/NN-sanitized-name.<ext>` へ画像を保存する。Markdown には `## Attachments` section を追加し、Issue file からの相対 Markdown image link を記録する。不正な data URL、未対応 MIME type、空画像、5 MB 超過、上限超過は保存せず、作成結果の status message で skipped 件数を通知する。GitHub Issue の remote attachment は作成しない。
 
 ## Markdown WebView
 

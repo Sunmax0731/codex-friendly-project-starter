@@ -52,6 +52,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 作成先は `Issue` 固定とし、新規作業の詳細は `Issues/*.md` に集約する。
 - 自然言語メモと構造化フォームを同じ画面に置き、`Codexで自然言語から反映` で Codex CLI に title、priority、type、phase、QCDS、acceptance criteria の JSON 下書きを作らせる。明示指定がない `00-inbox` を避け、release、test、design、requirements など判断できる工程へ寄せる。
 - Codex CLI 実行中はボタンを disable にし、完了時は Codex CLI 由来かローカル補完由来かを status text で表示する。
+- QCDS の下に画像添付領域を置き、Snipping Tool などで clipboard に入った画像を `Ctrl+V` で受け付ける。貼り付け後は thumbnail、file name、size、削除ボタンを表示し、Issue 作成前に添付対象を確認できるようにする。
 - `作成して開く` で Markdown を作成し、作成結果を WebView で表示する。
 - `Issue` 作成時は `TODO.md` にリンク付き checkbox と phase tag を追加し、TODO を入口にしても工程別表示が崩れないようにする。
 

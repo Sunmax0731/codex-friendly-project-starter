@@ -64,6 +64,7 @@ const {
   findExistingGitHubIssueImport,
   createLocalWorkItemsFromGitHubIssue
 } = require('./src/github-issues.cjs');
+const { writeIssueImageAttachments } = require('./src/work-item-attachments.cjs');
 const {
   fetchOpenAiPromptGuidance,
   fallbackOpenAiPromptGuidanceState,
@@ -1025,7 +1026,9 @@ function openWorkItemComposer(context, workItemsProvider, mode = 'linked') {
       const result = await createWorkItemFromComposerInput(pickWorkspaceRoot(), message.input || {});
       workItemsProvider?.refresh();
       await openMarkdownWebview(context, result.openPath);
-      vscode.window.setStatusBarMessage(`Codex Starter: ${result.created.length} work item(s) created`, 4000);
+      const skipped = result.rejectedAttachments?.length || 0;
+      const suffix = skipped ? ` / 添付画像 ${skipped}件をスキップ` : '';
+      vscode.window.setStatusBarMessage(`Codex Starter: ${result.created.length} work item(s) created${suffix}`, 5000);
     }
   }, undefined, context.subscriptions);
 }
@@ -1094,6 +1097,7 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     ...inferWorkItemDraft(input),
     draftSource: input.draftSource || input.inferenceSource || ''
   };
+  const imageAttachments = Array.isArray(input.attachments) ? input.attachments : [];
   if (draft.mode === 'task') {
     const taskPath = nextTaskFilePath(workspaceRoot, draft.title);
     const taskRelative = toSlash(path.relative(workspaceRoot, taskPath));
@@ -1112,8 +1116,9 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     const issuePath = nextIssueFilePath(workspaceRoot, draft.title);
     const taskRelative = toSlash(path.relative(workspaceRoot, taskPath));
     const issueRelative = toSlash(path.relative(workspaceRoot, issuePath));
+    const attachmentResult = writeIssueImageAttachments(issuePath, imageAttachments);
     await fs.promises.writeFile(taskPath, createTaskMarkdown({ ...draft, issue: issueRelative }), 'utf8');
-    await fs.promises.writeFile(issuePath, createIssueMarkdown({ ...draft, tasks: [{ label: taskRelative, href: '../' + taskRelative }] }), 'utf8');
+    await fs.promises.writeFile(issuePath, createIssueMarkdown({ ...draft, attachments: attachmentResult.attachments, tasks: [{ label: taskRelative, href: '../' + taskRelative }] }), 'utf8');
     const todo = appendTodoWorkItemLink(workspaceRoot, {
       title: draft.title,
       priority: draft.priority,
@@ -1124,11 +1129,12 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
         { label: 'Task', href: taskRelative }
       ]
     });
-    return { openPath: issuePath, created: [issuePath, taskPath, ...(todo.created ? [todo.todoPath] : [])] };
+    return { openPath: issuePath, created: [issuePath, taskPath, ...attachmentResult.attachments.map((item) => item.filePath), ...(todo.created ? [todo.todoPath] : [])], rejectedAttachments: attachmentResult.rejected };
   }
   const issuePath = nextIssueFilePath(workspaceRoot, draft.title);
   const issueRelative = toSlash(path.relative(workspaceRoot, issuePath));
-  await fs.promises.writeFile(issuePath, createIssueMarkdown(draft), 'utf8');
+  const attachmentResult = writeIssueImageAttachments(issuePath, imageAttachments);
+  await fs.promises.writeFile(issuePath, createIssueMarkdown({ ...draft, attachments: attachmentResult.attachments }), 'utf8');
   const todo = appendTodoWorkItemLink(workspaceRoot, {
     title: draft.title,
     priority: draft.priority,
@@ -1136,7 +1142,7 @@ async function createWorkItemFromComposerInput(workspaceRoot, input) {
     qcdsAxes: draft.qcdsAxes,
     links: [{ label: 'Issue', href: issueRelative }]
   });
-  return { openPath: issuePath, created: [issuePath, ...(todo.created ? [todo.todoPath] : [])] };
+  return { openPath: issuePath, created: [issuePath, ...attachmentResult.attachments.map((item) => item.filePath), ...(todo.created ? [todo.todoPath] : [])], rejectedAttachments: attachmentResult.rejected };
 }
 
 async function createBlockedFollowUpIssueCommand(context, workItemsProvider, item) {

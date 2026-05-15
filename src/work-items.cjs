@@ -935,6 +935,9 @@ function createIssueMarkdown(input = {}) {
   const qcds = Array.isArray(input.qcdsAxes) ? input.qcdsAxes.join(', ') : (input.qcds || '');
   const githubIssue = formatGitHubIssueLink(input);
   const tasks = Array.isArray(input.tasks) ? input.tasks : [];
+  const attachments = Array.isArray(input.attachments)
+    ? input.attachments.filter((item) => item && item.href)
+    : [];
   const context = input.context || '背景、目的、制約をここに記録します。';
   const acceptance = Array.isArray(input.acceptance) && input.acceptance.length
     ? input.acceptance
@@ -964,10 +967,22 @@ function createIssueMarkdown(input = {}) {
     '',
     ...acceptance.map((item) => '- [ ] ' + item),
     '',
+    attachments.length ? '## Attachments' : '',
+    attachments.length ? '' : '',
+    ...attachments.map(formatIssueAttachment),
+    attachments.length ? '' : '',
     '## Notes',
     '',
     '- '
   ].filter((line, index, lines) => line !== '' || lines[index - 1] !== '').join('\n') + '\n';
+}
+
+function formatIssueAttachment(item) {
+  const label = String(item.label || item.href || 'attachment')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[\[\]]/g, '')
+    .trim() || 'attachment';
+  return `![${label}](${item.href})`;
 }
 
 function createTaskMarkdown(input = {}) {

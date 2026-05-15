@@ -11,6 +11,7 @@
 | legacy Task を通常 UI から隠し互換読み取りだけ残す | `src/work-items.cjs`, `src/webview.cjs`, `src/workspace-docs.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `tests/workspace-docs.test.cjs`, `docs/manual-test.md` |
 | GUI で Issue を作成する | `src/work-item-composer.cjs`, `src/webview.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md` |
 | 自然言語から Issue を下書きする | `src/work-item-composer.cjs`, `src/codex-work-item-draft.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/work-items.test.cjs`, `tests/codex-work-item-draft.test.cjs`, `docs/manual-test.md` |
+| Work Item Composer で画像を Issue に添付する | `src/work-item-composer.cjs`, `src/work-item-attachments.cjs`, `src/work-items.cjs`, `extension.js` | `tests/work-item-attachments.test.cjs`, `tests/work-items.test.cjs`, `docs/manual-test.md` |
 | GitHub Issues を local TODO / Issue に取り込む | `src/github-issues.cjs`, `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/github-issues.test.cjs`, `tests/work-items.test.cjs`, `Issues/0012-github-issues-import.md` |
 | Issue 作成時に TODO へ phase 付きで同期する | `src/work-items.cjs`, `extension.js` | `tests/work-items.test.cjs`, `docs/vscode-verification-guide.md`, `Issues/0021-phase-aware-issue-routing.md` |
 | Issue の分類と phase 推定を拡張する | `src/work-item-composer.cjs`, `src/work-items.cjs` | `tests/work-items.test.cjs`, `Issues/0021-phase-aware-issue-routing.md` |

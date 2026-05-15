@@ -24,6 +24,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の日常操作は `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` に整理し、FirstPrompt と環境確認は初回セットアップ / 環境確認へ分ける。
 - GUI で提供する主要操作は Command Palette からも呼び出せる。Command Palette にある主要操作は Dashboard、Tree title、Tree item context、Markdown WebView toolbar のいずれかの GUI 導線から到達できる。
 - GUI フォームに自然言語メモを入力し、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria の下書きへ変換して Issue を作成できる。Codex CLI が利用できない場合はローカル補完で作業を止めず、判断可能な場合は `00-inbox` ではなく各工程へ振り分ける。
+- Work Item Composer で clipboard の画像を `Ctrl+V` から受け取り、貼り付け済み画像の preview と削除を行い、Issue 作成時に repo-local attachment と Markdown image link として保存できる。
 - Issue 作成時に `TODO.md` へリンク付き checkbox と phase tag を追加し、TODO を作業入口として維持できる。
 - TODO / Issue の行から 1 click で Codex CLI に開始プロンプトを渡し、該当 work item の作業へ着手できる。
 - Dashboard の checkbox または Command Palette の複数選択から、選択した TODO / Issue だけを VS Code Codex に渡して着手できる。
@@ -79,6 +80,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - Dashboard の中段セクションを折りたたみでき、Issue / TODO の priority、status、type、phase、QCDS tag が色分け表示される。
 - Dashboard の日常操作と初回セットアップ操作が分かれ、主要 action label が `Issueを起票`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始` に整理される。
 - Work Item Composer が Codex CLI で自然言語から Issue の下書きを作り、Issue と TODO の phase を同期したうえで Tree View と Dashboard が更新される。
+- Work Item Composer が `Ctrl+V` で画像を受け付け、作成された Issue Markdown に `Issues/assets/<issue-stem>/` への相対画像リンクを残せる。
 - Work Item の `Start` が、選択 work item と関連 Issue を含む開始プロンプトを VS Code Codex に渡せる。
 - `Start Selected Work Items` が、選択した TODO / Issue だけを含む開始プロンプトを VS Code Codex に渡せる。
 - `Start All Work Items` が、未完了 TODO / Issue の件数、優先度、QCDS、release readiness を含む一括開始プロンプトを VS Code Codex に渡せる。

@@ -159,6 +159,7 @@ test('createIssueMarkdown and createTaskMarkdown record Codex draft source when 
     title: 'Codex draft issue',
     draftSource: 'codex-cli',
     phase: '03-design',
+    attachments: [{ label: 'Snip 1.png', href: 'assets/0001-codex-draft-issue/01-snip-1.png' }],
     githubIssueUrl: 'https://github.com/Sunmax0731/repo/issues/10',
     githubIssueNumber: 10
   });
@@ -172,6 +173,8 @@ test('createIssueMarkdown and createTaskMarkdown record Codex draft source when 
   assert.match(issue, /- Draft source: codex-cli/);
   assert.match(issue, /- Phase: 03-design/);
   assert.match(issue, /- GitHub Issue: \[#10\]\(https:\/\/github\.com\/Sunmax0731\/repo\/issues\/10\)/);
+  assert.match(issue, /## Attachments/);
+  assert.match(issue, /!\[Snip 1\.png\]\(assets\/0001-codex-draft-issue\/01-snip-1\.png\)/);
   assert.match(task, /- Source: local/);
   assert.match(task, /- Draft source: codex-cli/);
   assert.match(task, /- GitHub Issue: \[#10\]\(https:\/\/github\.com\/Sunmax0731\/repo\/issues\/10\)/);
@@ -399,6 +402,9 @@ test('renderWorkItemComposerWebview exposes GUI creation controls', () => {
   assert.match(html, /Codexで自然言語から反映/);
   assert.match(html, /Codex CLI で自然言語/);
   assert.match(html, /作成して開く/);
+  assert.match(html, /画像添付/);
+  assert.match(html, /img-src data:/);
+  assert.match(html, /attachments: attachments\.slice/);
   assert.doesNotMatch(html, /Legacy Task/);
   assert.match(html, /security/);
   assert.match(html, /07-maintenance/);

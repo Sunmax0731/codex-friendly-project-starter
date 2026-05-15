@@ -13,7 +13,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues を優先度順の一括バックログとして Codex CLI へ渡せます。
 - QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。A- 以下の観点には改善調査 / TODO 化 action を表示し、同じ観点の改善 Issue は再利用します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。既に同じ文書の WebView がある場合は既存 panel を active にし、上部操作は tooltip / aria-label 付き icon button に統一します。root `AGENTS.md` / `SKILL.md` は子階層 docs を統合表示し、JSON は元ファイルを変更せずに整形表示します。
-- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。作成した TODO には Issue と同じ phase tag を残し、未整理へ落ちにくくします。
+- Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。Snipping Tool などで clipboard に入れた画像は `Ctrl+V` で貼り付け、repo-local attachment として Issue に残せます。作成した TODO には Issue と同じ phase tag を残し、未整理へ落ちにくくします。
 - GitHub Issues 取込: public GitHub repository の open Issues を取得し、選択した Issue を Codex CLI の read-only inference で整理して `TODO.md` と `Issues/*.md` に取り込みます。取り込んだ local Issue / TODO には GitHub Issue の個別リンクと phase tag を残します。
 - Local Issues: `Issues` ディレクトリを初期化し、1 Issue 1 Markdown の Issue 駆動 backlog を repo 内で管理できます。
 - Legacy Tasks: 既存プロジェクト互換のため `Tasks/*.md` の読み取りとリンク解決は残しますが、通常 UI と新規作成導線には表示しません。新規作業は Issue に集約します。

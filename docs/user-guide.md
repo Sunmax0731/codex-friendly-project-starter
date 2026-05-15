@@ -82,10 +82,11 @@
 2. 作成したい内容を自然言語メモに入力する。例: `P1。リリース前にVSIX生成とQCDS evidenceを同期したい。npm test 成功とrelease docs更新を完了条件にする。`
 3. `Codexで自然言語から反映` を押して、Codex CLI の read-only `codex exec` で title、priority、type、phase、QCDS、acceptance criteria を補完する。
 4. 必要なら GUI 上で修正する。
-5. `作成して開く` を押す。`Issues/*.md` が作成される。
-6. `TODO.md` には同じ作業を指す checkbox が追加され、Issue へのリンクと `[Phase:xx]` tag が記録される。
-7. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
-8. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
+5. 画像を残したい場合は、Snipping Tool などで画像を clipboard に入れ、Composer 内で `Ctrl+V` を押す。貼り付けた画像は thumbnail で確認でき、不要なものは `削除` で外せる。
+6. `作成して開く` を押す。`Issues/*.md` が作成される。画像を添付した場合は `Issues/assets/<issue-stem>/` に画像ファイルが保存され、Issue Markdown の `## Attachments` に相対 image link が記録される。
+7. `TODO.md` には同じ作業を指す checkbox が追加され、Issue へのリンクと `[Phase:xx]` tag が記録される。
+8. Codex CLI 由来の下書きから作成した Markdown には `Draft source: codex-cli` が記録される。
+9. Codex CLI がタイムアウトまたは JSON 解析に失敗した場合は、status text にローカル補完へ戻ったことが表示される。
 
 Work Item の `Start` で Permission denied を避けたい場合は、Settings の `codexFriendlyProjectStarter.codexGitWritePolicy` を `defer` にしておく。開始プロンプトは `git add` / `git commit` / `git push` を保留し、未コミット差分、実行済み検証、ユーザーが実行すべき Git コマンドを報告する方針になる。
 
