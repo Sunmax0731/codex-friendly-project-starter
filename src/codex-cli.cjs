@@ -33,7 +33,6 @@ function buildCodexExecScript(options = {}) {
   if (clean(options.outputLastMessagePath)) args.push('-o', clean(options.outputLastMessagePath));
   if (clean(options.color)) args.push('--color', clean(options.color));
   if (options.ephemeral === true) args.push('--ephemeral');
-  args.push('-');
   const lines = [
     ...buildPowerShellUtf8Prelude(),
     ...buildCodexCommandResolution(normalized.cliPath),
@@ -51,6 +50,8 @@ function buildCodexExecScript(options = {}) {
       modelReasoningEffort: normalized.modelReasoningEffort || 'Codex CLI default',
       profile: normalized.profile || 'default'
     }),
+    ...buildGitRepoCheckBootstrap(normalized.cwd),
+    `$codexArgs += '-'`,
     `Write-Host ''`,
     `Write-Host '--- Codex CLI output ---'`,
     `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs`,
@@ -85,7 +86,9 @@ function buildCodexCheckScript(options = {}) {
     `& $codexExecutable --version`,
     `Write-Host ''`,
     `Write-Host 'Codex exec options:'`,
-    `& $codexExecutable exec --help | Select-Object -First 24`,
+    `$codexExecHelp = & $codexExecutable exec --help`,
+    `$codexExecHelp | Select-Object -First 24`,
+    `Write-Host ('skip-git-repo-check=' + [bool]($codexExecHelp -match '--skip-git-repo-check'))`,
     `Write-Host ''`,
     `Write-Host 'Required tools:'`,
     `Write-Host ('rg.exe=' + (Get-Command rg.exe -ErrorAction Stop).Source)`,
@@ -133,6 +136,28 @@ function buildCodexConfigOverrides(normalized) {
     overrides.push(`model_reasoning_effort="${normalized.modelReasoningEffort}"`);
   }
   return overrides;
+}
+
+function buildGitRepoCheckBootstrap(cwd) {
+  return [
+    `$codexWorkspace = ${quotePowerShell(cwd)}`,
+    `$codexGitProbe = $codexWorkspace`,
+    `$codexGitRepoFound = $false`,
+    `while ($codexGitProbe) {`,
+    `  $codexGitMarker = Join-Path -Path $codexGitProbe -ChildPath '.git'`,
+    `  if (Test-Path -LiteralPath $codexGitMarker) {`,
+    `    $codexGitRepoFound = $true`,
+    `    break`,
+    `  }`,
+    `  $codexGitParent = Split-Path -Path $codexGitProbe -Parent`,
+    `  if (-not $codexGitParent -or $codexGitParent -eq $codexGitProbe) { break }`,
+    `  $codexGitProbe = $codexGitParent`,
+    `}`,
+    `if (-not $codexGitRepoFound) {`,
+    `  $codexArgs += '--skip-git-repo-check'`,
+    `  Write-Host 'Non-Git workspace detected: --skip-git-repo-check enabled'`,
+    `}`
+  ];
 }
 
 function buildToolPathBootstrap(toolPaths = []) {
@@ -204,6 +229,7 @@ module.exports = {
   buildCodexExecScript,
   buildCodexAppScript,
   buildCodexCheckScript,
+  buildGitRepoCheckBootstrap,
   buildToolPathBootstrap,
   buildPowerShellFileTerminalCommand,
   buildCodexAppTerminalCommand,

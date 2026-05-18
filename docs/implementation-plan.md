@@ -64,7 +64,8 @@
 ## Phase 3.10: Codex 実行環境と複数選択
 
 - extension-launched Codex PowerShell launcher で `rg.exe` と `gh.exe` の PATH を補強する。
-- `Check Codex CLI` で `codex`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
+- 非 Git folder を cwd にする Terminal mode では `--skip-git-repo-check` を自動追加し、Git repo 内では追加しない。
+- `Check Codex CLI` で `codex`、`skip-git-repo-check` flag、`rg.exe`、`gh.exe`、`gh auth status` を確認する。
 - Work Item Start 系の実行前に model、インテリジェンス、アクセス権限を選択し、既定の VS Code Codex handoff prompt と Terminal mode の `codex exec` に反映する。
 - Dashboard checkbox と Command Palette multi-select から選択 Work Items だけを Codex に渡せるようにする。
 - README、manual test、user guide、VSIX readiness、QCDS / traceability を同期する。

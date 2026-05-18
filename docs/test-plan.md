@@ -15,6 +15,7 @@ npm test
 - FirstPrompt、Work Item Start、Work Item Composer prompt に、選択 model に応じた OpenAI 公式 prompt guidance section が入る。
 - 起動時の OpenAI 公式 guidance fetch は本文を保存せず、取得 status、title、hash、latest model だけを cache し、失敗時は fallback guidance へ戻る。
 - Codex CLI command builder が prompt file と `.ps1` launcher を使い、UTF-8 の stdin 経由で `codex exec` に渡す。
+- Codex CLI command builder が cwd から親方向へ `.git` を探索し、非 Git folder のときだけ `--skip-git-repo-check` を stdin の `-` より前に追加する。
 - VS Code Codex sidebar handoff と CLI check の command builder が使え、Terminal mode では設定された CLI path、`rg.exe` と `gh.exe` の PATH 補強と確認を行う。
 - FirstPrompt の対象 repo path から `codex exec -C` の root を解決し、starter repo 外の対象 domain で実行できる。
 - Agent docs 判定とスキャンが `node_modules` を除外し、agent control docs、Development Documentation、子階層 `agents/**/AGENTS.md` / `skills/**/SKILL.md` を分類する。
@@ -46,7 +47,7 @@ npm test
 ## Codex CLI 導線
 
 - `Codex Starter: Check Codex CLI` が terminal に version と help を表示する。
-- `Codex Starter: Check Codex CLI` が PATH 補強後の `rg.exe`、`gh.exe`、`gh auth status` を確認する。
+- `Codex Starter: Check Codex CLI` が PATH 補強後の `rg.exe`、`gh.exe`、`gh auth status` と `skip-git-repo-check` flag の有無を確認する。
 - `Codex Starter: Send FirstPrompt to VS Code Codex` が一時 prompt file を作り、clipboard にコピーして Codex sidebar を開く。
 - `Codex Starter: Send Current Prompt to VS Code Codex` が選択範囲または開いている文書全体を clipboard にコピーして Codex sidebar を開く。
 - `Codex Starter: Start Work Item with Codex` が選択 TODO / Issue を開始プロンプトにして VS Code Codex に渡す。

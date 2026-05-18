@@ -24,3 +24,6 @@
 - [x] [P1][QCDS:Quality,Delivery,Satisfaction] [Codex tool environment と選択 Work Items 起動を追加する](Tasks/0013-codex-tool-env-and-selected-work-items.md)。
 - [x] [P1][QCDS:Quality,Delivery,Satisfaction] [GitHub Issues をローカル TODO / Issues / Tasks に取り込む](Tasks/0014-github-issues-import.md)。
 - [x] [P1][QCDS:Quality,Satisfaction,Delivery] [OpenAI prompt guidance と model 別 prompt 最適化を追加する](Issues/0013-openai-prompt-guidance.md)。
+
+## Work Items
+- [x] [P2] [Phase:02-specification] 非GitフォルダでCodex CLI接続を有効化 [Issue](Issues/0023-git-codex-cli.md) [QCDS:Quality,Delivery,Satisfaction]

@@ -151,6 +151,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - VS Code 統合ターミナルが開く。
 - `=== Codex Starter: Codex CLI check ===` の見出しが表示される。
 - `codex --version` と `codex exec --help` の先頭が表示される。
+- `skip-git-repo-check=True` が表示され、利用中の Codex CLI が非 Git folder 用 flag を持つことが分かる。
 - `rg.exe=...` と `gh.exe=...` が表示される。
 - `gh auth status` が表示される。
 - 出力が項目ごとに改行され、日本語が mojibake や `?` になっていない。
@@ -212,6 +213,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - `workspace-write` では Codex が workspace 内のファイルを変更できる。
 - まず挙動確認だけをしたい場合は Settings で `codexFriendlyProjectStarter.codexSandboxMode` を `read-only` にする。
 - FirstPrompt が `D:\AI\ChromeExtension\movie-loop-tool` など現在の starter repo 外を対象にする場合、確認ダイアログの workspace root が `D:\AI\ChromeExtension` など対象 repo の親ディレクトリになっていることを確認する。
+- Terminal mode の対象 cwd が `.git` を持たない場合は、launcher が `Non-Git workspace detected: --skip-git-repo-check enabled` を表示してから `codex exec` を実行する。Git repo 内ではこの行が出ないことを確認する。
 
 ## 8. 現在のプロンプトを VS Code Codex へ handoff
 

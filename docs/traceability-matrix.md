@@ -41,6 +41,7 @@
 | blocked の原因を follow-up Issue に起こす | `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `docs/manual-test.md` |
 | Webview から生成できる | `src/webview.cjs`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | Codex CLI で AI Agent を起動する | `src/codex-cli.cjs`, `extension.js` | `tests/codex-cli.test.cjs`, `docs/vscode-verification-guide.md` |
+| 非 Git folder でも Codex CLI 接続を起動できる | `src/codex-cli.cjs`, `extension.js` | `tests/codex-cli.test.cjs`, `docs/manual-test.md`, `docs/vscode-verification-guide.md`, `Issues/0023-git-codex-cli.md` |
 | VS Code PowerShell の `rg.exe` / `gh.exe` 不足、可読性、UTF-8 を補う | `src/codex-cli.cjs`, `extension.js`, `package.json` | `tests/codex-cli.test.cjs`, `docs/vscode-verification-guide.md`, `Issues/0011-codex-tool-env-and-selected-work-items.md` |
 | 対象 repo root で Codex を実行する | `src/invocation-target.cjs`, `extension.js` | `tests/invocation-target.test.cjs`, `docs/vscode-verification-guide.md` |
 | QCDS を評価する | `tools/qcds-evaluate.cjs` | `docs/qcds-strict-metrics.json` |

@@ -47,6 +47,7 @@ test('recordCodexSession writes project markdown and jsonl indexes', () => {
   assert.match(markdown, /codex-session-test/);
   assert.match(markdown, /danger-full-access/);
   assert.match(markdown, /issue:Issues\/0001-session-test\.md:1/);
+  assert.match(markdown, /\| 2026-05-12T00:00:00\.000Z \| codex-session-test \| Work Item: Session test \| danger-full-access \| gpt-5\.4 \| high \| issue:Issues\/0001-session-test\.md:1 \| \[prompt\]\(prompt\.md\) \|/);
   assert.equal(JSON.parse(jsonl).id, 'codex-session-test');
   assert.match(issue, /## Codex Sessions/);
   assert.match(issue, /access=danger-full-access/);

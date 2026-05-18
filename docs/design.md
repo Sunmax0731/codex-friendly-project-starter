@@ -113,6 +113,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - Work Item Start 実行前: `promptForCodexRunOptions` が true の場合は model、インテリジェンス、アクセス権限を QuickPick で選択する。
 - 起動直後: OpenAI 公式 prompt guidance を timeout 付きで取得し、本文保存なしの cache を作る。失敗時は fallback guidance を使い、UI と prompt には fallback と表示する。
 - VS Code 内 PowerShell の PATH が不足する場合: extension-launched Codex の launcher で `rg.exe` と `gh.exe` の候補ディレクトリを PATH 先頭に追加し、`Check Codex CLI` で同じ環境を確認する。
+- Terminal mode の cwd が非 Git folder の場合: launcher が cwd から親方向へ `.git` を探索し、見つからない場合だけ `codex exec` に `--skip-git-repo-check` を追加する。Git repo 内では追加しない。
 - Work Item Composer の自然言語反映: Codex CLI が使える場合は read-only `codex exec` で下書きを生成し、失敗時はローカル補完へ戻す。
 - GitHub Issues 取込: public GitHub Issues API 取得に失敗した場合はエラーを表示してローカルファイルを書き換えない。Codex 下書き生成だけに失敗した場合はローカル補完で import を続ける。
 - Issues directory なし: Dashboard の `Issues 初期化` または `Initialize Issues Directory` で `Issues/README.md` を作成する。

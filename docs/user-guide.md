@@ -153,7 +153,9 @@ Command Palette から `Codex Starter: Open Project Starter` を実行する。�
 - `Codex Starter: Send FirstPrompt to VS Code Codex`: 選択式に FirstPrompt を作り、clipboard にコピーして Codex sidebar を開く。
 - `Codex Starter: Send Current Prompt to VS Code Codex`: 現在開いているプロンプト、または選択範囲だけを clipboard にコピーして Codex sidebar を開く。
 
-初回は `Codex Starter: Check Codex CLI` で CLI と補助ツールが見えることを確認する。この command は extension-launched Codex と同じ PATH 補強を使い、`codex --version`、`codex exec --help`、`rg.exe`、`gh.exe`、`gh auth status` を確認する。VS Code 内 PowerShell で `rg.exe` や `gh.exe` が見つからない場合は、`codexFriendlyProjectStarter.codexToolPathPrepend` に追加の配置先を入れる。
+初回は `Codex Starter: Check Codex CLI` で CLI と補助ツールが見えることを確認する。この command は extension-launched Codex と同じ PATH 補強を使い、`codex --version`、`codex exec --help`、`skip-git-repo-check` flag、`rg.exe`、`gh.exe`、`gh auth status` を確認する。VS Code 内 PowerShell で `rg.exe` や `gh.exe` が見つからない場合は、`codexFriendlyProjectStarter.codexToolPathPrepend` に追加の配置先を入れる。
+
+Terminal mode で `.git` を持たない作業フォルダを対象にする場合、launcher は cwd から親方向へ `.git` を探し、見つからないときだけ `codex exec` に `--skip-git-repo-check` を追加する。通常の Git repo 内で起動するときはこの flag を追加しないため、既存 repo の挙動は変わらない。
 
 ## 表示言語
 

@@ -37,6 +37,7 @@ VS Code で新規または既存プロジェクトを開始する際に、Codex 
 - GitHub Issues 取込では、自由フォーマットの GitHub Issue 本文を local format の context / acceptance criteria へ再構成し、TODO / Issue に GitHub Issue 個別リンクを残す。
 - 同じ GitHub Issue URL が既に local TODO / Issue に存在する場合、重複した local work item を作成しない。
 - VS Code 内 PowerShell から拡張が起動する Codex セッションで、`rg.exe` と `gh.exe` の候補ディレクトリを `PATH` に追加し、`Codex Starter: Check Codex CLI` で検出と `gh auth status` を確認できる。PowerShell launcher は UTF-8 と読みやすい改行付き出力を設定する。
+- Terminal mode の `codex exec` は、対象 cwd と親ディレクトリに `.git` が見つからない場合だけ `--skip-git-repo-check` を付け、Git repo では従来の起動引数を維持する。
 - VS Code Codex handoff または Codex CLI 起動時に対象 project の `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を残せる。
 - Work Item が closed にならない場合、blocked 原因を調査する follow-up Issue を作成できる。
 - Permission denied を避けるため、FirstPrompt で Git 書き込み方針を選択でき、Work Item Start では `codexFriendlyProjectStarter.codexGitWritePolicy` に従って Git 書き込みの事前確認または保留を指示できる。

@@ -5,6 +5,7 @@ const {
   buildCodexExecScript,
   buildCodexAppScript,
   buildCodexCheckScript,
+  buildGitRepoCheckBootstrap,
   buildToolPathBootstrap,
   buildPowerShellFileTerminalCommand,
   quotePowerShell
@@ -52,6 +53,10 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /\$env:Path = \$codexToolPath \+ ';' \+ \$codexRemainingPath/);
   assert.match(script, /Get-Content -LiteralPath \$promptFile -Encoding UTF8 -Raw/);
   assert.match(script, /& \$codexExecutable @codexArgs/);
+  assert.match(script, /Join-Path -Path \$codexGitProbe -ChildPath '\.git'/);
+  assert.match(script, /\$codexArgs \+= '--skip-git-repo-check'/);
+  assert.match(script, /Non-Git workspace detected: --skip-git-repo-check enabled/);
+  assert.ok(script.indexOf("$codexArgs += '--skip-git-repo-check'") < script.indexOf("$codexArgs += '-'"));
   assert.match(script, /'exec'/);
   assert.match(script, /'-C'/);
   assert.match(script, /'D:\\AI\\VSCodeExtension\\sample'/);
@@ -73,6 +78,15 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /'-'/);
 });
 
+test('buildGitRepoCheckBootstrap adds skip-git-repo-check only after probing parent directories', () => {
+  const script = buildGitRepoCheckBootstrap('D:\\AI\\scratch').join('\n');
+  assert.match(script, /\$codexWorkspace = 'D:\\AI\\scratch'/);
+  assert.match(script, /while \(\$codexGitProbe\)/);
+  assert.match(script, /Test-Path -LiteralPath \$codexGitMarker/);
+  assert.match(script, /Split-Path -Path \$codexGitProbe -Parent/);
+  assert.match(script, /\$codexArgs \+= '--skip-git-repo-check'/);
+});
+
 test('buildPowerShellFileTerminalCommand launches a visible script file', () => {
   const command = buildPowerShellFileTerminalCommand('D:\\tmp\\run-codex.ps1');
   assert.equal(command, "powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File 'D:\\tmp\\run-codex.ps1'");
@@ -86,6 +100,7 @@ test('app and check scripts use the configured CLI command', () => {
   assert.match(check, /\$codexCommand = 'codex'/);
   assert.match(check, /=== Codex Starter: Codex CLI check ===/);
   assert.match(check, /exec --help/);
+  assert.match(check, /skip-git-repo-check=/);
   assert.match(check, /Get-Command rg\.exe/);
   assert.match(check, /Get-Command gh\.exe/);
   assert.match(check, /gh\.exe auth status/);

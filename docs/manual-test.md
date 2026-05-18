@@ -46,10 +46,11 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 34. コピーした FirstPrompt を VS Code 右側の Codex パネルへ貼り付け、本文に VS Code Codex / Codex CLI 相当のローカル workspace agent 前提、選択した開発手法、Git 書き込み方針が含まれることを確認する。
 35. Settings で `codexFriendlyProjectStarter.codexGitWritePolicy` を `defer` に変更し、任意の Work Item の `Start` で作成される prompt に `Git 書き込みを保留` が含まれることを確認する。
 36. Settings で `codexFriendlyProjectStarter.codexModelChoices`、`codexFriendlyProjectStarter.codexReasoningEffort`、`codexFriendlyProjectStarter.codexSandboxMode`、`codexFriendlyProjectStarter.recordCodexSessions`、`codexFriendlyProjectStarter.promptForCodexRunOptions`、`codexFriendlyProjectStarter.openAiPromptGuidanceOnStartup`、`codexFriendlyProjectStarter.openAiPromptGuidanceTimeoutMs`、`codexFriendlyProjectStarter.codexToolPathPrepend` が表示されることを確認する。`codexFriendlyProjectStarter.workItemDetailMode` は表示されないことを確認する。
-37. Dashboard の `Codex CLI 確認` または Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `=== Codex Starter: Codex CLI check ===`、`codex` version、`exec --help`、`rg.exe=...`、`gh.exe=...`、`gh auth status` が改行付きで表示されることを確認する。日本語が `?` や mojibake に置換されていないことも確認する。
+37. Dashboard の `Codex CLI 確認` または Command Palette から `Codex Starter: Check Codex CLI` を実行し、terminal に `=== Codex Starter: Codex CLI check ===`、`codex` version、`exec --help`、`skip-git-repo-check=True`、`rg.exe=...`、`gh.exe=...`、`gh auth status` が改行付きで表示されることを確認する。日本語が `?` や mojibake に置換されていないことも確認する。
 38. Dashboard の `CodexにPrompt送信` から `現在Promptを送信` を選ぶか、生成した FirstPrompt の untitled Markdown を開いた状態で Command Palette から `Codex Starter: Send Current Prompt to VS Code Codex` を実行する。
 39. 確認ダイアログで workspace root と access を確認し、必要な場合だけ `Copy & Open Codex` を選択する。
 40. 右側の VS Code Codex sidebar が開き、clipboard にプロンプトが入ることを確認する。Terminal mode に切り替えた場合だけ `codex exec` が起動することを確認する。
+41. Terminal mode で `.git` を持たない一時フォルダを workspace または対象 cwd にして Work Item / Current Prompt を起動し、terminal の `Codex exec` banner 後に `Non-Git workspace detected: --skip-git-repo-check enabled` が表示され、既存 Git repo 内の起動では同じ行が表示されないことを確認する。
 
 詳細な確認項目は docs/vscode-verification-guide.md を参照する。
 

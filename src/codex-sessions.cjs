@@ -50,8 +50,7 @@ function sessionMarkdownRow(rootPath, record) {
     ? record.workItems.map((item) => item.relativePath ? `${item.kind}:${item.relativePath}${item.lineNumber ? ':' + item.lineNumber : ''}` : item.title).join('<br>')
     : '-';
   const prompt = record.promptFilePath ? markdownPathLink(rootPath, record.promptFilePath, 'prompt') : '-';
-  return [
-    '|',
+  const cells = [
     markdownCell(record.timestamp),
     markdownCell(record.id),
     markdownCell(record.sourceLabel),
@@ -59,9 +58,9 @@ function sessionMarkdownRow(rootPath, record) {
     markdownCell(run.model || 'default'),
     markdownCell(run.modelReasoningEffort || 'default'),
     markdownCell(targets),
-    markdownCell(prompt),
-    '|'
-  ].join(' ') + '\n';
+    markdownCell(prompt)
+  ];
+  return `| ${cells.join(' | ')} |\n`;
 }
 
 function appendSessionReferenceToWorkItems(rootPath, record) {

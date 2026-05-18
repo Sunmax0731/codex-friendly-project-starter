@@ -222,6 +222,8 @@ Work Item Composer の自然言語反映では、拡張が prompt file、JSON sc
 
 extension-launched Codex PowerShell セッションは、PATH 補強前に `codexFriendlyProjectStarter.codexCliPath` を解決して Codex CLI 本体を固定する。その後、`codexFriendlyProjectStarter.codexToolPathPrepend`、Codex bundled ripgrep の既定候補、`E:\DevEnv\GitHubCLI`、`E:\DevEnv\ripgrep`、`C:\Program Files\GitHub CLI`、絶対指定された `codexCliPath` の親ディレクトリを重複排除して `PATH` の先頭へ追加する。候補の優先順が保たれるように PowerShell 側では逆順に処理してから prepend し、存在しない候補は `Test-Path` で無視する。これにより VS Code 内 PowerShell で `codex` が起動された場合でも、Codex CLI 本体の解決先を変えずに、Codex が内部で使う `rg.exe` と GitHub 操作用の `gh.exe` を見つけやすくする。
 
+`codex exec` launcher は `-C` に渡す cwd から親ディレクトリへ `.git` を探索する。`.git` が見つからない場合だけ `--skip-git-repo-check` を stdin の `-` より前に追加し、非 Git folder での Codex CLI 接続を許可する。`.git` が見つかる通常の Git repo では `--skip-git-repo-check` を追加せず、既存の Git repo 内起動挙動を維持する。`Codex Starter: Check Codex CLI` は `codex exec --help` の内容から `skip-git-repo-check` flag の有無も表示する。
+
 FirstPrompt に対象 repo path が含まれる場合は、その path を解決して `codex exec -C` の root を選ぶ。対象 repo が未作成なら、最も近い既存親ディレクトリを root にする。例: `D:\AI\ChromeExtension\movie-loop-tool` が未作成なら `D:\AI\ChromeExtension` を root にする。
 
 Work Item の `Start` では、選択 item の Markdown 本文とリンク先の Issue 本文を読み込み、`README.md`、`AGENTS.md`、`SKILL.md`、選択 work item の確認順、TODO を入口にする進め方、完了時の TODO / Issue 更新条件、Git 書き込み方針、blocked handling を含む開始プロンプトを生成する。生成した prompt は通常の `invokeCodexAgent` と同じ確認ダイアログ、access、model/profile 設定を使い、既定では clipboard + VS Code Codex sidebar に渡す。Terminal mode では `codex exec` に渡す。
