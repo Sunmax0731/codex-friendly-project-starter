@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "command": "npm run platform:gate",
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-07-05T08:02:10.230Z",
+      "finishedAt": "2026-07-05T08:02:10.735Z",
+      "stdout": "\n> codex-friendly-project-starter@0.1.0 platform:gate\n> node tools/platform-runtime-gate.mjs\n\n{\"product\":\"codex-friendly-project-starter\",\"platform\":\"vscode-extension\",\"pass\":true}\n",
+      "stderr": ""
+    },
+    {
+      "command": "npm run release:check",
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-07-05T08:02:10.735Z",
+      "finishedAt": "2026-07-05T08:02:11.281Z",
+      "stdout": "\n> codex-friendly-project-starter@0.1.0 release:check\n> node tools/vsix-readiness.mjs\n\n{\"product\":\"codex-friendly-project-starter\",\"version\":\"0.1.0\",\"pass\":true}\n",
+      "stderr": ""
+    }
+  ]
+}

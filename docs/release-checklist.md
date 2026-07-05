@@ -40,9 +40,10 @@ GitHub prerelease はこの初期実装では作成しない。Public repo と `
 
 ## 2026-07-05 Phase 60 package refresh
 
-- `npx --yes @vscode/vsce package --out dist\codex-friendly-project-starter-0.1.0.vsix` -> generated 33 files / 125237 bytes。
-- SHA256 -> `1025AD7AC64D9E9E9AD5B3E9878458DB20A1C112481DFCF621AF8FFCA1B957EA`。
+- `npx --yes @vscode/vsce package --out dist\codex-friendly-project-starter-0.1.0.vsix` -> generated 33 files / 125523 bytes。
+- SHA256 -> `CFC9E8EAEC98E87C5A6207CAB48CE0A520CDD5D6B333A746F011D13860BF9E8F`。
 - `.vscodeignore` を更新し、`.codexflow/`、`prompts/`、`tmp/` が VSIX に含まれないことを確認した。
+- `.gitignore` に `tmp/` を追加し、ユーザー提供設計パッケージを削除せず worktree を clean にできるようにした。
 - `E:\DevEnv\VSCode\App\bin\code.cmd --install-extension ... --force` -> installed successfully。
 - `code --list-extensions --show-versions` -> `sunmax0731.codex-friendly-project-starter@0.1.0` を確認した。
 - 実 VS Code UI のクリック QA は未確認のまま残す。確認できていない `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` を completed とは扱わない。

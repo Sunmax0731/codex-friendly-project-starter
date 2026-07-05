@@ -78,7 +78,8 @@ code
 
 - `npx --yes @vscode/vsce package --out dist\codex-friendly-project-starter-0.1.0.vsix` を再実行した。
 - 初回再生成時に `.vscodeignore` が `.codexflow/`、`prompts/`、`tmp/` を除外していないことを確認したため、VSIX に repo-local flow state とユーザー提供 `tmp/` が入らないよう修正した。
-- 再生成後の VSIX は 33 files / 125237 bytes、SHA256 `1025AD7AC64D9E9E9AD5B3E9878458DB20A1C112481DFCF621AF8FFCA1B957EA`。
+- 再生成後の VSIX は 33 files / 125523 bytes、SHA256 `CFC9E8EAEC98E87C5A6207CAB48CE0A520CDD5D6B333A746F011D13860BF9E8F`。
+- `tmp/` は `.gitignore` に追加し、ユーザー提供設計パッケージを削除せず worktree を clean にできるようにした。
 - `E:\DevEnv\VSCode\App\bin\code.cmd --install-extension ... --force` で CLI install を確認し、`sunmax0731.codex-friendly-project-starter@0.1.0` が表示されることを確認した。
 - インストール先に `.codexflow`、`tmp`、`prompts`、`docs`、`tests`、`tools`、`Issues`、`Tasks` が含まれないことを確認した。
 - 実 VS Code UI のクリック QA は引き続き未確認のため、Codex Flow dashboard / prompt copy / latest handoff / Work Dashboard Codex Flow actions は completed として扱わない。

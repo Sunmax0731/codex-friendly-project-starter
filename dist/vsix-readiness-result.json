@@ -6,8 +6,8 @@
   "manualPackage": "generated-by-codex",
   "vsixArtifact": {
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 125237,
-    "sha256": "1025AD7AC64D9E9E9AD5B3E9878458DB20A1C112481DFCF621AF8FFCA1B957EA"
+    "sizeBytes": 125523,
+    "sha256": "CFC9E8EAEC98E87C5A6207CAB48CE0A520CDD5D6B333A746F011D13860BF9E8F"
   },
   "checks": [
     {

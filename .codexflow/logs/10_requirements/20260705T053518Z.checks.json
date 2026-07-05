@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "command": "node --test tests/default-docs.test.cjs tests/invocation-target.test.cjs",
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-07-05T05:43:06.971Z",
+      "finishedAt": "2026-07-05T05:43:07.226Z",
+      "stdout": "✔ renderDefaultDocs includes D:\\AI source docs, hierarchical agent docs, phase skills, and Issues (5.4541ms)\n✔ ensureDefaultProjectDocs writes missing files and preserves existing files by default (32.3741ms)\n✔ Codex Flow scaffold is created by its own helper (32.6919ms)\n✔ collectDefaultDocSources reports common and domain source paths (2.0935ms)\n✔ repositoryPathFromInput builds a domain target path (1.3502ms)\n✔ extractRepositoryPathFromPrompt reads the primary FirstPrompt target path (0.4451ms)\n✔ extractRepositoryPathFromPrompt ignores IDEAS and legacy Claude fallback paths (0.5997ms)\n✔ nearestExistingDirectory uses the nearest parent for a new repo path (1.6408ms)\n✔ resolveInvocationTarget prefers input and reports a parent cwd (0.7194ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 161.3575\n",
+      "stderr": ""
+    }
+  ]
+}

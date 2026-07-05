@@ -4,4 +4,4 @@ coverage/
 *.vsix
 .vscode-test/
 dist/*.tmp
-
+tmp/
