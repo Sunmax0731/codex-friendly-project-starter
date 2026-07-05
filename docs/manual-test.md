@@ -85,3 +85,20 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 - 自動テスト、QCDS、platform runtime gate、docs ZIP 生成は `npm test` で確認する。
 - 実 VS Code UI の手動操作はユーザー環境での確認項目として残す。
+
+## 2026-07-05 Codex Flow QA 実施記録
+
+- 実施日時: 2026-07-05 11:04-11:17 JST
+- 対象 branch: `codex/codex-flow-qa-smoke`
+- Extension Host: `code --new-window --user-data-dir=.vscode-test/codex-flow-qa-user-data --extensions-dir=.vscode-test/codex-flow-qa-extensions --extensionDevelopmentPath=D:\AI\VSCodeExtension\codex-friendly-project-starter D:\AI\VSCodeExtension\codex-friendly-project-starter` で起動した。
+- 起動確認: `code --status --user-data-dir .vscode-test\codex-flow-qa-user-data` で `[Extension Development Host]` window、extension-host process、workspace `codex-friendly-project-starter` を確認した。
+- Activation 確認: `.vscode-test/codex-flow-qa-user-data/logs/20260705T110454/window1/exthost/exthost.log` に `ExtensionService#_doActivateExtension sunmax0731.codex-friendly-project-starter` が記録された。
+- 未実施: Command Palette / Dashboard 上の `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` ボタン操作は、Windows Computer Use helper の Node REPL 初期化が `sandboxCwd must use the file URI scheme` で失敗したため自動操作できず未実施。
+- Codex Flow scaffold: repo-local に `.codexflow/flow.json`、`.codexflow/state.json`、`prompts/codexflow/*.md`、`docs/handoff/template.md`、`docs/handoff/latest.md` を生成した。smoke 用に `00_smoke` phase を先頭に追加し、実作業 phase は `10_requirements` 以降に残した。
+- Codex CLI smoke: `src/codex-flow-runner.cjs` の background runner を実 Codex CLI 0.130.0-alpha.5 で実行した。sandbox は `read-only`、check は `node -e "process.exit(0)"`。
+- 生成確認: `.codexflow/logs/00_smoke/20260705T020700Z.prompt.md`、`.jsonl`、`.final.md`、`.checks.json`、`.launcher.ps1` が生成された。
+- state / session 確認: `.codexflow/state.json` に `00_smoke: succeeded`、`docs/codex-sessions.jsonl` に `Codex Flow smoke: 00_smoke` が追記された。
+- smoke 結果: final message は `Codex CLI smoke reached the model: yes`、`Repository edits made by the model: none requested`。checks は `passed`。
+- 不具合修正: smoke で、fallback handoff 生成時に `docs/handoff/latest.md` が初期内容のまま残る問題を確認した。`ensureFallbackHandoff` を修正し、phase handoff を `latest.md` に同期する回帰テストを追加した。
+- 不具合修正: Windows PowerShell の `Tee-Object -FilePath` が JSONL を UTF-16LE で保存しうることを確認した。Codex CLI launcher は JSONL を UTF-8 で追記する実装へ変更し、runner 側にも UTF-16LE / 非 JSON 行の sanitizer 回帰テストを追加した。既存 smoke の `.jsonl` は UTF-8 の有効な JSONL として検証済み。
+- 修正後 smoke: `20260705T021647Z` の attempt 2 を修正後 launcher で再実行し、`.prompt.md`、`.jsonl`、`.final.md`、`.checks.json`、`.launcher.ps1` の再生成、state 更新、`docs/codex-sessions.jsonl` 追記を確認した。`.jsonl` は UTF-8 として parse 済みで、Codex CLI の process cleanup 行は sanitizer の `codex-flow-runner-non-json-output` 診断イベントとして保持された。

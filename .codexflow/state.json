@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "flowId": "codex-friendly-project-starter",
+  "updatedAt": "2026-07-05T02:17:28.460Z",
+  "currentPhaseId": "",
+  "phaseStatus": {
+    "00_smoke": "succeeded"
+  },
+  "phaseRuns": [
+    {
+      "runId": "flow-run-20260705T020700Z-o05vwz",
+      "phaseId": "00_smoke",
+      "phaseName": "Codex Flow background runner smoke",
+      "attempt": 1,
+      "status": "succeeded",
+      "startedAt": "2026-07-05T02:07:00.584Z",
+      "finishedAt": "2026-07-05T02:07:36.521Z",
+      "checksStatus": "passed",
+      "promptPath": ".codexflow/logs/00_smoke/20260705T020700Z.prompt.md",
+      "jsonlPath": ".codexflow/logs/00_smoke/20260705T020700Z.jsonl",
+      "finalMessagePath": ".codexflow/logs/00_smoke/20260705T020700Z.final.md",
+      "checksPath": ".codexflow/logs/00_smoke/20260705T020700Z.checks.json",
+      "launcherPath": ".codexflow/logs/00_smoke/20260705T020700Z.launcher.ps1",
+      "handoffPath": "docs/handoff/00_smoke.md",
+      "exitCode": 0
+    },
+    {
+      "runId": "flow-run-20260705T021647Z-6ur2hp",
+      "phaseId": "00_smoke",
+      "phaseName": "Codex Flow background runner smoke",
+      "attempt": 2,
+      "status": "succeeded",
+      "startedAt": "2026-07-05T02:16:47.433Z",
+      "finishedAt": "2026-07-05T02:17:28.460Z",
+      "checksStatus": "passed",
+      "promptPath": ".codexflow/logs/00_smoke/20260705T021647Z.prompt.md",
+      "jsonlPath": ".codexflow/logs/00_smoke/20260705T021647Z.jsonl",
+      "finalMessagePath": ".codexflow/logs/00_smoke/20260705T021647Z.final.md",
+      "checksPath": ".codexflow/logs/00_smoke/20260705T021647Z.checks.json",
+      "launcherPath": ".codexflow/logs/00_smoke/20260705T021647Z.launcher.ps1",
+      "handoffPath": "docs/handoff/00_smoke.md",
+      "exitCode": 0
+    }
+  ]
+}

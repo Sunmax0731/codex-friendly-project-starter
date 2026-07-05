@@ -7,7 +7,8 @@ const { defaultCodexFlow, ensureCodexFlowScaffold } = require('../src/codex-flow
 const {
   prepareCodexFlowPhaseRun,
   runCodexFlowChecks,
-  buildCodexFlowRepairPrompt
+  buildCodexFlowRepairPrompt,
+  sanitizeCodexJsonlOutput
 } = require('../src/codex-flow-runner.cjs');
 
 test('prepareCodexFlowPhaseRun writes prompt and log paths under phase directory', async () => {
@@ -51,6 +52,47 @@ test('runCodexFlowChecks reports pass and failure results', async () => {
   });
   assert.equal(failed.status, 'failed');
   assert.notEqual(failed.results[0].exitCode, 0);
+});
+
+test('sanitizeCodexJsonlOutput preserves valid events and records non-json output', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-jsonl-'));
+  const jsonlPath = path.join(root, 'run.jsonl');
+  fs.writeFileSync(jsonlPath, [
+    JSON.stringify({ type: 'turn.started' }),
+    'SUCCESS: child process was terminated.',
+    JSON.stringify({ type: 'turn.completed' }),
+    ''
+  ].join('\n'), 'utf8');
+  const result = await sanitizeCodexJsonlOutput(jsonlPath);
+  const lines = fs.readFileSync(jsonlPath, 'utf8').trim().split(/\r?\n/).map((line) => JSON.parse(line));
+  assert.equal(result.changed, true);
+  assert.equal(lines.length, 3);
+  assert.equal(lines[0].type, 'turn.started');
+  assert.equal(lines[1].type, 'turn.completed');
+  assert.equal(lines[2].type, 'codex-flow-runner-non-json-output');
+  assert.deepEqual(lines[2].lines, ['SUCCESS: child process was terminated.']);
+});
+
+test('sanitizeCodexJsonlOutput can recover UTF-16LE JSONL written by Windows PowerShell', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-jsonl-utf16-'));
+  const jsonlPath = path.join(root, 'run.jsonl');
+  const content = [
+    JSON.stringify({ type: 'turn.started' }),
+    'SUCCESS: child process was terminated.',
+    JSON.stringify({ type: 'turn.completed' }),
+    ''
+  ].join('\r\n');
+  fs.writeFileSync(jsonlPath, Buffer.concat([
+    Buffer.from([0xff, 0xfe]),
+    Buffer.from(content, 'utf16le')
+  ]));
+  const result = await sanitizeCodexJsonlOutput(jsonlPath);
+  const lines = fs.readFileSync(jsonlPath, 'utf8').trim().split(/\r?\n/).map((line) => JSON.parse(line));
+  assert.equal(result.changed, true);
+  assert.equal(lines.length, 3);
+  assert.equal(lines[0].type, 'turn.started');
+  assert.equal(lines[1].type, 'turn.completed');
+  assert.deepEqual(lines[2].lines, ['SUCCESS: child process was terminated.']);
 });
 
 test('buildCodexFlowRepairPrompt includes failed prompt, final message, and checks', () => {

@@ -56,7 +56,9 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /Get-Content -LiteralPath \$promptFile -Encoding UTF8 -Raw/);
   assert.match(script, /& \$codexExecutable @codexArgs/);
   assert.match(script, /\$jsonlFile = 'D:\\tmp\\flow\.jsonl'/);
-  assert.match(script, /Tee-Object -FilePath \$jsonlFile/);
+  assert.match(script, /Remove-Item -LiteralPath \$jsonlFile -Force/);
+  assert.match(script, /ForEach-Object \{ \[System\.IO\.File\]::AppendAllText\(\$jsonlFile/);
+  assert.doesNotMatch(script, /Tee-Object -FilePath \$jsonlFile/);
   assert.match(script, /Join-Path -Path \$codexGitProbe -ChildPath '\.git'/);
   assert.match(script, /\$codexArgs \+= '--skip-git-repo-check'/);
   assert.match(script, /Non-Git workspace detected: --skip-git-repo-check enabled/);

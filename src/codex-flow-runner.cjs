@@ -126,6 +126,7 @@ async function runCodexFlowPhaseWithCodexCli(input = {}) {
     executionError = String(error?.message || error);
     await appendExecutionError(prepared.jsonlPath, error);
   }
+  await sanitizeCodexJsonlOutput(prepared.jsonlPath);
   const checks = exitCode === 0
     ? await runCodexFlowChecks({
       rootPath: prepared.rootPath,
@@ -296,6 +297,46 @@ async function appendExecutionError(jsonlPath, error) {
   await fs.promises.appendFile(jsonlPath, JSON.stringify(payload) + '\n', 'utf8').catch(() => {});
 }
 
+async function sanitizeCodexJsonlOutput(jsonlPath) {
+  const content = await readTextFileFlexible(jsonlPath);
+  if (!content) return { changed: false, invalidLines: [] };
+  const validLines = [];
+  const invalidLines = [];
+  for (const line of content.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    try {
+      JSON.parse(line);
+      validLines.push(line);
+    } catch {
+      invalidLines.push(line);
+    }
+  }
+  if (!invalidLines.length) return { changed: false, invalidLines: [] };
+  validLines.push(JSON.stringify({
+    type: 'codex-flow-runner-non-json-output',
+    lines: invalidLines
+  }));
+  await fs.promises.writeFile(jsonlPath, validLines.join('\n') + '\n', 'utf8');
+  return { changed: true, invalidLines };
+}
+
+async function readTextFileFlexible(filePath) {
+  const buffer = await fs.promises.readFile(filePath).catch(() => Buffer.alloc(0));
+  if (!buffer.length) return '';
+  if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xfe) {
+    return buffer.subarray(2).toString('utf16le').replace(/^\uFEFF/, '');
+  }
+  const sample = buffer.subarray(0, Math.min(buffer.length, 2000));
+  let nulCount = 0;
+  for (const byte of sample) {
+    if (byte === 0) nulCount += 1;
+  }
+  if (nulCount > sample.length / 4) {
+    return buffer.toString('utf16le').replace(/^\uFEFF/, '');
+  }
+  return buffer.toString('utf8').replace(/^\uFEFF/, '');
+}
+
 function nextAttemptForPhase(state, phaseId) {
   const runs = normalizeCodexFlowState(state).phaseRuns.filter((run) => run.phaseId === phaseId);
   return runs.length + 1;
@@ -327,6 +368,7 @@ module.exports = {
   runCodexFlowPhaseWithCodexCli,
   runCodexFlowChecks,
   buildCodexFlowRepairPrompt,
+  sanitizeCodexJsonlOutput,
   readReferencedDocs,
   collectGitContext
 };

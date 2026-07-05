@@ -42,6 +42,7 @@ function buildCodexExecScript(options = {}) {
     `if (-not $codexExecutable) { $codexExecutable = (Get-Command $codexCommand -ErrorAction Stop).Source }`,
     `$promptFile = ${quotePowerShell(options.promptFilePath)}`,
     outputJsonlPath ? `$jsonlFile = ${quotePowerShell(outputJsonlPath)}` : '',
+    outputJsonlPath ? `if (Test-Path -LiteralPath $jsonlFile) { Remove-Item -LiteralPath $jsonlFile -Force }` : '',
     `$codexArgs = @(`,
     ...args.map((arg) => `  ${quotePowerShell(arg)}`),
     `)`,
@@ -58,7 +59,7 @@ function buildCodexExecScript(options = {}) {
     `Write-Host ''`,
     `Write-Host '--- Codex CLI output ---'`,
     outputJsonlPath
-      ? `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs | Tee-Object -FilePath $jsonlFile`
+      ? `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs | ForEach-Object { [System.IO.File]::AppendAllText($jsonlFile, ($_ + [Environment]::NewLine), $utf8NoBom); $_ }`
       : `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs`,
     `Write-Host ''`,
     `Write-Host '--- Codex CLI finished ---'`,

@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "command": "node -e \"process.exit(0)\"",
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-07-05T02:17:28.342Z",
+      "finishedAt": "2026-07-05T02:17:28.458Z",
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

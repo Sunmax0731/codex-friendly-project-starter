@@ -383,17 +383,20 @@ function ensureFallbackHandoff(rootPath, flow, phase, runRecord = {}, finalMessa
   const latestPath = resolveFlowPath(rootPath, latestRelative);
   const handoffExists = handoffPath && fs.existsSync(handoffPath);
   const latestExists = latestPath && fs.existsSync(latestPath);
-  if (handoffExists && latestExists) return { handoffPath, latestPath, created: false };
-  const content = fallbackHandoffContent(phase, runRecord, finalMessage);
+  const content = handoffExists
+    ? fs.readFileSync(handoffPath, 'utf8')
+    : fallbackHandoffContent(phase, runRecord, finalMessage);
   if (!handoffExists) {
     fs.mkdirSync(path.dirname(handoffPath), { recursive: true });
     fs.writeFileSync(handoffPath, content, 'utf8');
   }
-  if (!latestExists) {
+  const latestContent = latestExists ? fs.readFileSync(latestPath, 'utf8') : '';
+  if (!latestExists || latestContent !== content) {
     fs.mkdirSync(path.dirname(latestPath), { recursive: true });
     fs.writeFileSync(latestPath, content, 'utf8');
+    return { handoffPath, latestPath, created: true };
   }
-  return { handoffPath, latestPath, created: true };
+  return { handoffPath, latestPath, created: !handoffExists };
 }
 
 function phaseHandoffPath(flow, phase = {}) {

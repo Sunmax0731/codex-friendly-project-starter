@@ -15,6 +15,7 @@ const {
   assembleCodexFlowPhasePrompt,
   createCodexFlowRunRecord,
   updateCodexFlowStateAfterRun,
+  ensureFallbackHandoff,
   phaseHandoffPath,
   isSafeWorkspaceRelativePath
 } = require('../src/codex-flow.cjs');
@@ -113,4 +114,47 @@ test('assembleCodexFlowPhasePrompt includes metadata, handoff, docs, and require
   assert.match(prompt, /README\.md/);
   assert.match(prompt, new RegExp(phaseHandoffPath(flow, phase).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(prompt, /git push/);
+});
+
+test('ensureFallbackHandoff refreshes latest when phase handoff is missing', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-handoff-'));
+  const flow = defaultCodexFlow(root);
+  const phase = flow.phases[0];
+  fs.mkdirSync(path.join(root, 'docs', 'handoff'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'docs', 'handoff', 'latest.md'), '# Handoff: initial\n', 'utf8');
+  const run = createCodexFlowRunRecord({
+    phase,
+    status: 'succeeded',
+    finishedAt: '2026-07-05T00:00:00.000Z',
+    checksStatus: 'passed',
+    promptPath: '.codexflow/logs/10_requirements/run.prompt.md',
+    finalMessagePath: '.codexflow/logs/10_requirements/run.final.md',
+    checksPath: '.codexflow/logs/10_requirements/run.checks.json'
+  });
+  const result = ensureFallbackHandoff(root, flow, phase, run, 'Smoke succeeded.');
+  const phaseHandoff = fs.readFileSync(result.handoffPath, 'utf8');
+  const latestHandoff = fs.readFileSync(result.latestPath, 'utf8');
+  assert.equal(result.created, true);
+  assert.match(phaseHandoff, /Smoke succeeded/);
+  assert.equal(latestHandoff, phaseHandoff);
+});
+
+test('ensureFallbackHandoff syncs an existing phase handoff to latest', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-existing-handoff-'));
+  const flow = defaultCodexFlow(root);
+  const phase = flow.phases[0];
+  const phasePath = path.join(root, ...phaseHandoffPath(flow, phase).split('/'));
+  const latestPath = path.join(root, 'docs', 'handoff', 'latest.md');
+  fs.mkdirSync(path.dirname(phasePath), { recursive: true });
+  fs.writeFileSync(phasePath, '# Handoff: 10_requirements\n\nPhase content.\n', 'utf8');
+  fs.writeFileSync(latestPath, '# Handoff: initial\n', 'utf8');
+  const run = createCodexFlowRunRecord({
+    phase,
+    status: 'succeeded',
+    finishedAt: '2026-07-05T00:00:00.000Z',
+    checksStatus: 'passed'
+  });
+  const result = ensureFallbackHandoff(root, flow, phase, run, '');
+  assert.equal(result.created, true);
+  assert.equal(fs.readFileSync(latestPath, 'utf8'), fs.readFileSync(phasePath, 'utf8'));
 });

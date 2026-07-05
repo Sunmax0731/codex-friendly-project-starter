@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "flowId": "codex-friendly-project-starter",
+  "name": "codex-friendly-project-starter",
+  "mode": "new-session-handoff",
+  "targetRoot": ".",
+  "sandbox": "workspace-write",
+  "stopOnFailure": true,
+  "maxRepairAttempts": 1,
+  "autoCommit": false,
+  "docs": [
+    "README.md",
+    "AGENTS.md",
+    "SKILL.md",
+    "TODO.md",
+    "docs/requirements.md",
+    "docs/specification.md",
+    "docs/design.md",
+    "docs/architecture.md",
+    "docs/implementation-plan.md",
+    "docs/test-plan.md",
+    "docs/manual-test.md",
+    "docs/traceability-matrix.md"
+  ],
+  "handoff": {
+    "directory": "docs/handoff",
+    "latest": "docs/handoff/latest.md",
+    "template": "docs/handoff/template.md"
+  },
+  "logs": {
+    "directory": ".codexflow/logs",
+    "jsonl": true
+  },
+  "phases": [
+    {
+      "id": "00_smoke",
+      "name": "Codex Flow background runner smoke",
+      "prompt": "prompts/codexflow/00_smoke.md",
+      "checks": [
+        "node -e \"process.exit(0)\""
+      ]
+    },
+    {
+      "id": "10_requirements",
+      "name": "Requirements confirmation",
+      "prompt": "prompts/codexflow/10_requirements.md",
+      "checks": [
+        "node --test tests/default-docs.test.cjs tests/invocation-target.test.cjs"
+      ]
+    },
+    {
+      "id": "20_design",
+      "name": "Design and architecture",
+      "prompt": "prompts/codexflow/20_design.md",
+      "checks": [
+        "node --test tests/work-items.test.cjs tests/markdown-webview.test.cjs"
+      ]
+    },
+    {
+      "id": "30_implementation",
+      "name": "Implementation",
+      "prompt": "prompts/codexflow/30_implementation.md",
+      "checks": [
+        "node --test tests/*.test.cjs"
+      ]
+    },
+    {
+      "id": "40_test_refactor",
+      "name": "Test and refactor",
+      "prompt": "prompts/codexflow/40_test_refactor.md",
+      "checks": [
+        "node --test tests/*.test.cjs"
+      ]
+    },
+    {
+      "id": "50_release_check",
+      "name": "Release check",
+      "prompt": "prompts/codexflow/50_release_check.md",
+      "checks": [
+        "npm run platform:gate",
+        "npm run release:check"
+      ]
+    }
+  ]
+}
