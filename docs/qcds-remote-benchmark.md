@@ -12,4 +12,5 @@
 - metrics は `docs/qcds-strict-metrics.json` に機械可読で残す。
 - platform runtime gate は `dist/platform-runtime-gate-result.json` に残す。
 - release evidence は `docs/release-evidence.json` に残す。
-
+- Codex Flow は remote benchmark の multi-step handoff 証跡に対応する比較軸として扱う。`.codexflow/logs/**`、`docs/handoff/*.md`、`docs/codex-sessions.jsonl`、`Issues/0024-codex-flow-orchestrator.md` を、単発 prompt ではなく工程連鎖の evidence として確認する。
+- Default Docs scaffold とは別に評価する。docs scaffold は project 初期文書の再現性、Codex Flow scaffold は phase 実行、handoff、logs、repair の再現性を測る。

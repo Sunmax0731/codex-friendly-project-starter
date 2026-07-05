@@ -38,6 +38,8 @@ npm test
 - Codex Flow runner が `--json`、final message、JSONL、checks を log path に保存し、state と session record に flow metadata を残す。
 - Codex Flow Dashboard が missing flow、phase status、Run Next / Run All / Copy Prompt / Repair action を表示する。
 - Work Dashboard から Codex Flow Dashboard、Run Next、Run All、Initialize Flow に遷移できる。
+- `TODO.md` / `Issues/0024-codex-flow-orchestrator.md` / QCDS tag から Codex Flow の work item と docs 統合範囲を scan できる。
+- Default Docs scaffold は `.codexflow/` を生成せず、Codex Flow scaffold helper だけが `.codexflow/flow.json` と `prompts/codexflow/*.md` を生成する。
 - FirstPrompt 履歴が workspace storage に保存、復元、削除できる。
 - `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から project name 候補を補完し、文字化け候補を除外できる。
 - QCDS metrics の grade が定義済み値だけを使う。
@@ -67,6 +69,18 @@ npm test
 - `Codex Starter: Repair Failed Codex Flow Phase` が failed logs から repair prompt を生成する。
 - `Codex Starter: Open Latest Codex Flow Handoff` が `docs/handoff/latest.md` を開く。
 - `Codex Starter: Open Markdown WebView` が同じ文書を複数回開いても既存 panel を active にする。
+
+## Phase 40 指定検証
+
+```powershell
+node --test tests/workspace-docs.test.cjs tests/work-items.test.cjs tests/default-docs.test.cjs
+```
+
+確認内容:
+
+- Agent docs scan が docs 更新後も `docs/design.md` などを分類できる。
+- Work Items scan が `TODO.md` と `Issues/0024-codex-flow-orchestrator.md` の completed 状態、phase、QCDS tag を解釈できる。
+- Default Docs scaffold と Codex Flow scaffold の分離を `tests/default-docs.test.cjs` で確認できる。
 
 ## 手動テスト
 

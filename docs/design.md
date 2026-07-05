@@ -99,6 +99,7 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - `Codex Starter: Scaffold D:\AI Default Docs` は QuickPick と InputBox で domain、repo name、goal、overwrite policy を選ぶ。
 - 生成後は `README.md` を Markdown WebView で表示し、Agent Docs / Work Items を refresh する。
 - root `AGENTS.md` は `agents/phases/*/AGENTS.md` と作業種類別 Skill を案内し、root `SKILL.md` は `skills/01-requirements` から `skills/06-release` までの工程別 Skill と `skills/work-types/*/SKILL.md` へリンクする。
+- Default Docs scaffold は project docs と Issue 初期候補の生成に限定し、`.codexflow/`、`prompts/codexflow/`、`docs/handoff/latest.md` は作らない。Codex Flow scaffold は初回セットアップの別 action とし、Default Docs で生成した docs を phase prompt の参照 docs として再利用する。
 
 ### FirstPrompt Webview
 

@@ -122,3 +122,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 全体検証: `npm test` -> 93 tests passed。docs ZIP 生成、QCDS `S+` / 100、platform runtime gate、VSIX readiness、closed alpha guard も passed。
 - GUI 未実施理由: Windows Computer Use helper を再試行したが、`sandboxCwd must use the file URI scheme` で初期化できず、実 VS Code UI のクリック QA は今回も未実施。
 - 残確認: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` は、Computer Use helper が動く環境または人手でクリックできる VS Code 画面で確認する。
+
+## 2026-07-05 Phase 40 docs / Work Items / QCDS 統合記録
+
+- 実施日時: 2026-07-05 12:21 JST
+- 対象 branch: `codex/40-docs-work-items-integration`
+- 実施範囲: `TODO.md`、`Issues/0024-codex-flow-orchestrator.md`、architecture / design / implementation / test / user / traceability docs、QCDS docs、release readiness docs、handoff を Codex Flow 統合として同期した。
+- 指定検証: `node --test tests/workspace-docs.test.cjs tests/work-items.test.cjs tests/default-docs.test.cjs` -> 30 tests passed。
+- release package: Phase 40 指定検証は docs ZIP 生成を含まないため、`dist/codex-friendly-project-starter-docs.zip` は再生成していない。
+- Flow state: `.codexflow/state.json` は `00_smoke: succeeded` の既存状態を維持し、実作業 phase を実行済みに変更していない。
+- GUI 未実施状態: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` の実クリック確認は、Phase 30 から引き続き未実施。確認できていない操作を completed とは扱わない。

@@ -49,6 +49,8 @@ Codex Flow は Work Items の上位 orchestration として扱う。source of tr
 
 Flow の完全自動実行は `codexFriendlyProjectStarter.codexFlowRunner=background` で行う。runner は `codex exec --json -o <final>` の stdout を `.jsonl` に保存し、checks を実行して state を更新する。`terminal` と `vscode-codex` は終了検知をしないため manual-handoff として記録する。
 
+Default Docs scaffold と Codex Flow scaffold は別責務にする。`src/default-docs.cjs` は root docs、`docs/*.md`、`Issues/*.md`、`agents/phases/*/AGENTS.md`、`skills/*/SKILL.md` を生成し、`.codexflow/` や `prompts/codexflow/` は作らない。Codex Flow 初期化だけが `.codexflow/flow.json`、`state.json`、phase prompts、handoff template を生成し、既存 docs を `flow.docs` の参照対象として利用する。
+
 QCDS が `A-` 以下の観点では、`src/work-items.cjs` の QCDS improvement helper が観点、grade、score、checks、linked work items を含む Issue を生成する。同じ `QCDS Improvement Axis` の Issue が存在する場合は重複作成せず、既存 Issue に再確認 notes を追記する。
 
 Markdown WebView は file path を key に WebViewPanel を再利用する。root `AGENTS.md` / `SKILL.md` の統合表示は `src/markdown-webview.cjs` が子階層 docs を読み込んで HTML に追加し、元ファイルへの link は通常の link navigation と同じ経路で扱う。

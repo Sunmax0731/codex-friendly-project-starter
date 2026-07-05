@@ -15,6 +15,7 @@
 - [ ] `GitHub Issues 取込` が public GitHub Issue を local TODO / Issue に取り込み、GitHub Issue URL と phase tag を保持し、legacy Task を新規作成しないことを確認する。
 - [ ] Work Item Composer で clipboard 画像を `Ctrl+V` 貼り付けし、Issue Markdown の `## Attachments` と `Issues/assets/<issue-stem>/` に保存されることを確認する。
 - [ ] `docs/codex-sessions.md` / `.jsonl` と blocked follow-up Issue 作成導線を確認する。
+- [ ] Codex Flow の `.codexflow/flow.json`、`state.json`、`docs/handoff/latest.md`、`.codexflow/logs/**` の扱いと、Default Docs scaffold とは別 action であることを確認する。
 - [ ] `Codex Starter: Check Codex CLI` で `rg.exe`、`gh.exe`、`gh auth status` の確認手順が残っている。
 - [ ] `Open QCDS Status` で QCDS current status と QCDS improvements を確認する。
 - [ ] `Open Markdown WebView` で AGENTS / SKILL / TODO / Issues / docs のリンク遷移と、既存互換の `Tasks/*.md` link 解決を確認する。

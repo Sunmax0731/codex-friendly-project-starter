@@ -44,6 +44,8 @@ Flow artifacts は workspace 内に保存される。
 
 `danger-full-access` と `git push` は既定にならない。auto commit も既定 false で、必要な場合は Flow 定義と設定で明示する。
 
+`D:\AI` 既定 docs 生成とは別の機能です。Default Docs scaffold は `AGENTS.md`、`SKILL.md`、`docs/*.md`、`Issues/*.md`、工程別 agent / skill docs を用意するだけで、`.codexflow/` は作らない。Codex Flow を使う場合は、その後に `Codex Flow 初期化` を実行し、生成済み docs を Flow の参照 docs として使う。
+
 ## TODO / Issue から Codex に着手してもらう
 
 1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue を選ぶ。

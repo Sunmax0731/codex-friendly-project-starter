@@ -54,6 +54,7 @@ code
 - Work Item Composer で clipboard 画像を `Ctrl+V` 貼り付けでき、Issue 作成後に `Issues/assets/<issue-stem>/` と Markdown image link が作られる。
 - Dashboard の `GitHub Issuesインポート` または Command Palette の `GitHub Issues 取込` から、public GitHub Issue を local TODO / Issue へ取り込める。legacy Task は新規作成されない。
 - `docs/codex-sessions.md` / `.jsonl` に起動履歴が記録され、blocked work item から follow-up Issue を作成できる。
+- `Codex Starter: Codex Flow を初期化` と `Codex Starter: Codex Flow Dashboard を開く` が使え、Flow scaffold は `.codexflow/` と `prompts/codexflow/` を作成する。`D:\AI Docs 生成` だけでは `.codexflow/` が作られない。
 - `Codex Starter: Check Codex CLI` が `rg.exe`、`gh.exe`、`gh auth status` を確認する。
 
 ## 記録

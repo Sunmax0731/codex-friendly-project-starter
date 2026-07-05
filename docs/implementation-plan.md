@@ -90,6 +90,14 @@
 - `Codex Flow Dashboard` と Work Dashboard の Flow actions、Command Palette commands、package localization、settings を追加する。
 - repair prompt を生成し、failed phase を同じ phase scope で再実行できるようにする。
 
+## Phase 3.13: Codex Flow docs / Work Items / QCDS 統合
+
+- `Issues/0024-codex-flow-orchestrator.md` と `TODO.md` から Codex Flow の scope、完了条件、QCDS 観点を辿れるようにする。
+- architecture、design、test plan、manual test、user guide、traceability に Codex Flow の repo-local state、handoff、logs、repair、Work Dashboard integration を反映する。
+- QCDS docs に Codex Flow の Quality / Cost / Delivery / Satisfaction 観点を追加し、release readiness では Flow artifacts と handoff の確認を正式配布前の確認項目にする。
+- Default Docs scaffold は `.codexflow/` を生成せず、Codex Flow scaffold が独立して `.codexflow/`、phase prompts、handoff template を生成する関係を docs と tests に明記する。
+- 実 VS Code UI のクリック QA は実施できた場合だけ日時と結果を記録し、未実施の状態を completed と書かない。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

@@ -24,7 +24,8 @@
 - Flow Dashboard
 - Work Dashboard integration
 - repair prompt
-- tests / docs / manual QA
+- tests / docs / QCDS / release readiness / manual QA
+- Default Docs scaffold と Flow scaffold の責務境界
 
 ## Acceptance Criteria
 
@@ -40,14 +41,18 @@
 - [x] `danger-full-access` と auto push が既定になっていない
 - [x] unit tests が追加され、既存 tests が regress していない
 - [x] architecture / design / implementation-plan / test-plan / manual-test / user-guide / traceability が更新されている
+- [x] `TODO.md`、QCDS docs、release readiness から Codex Flow の作業範囲を辿れる
+- [x] `D:\AI` default docs scaffold は `.codexflow/` を作らず、Codex Flow scaffold は独立 helper として扱うことが docs と tests に残っている
 
 ## Validation
 
 - [x] `node --test tests/default-docs.test.cjs tests/invocation-target.test.cjs tests/codex-flow.test.cjs`
 - [x] `node --test tests/codex-cli.test.cjs tests/codex-sessions.test.cjs tests/codex-flow-runner.test.cjs tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs`
+- [x] `node --test tests/workspace-docs.test.cjs tests/work-items.test.cjs tests/default-docs.test.cjs`
 
 ## Notes
 
 - 自動連続実行は VS Code Codex sidebar ではなく Codex CLI background runner を主経路にする。
 - sidebar は prompt copy の半自動 handoff として維持する。
 - Flow state は VS Code globalState ではなく repo-local `.codexflow/state.json` を source of truth にする。
+- Phase 40 では docs / Work Items / QCDS 統合だけを更新した。実 VS Code UI のクリック QA は `sandboxCwd must use the file URI scheme` のため未確認のまま残し、完了扱いにしない。
