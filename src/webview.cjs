@@ -337,6 +337,8 @@ function renderWorkDashboardWebview(nonce, dashboard, options = {}) {
     <div class="actions">
       <div class="action-row">
         <button class="action secondary" data-action="openStarter">${escapeHtml(t('dashboard.firstPrompt', locale))}</button>
+        <button class="action secondary" data-action="openSafeZipAuthoringPrompt">${escapeHtml(t('dashboard.safeZipPrompt', locale))}</button>
+        <button class="action secondary" data-action="copySafeZipAuthoringPrompt">${escapeHtml(t('dashboard.copySafeZipPrompt', locale))}</button>
         <button class="action secondary" data-action="scaffoldDocs">${escapeHtml(t('dashboard.scaffoldDocs', locale))}</button>
         <button class="action secondary" data-action="initializeCodexFlow">${escapeHtml(t('dashboard.initializeCodexFlow', locale))}</button>
         <button class="action secondary" data-action="initializeIssues">${escapeHtml(t('dashboard.initializeIssues', locale))}</button>

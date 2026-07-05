@@ -228,6 +228,8 @@ VS Code の表示言語が日本語の場合、Dashboard、QCDS Status、Markdow
 
 A Codex Flow Package is a ZIP that carries pre-implementation planning material from ChatGPT into the current VS Code workspace. It is a transport format, not a Codex input. Codex CLI is started later from the imported workspace files through Codex Flow runtime prompt generation.
 
+To ask ChatGPT for a safe package, run `Codex Friendly: Open Safe ZIP Authoring Prompt` or `Codex Friendly: Copy Safe ZIP Authoring Prompt`. Paste the prompt into ChatGPT, replace the final development-request placeholder, and ask for the package files. The bundled prompt states that the ZIP is a Codex Flow input package, not a source-code patch package. It requires package files under `docs/**`, `prompts/**`, and `.codexflow/flow.json`; handoff outputs under `docs/handoff/**`; and log outputs under `.codexflow/logs/**`.
+
 Expected ZIP layout:
 
 ```text
@@ -244,7 +246,6 @@ prompts/codexflow/
   20_core_implementation.md
 .codexflow/
   flow.json
-  state.json
 AGENTS.md
 README.codexflow.md
 ```

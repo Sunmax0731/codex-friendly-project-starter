@@ -107,6 +107,7 @@ let lastMarkdownWebview = null;
 const markdownWebviewPanels = new Map();
 const activeCodexFlowRuns = new Map();
 const OPENAI_PROMPT_GUIDANCE_STATE_KEY = 'openAiPromptGuidanceState.v1';
+const SAFE_ZIP_AUTHORING_PROMPT_RESOURCE_PATH = 'resources/reference-prompts/safe-codex-flow-package-authoring.md';
 let codexFlowPackageOutputChannel = null;
 
 function activate(context) {
@@ -142,6 +143,8 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeCodexFlow', () => initializeCodexFlowCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.importCodexFlowPackage', () => importCodexFlowPackageCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.validateCodexFlowPackage', () => validateCodexFlowPackageCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openSafeZipAuthoringPrompt', () => openSafeZipAuthoringPromptCommand(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.copySafeZipAuthoringPrompt', () => copySafeZipAuthoringPromptCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openCodexFlowDashboard', () => openCodexFlowDashboard(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.runNextCodexFlowPhase', () => runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.runAllCodexFlowPhases', () => runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider)),
@@ -888,6 +891,14 @@ async function handleDashboardMessage(args) {
     openStarterWebview(context);
     return;
   }
+  if (message?.type === 'openSafeZipAuthoringPrompt') {
+    await openSafeZipAuthoringPromptCommand(context);
+    return;
+  }
+  if (message?.type === 'copySafeZipAuthoringPrompt') {
+    await copySafeZipAuthoringPromptCommand(context);
+    return;
+  }
   if (message?.type === 'checkCodexCli') {
     checkCodexCliCommand();
     return;
@@ -897,6 +908,50 @@ async function handleDashboardMessage(args) {
     workItemsProvider?.refresh();
     await renderDashboardPanel(panel, nonce, workspaceRoot);
   }
+}
+
+async function openSafeZipAuthoringPromptCommand(context) {
+  try {
+    const prompt = await loadSafeZipAuthoringPrompt(context);
+    const document = await vscode.workspace.openTextDocument({
+      language: 'markdown',
+      content: prompt.text
+    });
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    vscode.window.setStatusBarMessage('Codex Friendly: Safe ZIP Authoring Prompt opened', 4000);
+  } catch (error) {
+    showSafeZipAuthoringPromptError(error);
+  }
+}
+
+async function copySafeZipAuthoringPromptCommand(context) {
+  try {
+    const prompt = await loadSafeZipAuthoringPrompt(context);
+    await vscode.env.clipboard.writeText(prompt.text);
+    vscode.window.showInformationMessage('Codex Friendly: Safe ZIP Authoring Prompt copied to clipboard.');
+  } catch (error) {
+    showSafeZipAuthoringPromptError(error);
+  }
+}
+
+async function loadSafeZipAuthoringPrompt(context) {
+  const uri = vscode.Uri.joinPath(context.extensionUri, ...SAFE_ZIP_AUTHORING_PROMPT_RESOURCE_PATH.split('/'));
+  try {
+    const bytes = await vscode.workspace.fs.readFile(uri);
+    return {
+      uri,
+      text: Buffer.from(bytes).toString('utf8')
+    };
+  } catch (error) {
+    const message = `bundled prompt resource missing or unreadable: ${SAFE_ZIP_AUTHORING_PROMPT_RESOURCE_PATH}`;
+    const wrapped = new Error(`${message}; ${error?.message || error}`);
+    wrapped.cause = error;
+    throw wrapped;
+  }
+}
+
+function showSafeZipAuthoringPromptError(error) {
+  vscode.window.showErrorMessage(`Codex Friendly: Safe ZIP Authoring Prompt error. ${error?.message || error}`);
 }
 
 async function validateCodexFlowPackageCommand(context, treeProvider, workItemsProvider, initial = {}) {

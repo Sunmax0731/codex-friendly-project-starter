@@ -13,6 +13,8 @@
   "command.initializeCodexFlow.title": "Codex Starter: Codex Flow を初期化",
   "command.importCodexFlowPackage.title": "Codex Friendly: Codex Flow パッケージをインポート",
   "command.validateCodexFlowPackage.title": "Codex Friendly: Codex Flow パッケージを検証",
+  "command.openSafeZipAuthoringPrompt.title": "Codex Friendly: Open Safe ZIP Authoring Prompt",
+  "command.copySafeZipAuthoringPrompt.title": "Codex Friendly: Copy Safe ZIP Authoring Prompt",
   "command.openCodexFlowDashboard.title": "Codex Starter: Codex Flow Dashboard を開く",
   "command.runNextCodexFlowPhase.title": "Codex Starter: Codex Flow の次工程を実行",
   "command.runAllCodexFlowPhases.title": "Codex Starter: Codex Flow の全工程を実行",

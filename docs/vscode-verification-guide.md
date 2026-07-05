@@ -308,9 +308,19 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 
 Use these checks when verifying the VS Code command surface for ChatGPT-generated Codex Flow Package ZIPs.
 
+Safe ZIP authoring prompt:
+
+1. Run `Codex Friendly: Open Safe ZIP Authoring Prompt` from the Command Palette.
+2. Confirm that the bundled Markdown prompt opens without creating a file in the target workspace.
+3. Run `Codex Friendly: Copy Safe ZIP Authoring Prompt`.
+4. Paste the clipboard into a temporary editor and confirm it includes `docs/handoff/**`, `.codexflow/logs/**`, `src/**`, `package.json`, `.codexflow/flow.json`, and guidance that Import must not automatically Run All.
+5. Confirm that the prompt describes a Codex Flow input package, not a source-code patch package, and only allows package planning assets under `docs/**`, `prompts/**`, and `.codexflow/flow.json`.
+
+Validate / Import:
+
 1. Open a target workspace in the Extension Development Host.
 2. Run `Codex Friendly: Validate Codex Flow Package` from the Command Palette.
-3. Select a ZIP that contains `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, optional `.codexflow/state.json`, `AGENTS.md`, and `README.codexflow.md`.
+3. Select a ZIP that contains `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, `AGENTS.md`, and `README.codexflow.md`.
 4. Confirm that the validation report opens in the `Codex Flow Package` output channel and includes valid or invalid status, errors, warnings, files to import, files to skip, overwrite candidates, phase count, prompt count, docs count, and phase checks when checks are present.
 5. Confirm that validation does not write any file to the workspace.
 6. Run `Codex Friendly: Import Codex Flow Package` and select the same ZIP.

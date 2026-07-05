@@ -164,6 +164,8 @@ path 系 field は workspace relative path のみ許可し、絶対パス、`../
 
 Codex Flow Package import is a document and prompt transport feature. It accepts a ZIP generated before development, usually by ChatGPT, and imports only Codex Flow planning assets into the current VS Code workspace. The ZIP is not passed directly to Codex CLI. Codex CLI receives the runtime prompt synthesized later from the imported `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, Git state, logs, and handoff files.
 
+The Safe ZIP Authoring Prompt is a bundled Markdown reference prompt at `resources/reference-prompts/safe-codex-flow-package-authoring.md`. `Codex Friendly: Open Safe ZIP Authoring Prompt` and `Codex Friendly: Copy Safe ZIP Authoring Prompt` load that resource through `context.extensionUri` and `vscode.workspace.fs.readFile`. These commands only display or copy guidance. They do not generate, validate, import, run, or execute a flow, and they do not read a same-named file from the user workspace.
+
 The package root may be either the ZIP root or one single top-level folder. Multiple unrelated top-level folders are rejected. Allowed package paths are:
 
 - `docs/**`

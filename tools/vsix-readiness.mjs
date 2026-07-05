@@ -15,6 +15,8 @@ const requiredCommands = [
   'codex-friendly-project-starter.initializeCodexFlow',
   'codex-friendly-project-starter.importCodexFlowPackage',
   'codex-friendly-project-starter.validateCodexFlowPackage',
+  'codex-friendly-project-starter.openSafeZipAuthoringPrompt',
+  'codex-friendly-project-starter.copySafeZipAuthoringPrompt',
   'codex-friendly-project-starter.runNextCodexFlowPhase',
   'codex-friendly-project-starter.runAllCodexFlowPhases',
   'codex-friendly-project-starter.copyNextCodexFlowPrompt',
@@ -40,6 +42,7 @@ const checks = [
   check('manual-test', includes('docs/manual-test.md', ['Markdown WebView', 'Scaffold D:\\AI Default Docs', 'Start Selected Work Items', 'GitHub Issues 取込', 'Create Blocked Follow-up Issue', 'OpenAI 公式プロンプトガイド適用', 'Copy & Open Codex', 'Codex Flow', 'Run Next', 'rg.exe', 'gh.exe', 'Legacy Task を作成']), 'manual test covers visible commands and hidden legacy tasks'),
   check('user-guide', includes('docs/user-guide.md', ['Markdown WebView', '通常 UI には表示しない', 'D:\\AI', 'FirstPrompt 履歴', 'OpenAI 公式 prompt guidance', 'Start Selected Work Items', 'GitHub Issues 取込', 'アクセス権限', 'codex-sessions.md', 'codexHandoffTarget']), 'user guide covers docs scaffold, issue-first work items, history, and Codex run options'),
   check('commands', requiredCommands.every((command) => commands.has(command)), 'required commands exist'),
+  check('safe-zip-prompt-resource', promptResourceReady(), 'safe ZIP authoring prompt resource is bundled and not excluded'),
   check('qcds', fs.existsSync(file('docs/qcds-strict-metrics.json')) && fs.existsSync(file('docs/qcds-evaluation.md')), 'QCDS evidence docs exist'),
   check('icon', fs.existsSync(file('resources/codex-starter.svg')), 'activity bar icon exists')
 ];
@@ -66,6 +69,26 @@ function includes(relativePath, values) {
   if (!fs.existsSync(file(relativePath))) return false;
   const content = fs.readFileSync(file(relativePath), 'utf8');
   return values.every((value) => content.includes(value));
+}
+
+function promptResourceReady() {
+  const resourcePath = 'resources/reference-prompts/safe-codex-flow-package-authoring.md';
+  if (!fs.existsSync(file(resourcePath))) return false;
+  const content = fs.readFileSync(file(resourcePath), 'utf8');
+  const ignoreLines = fs.readFileSync(file('.vscodeignore'), 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const excluded = ['resources/**', 'resources/', 'resources/reference-prompts/**', resourcePath]
+    .some((pattern) => ignoreLines.includes(pattern));
+  return !excluded && [
+    'docs/handoff/**',
+    '.codexflow/logs/**',
+    'src/**',
+    'package.json',
+    '.codexflow/flow.json',
+    'Import 後に自動'
+  ].every((value) => content.includes(value));
 }
 
 function readJson(relativePath) {

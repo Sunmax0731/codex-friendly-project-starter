@@ -66,6 +66,11 @@
       "detail": "Codex Flow Package validation and import helper exists"
     },
     {
+      "id": "safe-zip-authoring-prompt",
+      "pass": true,
+      "detail": "Safe ZIP authoring prompt commands use the bundled resource and preserve package safety guidance"
+    },
+    {
       "id": "codex-flow-control-actions",
       "pass": true,
       "detail": "Codex Flow stop, logs, git diff summary, and phase metadata contract exists"

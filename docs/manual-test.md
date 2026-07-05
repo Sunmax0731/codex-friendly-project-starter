@@ -212,7 +212,20 @@ phase optional fields の検収例:
 
 ## Codex Flow Package Import / Validate manual checks
 
-1. Prepare a valid Codex Flow Package ZIP with `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, optional `.codexflow/state.json`, `AGENTS.md`, and `README.codexflow.md`.
+Safe ZIP authoring prompt checks:
+
+1. Start the VS Code Extension Development Host.
+2. Open a disposable workspace.
+3. Run `Codex Friendly: Open Safe ZIP Authoring Prompt`.
+4. Confirm that a Markdown prompt opens and includes `docs/handoff/**`, `.codexflow/logs/**`, `src/**`, `package.json`, `.codexflow/flow.json`, and language saying Import must not auto-run phases.
+5. Run `Codex Friendly: Copy Safe ZIP Authoring Prompt`.
+6. Paste the clipboard into a temporary editor and confirm it is the same prompt content.
+7. Confirm that open/copy did not create or modify files in the disposable workspace.
+8. Confirm that Validate / Import behavior remains unchanged and still requires explicit user commands.
+
+Package import checks:
+
+1. Prepare a valid Codex Flow Package ZIP with `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, `AGENTS.md`, and `README.codexflow.md`.
 2. Start the VS Code Extension Development Host.
 3. Run `Codex Friendly: Validate Codex Flow Package`.
 4. Select the ZIP file.

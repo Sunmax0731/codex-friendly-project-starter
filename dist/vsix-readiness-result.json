@@ -6,8 +6,8 @@
   "manualPackage": "generated-by-codex",
   "vsixArtifact": {
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 125523,
-    "sha256": "CFC9E8EAEC98E87C5A6207CAB48CE0A520CDD5D6B333A746F011D13860BF9E8F"
+    "sizeBytes": 145477,
+    "sha256": "6005C45D1F9E3E0593D5EE381E2095CA372C3F92DE596B51B6F997377F648996"
   },
   "checks": [
     {
@@ -49,6 +49,11 @@
       "id": "commands",
       "pass": true,
       "detail": "required commands exist"
+    },
+    {
+      "id": "safe-zip-prompt-resource",
+      "pass": true,
+      "detail": "safe ZIP authoring prompt resource is bundled and not excluded"
     },
     {
       "id": "qcds",

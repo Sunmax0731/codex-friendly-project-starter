@@ -130,6 +130,8 @@ Public repository: https://github.com/Sunmax0731/codex-friendly-project-starter
 
 A Codex Flow Package is a ZIP created outside VS Code, typically by ChatGPT before implementation starts. It is a transport format for Codex Flow documents and phase prompts, not a file that is passed directly to Codex CLI.
 
+Use `Codex Friendly: Open Safe ZIP Authoring Prompt` to open the bundled ChatGPT reference prompt, or `Codex Friendly: Copy Safe ZIP Authoring Prompt` to copy it to the clipboard. The prompt tells ChatGPT to generate a safe Codex Flow input package, not a source-code patch package. It limits package contents to `docs/**`, `prompts/**`, and `.codexflow/flow.json`, keeps handoff outputs under `docs/handoff/**`, keeps log outputs under `.codexflow/logs/**`, and excludes unsafe code/runtime paths such as `src/**`, `package.json`, `tests/**`, `dist/**`, `node_modules/**`, `.git/**`, `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**`.
+
 Expected package contents:
 
 ```text
@@ -142,7 +144,6 @@ prompts/codexflow/
   10_project_setup.md
 .codexflow/
   flow.json
-  state.json
 AGENTS.md
 README.codexflow.md
 ```

@@ -220,6 +220,9 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /importGitHubIssues/);
   assert.match(html, /Codex Flow/);
   assert.match(html, /openCodexFlowDashboard/);
+  assert.match(html, /Safe ZIP Prompt/);
+  assert.match(html, /openSafeZipAuthoringPrompt/);
+  assert.match(html, /copySafeZipAuthoringPrompt/);
   assert.match(html, /次工程を実行/);
   assert.match(html, /runNextCodexFlowPhase/);
   assert.match(html, /全工程を実行/);

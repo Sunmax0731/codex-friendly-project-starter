@@ -34,6 +34,8 @@
     "onCommand:codex-friendly-project-starter.initializeCodexFlow",
     "onCommand:codex-friendly-project-starter.importCodexFlowPackage",
     "onCommand:codex-friendly-project-starter.validateCodexFlowPackage",
+    "onCommand:codex-friendly-project-starter.openSafeZipAuthoringPrompt",
+    "onCommand:codex-friendly-project-starter.copySafeZipAuthoringPrompt",
     "onCommand:codex-friendly-project-starter.openCodexFlowDashboard",
     "onCommand:codex-friendly-project-starter.runNextCodexFlowPhase",
     "onCommand:codex-friendly-project-starter.runAllCodexFlowPhases",
@@ -138,6 +140,16 @@
         "command": "codex-friendly-project-starter.validateCodexFlowPackage",
         "title": "%command.validateCodexFlowPackage.title%",
         "icon": "$(shield)"
+      },
+      {
+        "command": "codex-friendly-project-starter.openSafeZipAuthoringPrompt",
+        "title": "%command.openSafeZipAuthoringPrompt.title%",
+        "icon": "$(book)"
+      },
+      {
+        "command": "codex-friendly-project-starter.copySafeZipAuthoringPrompt",
+        "title": "%command.copySafeZipAuthoringPrompt.title%",
+        "icon": "$(copy)"
       },
       {
         "command": "codex-friendly-project-starter.openCodexFlowDashboard",
