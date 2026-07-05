@@ -37,6 +37,7 @@ npm test
 - Codex Flow phase prompt が phase prompt、参照 docs、Git context、previous handoff、必須成果物を含む。
 - Codex Flow runner が `--json`、final message、JSONL、checks を log path に保存し、state と session record に flow metadata を残す。
 - Codex Flow background runner cancellation aborts the CLI/check path and records phase status `cancelled` without marking the phase succeeded.
+- Codex Flow Run All confirms once at start and does not ask again for each phase.
 - Codex Flow Dashboard が missing flow、phase status、Run Next / Run All / Copy Prompt / Repair action を表示する。
 - Work Dashboard から Codex Flow Dashboard、Run Next、Run All、Initialize Flow に遷移できる。
 - `TODO.md` / `Issues/0024-codex-flow-orchestrator.md` / QCDS tag から Codex Flow の work item と docs 統合範囲を scan できる。

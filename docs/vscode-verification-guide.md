@@ -45,17 +45,18 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 7. `Copy Next Prompt` を実行し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が含まれることを確認する。
 8. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background` で `Run Next` を実行し、`.codexflow/logs/**`、`.codexflow/state.json`、`docs/codex-sessions.jsonl` に flow / phase metadata が残ることを確認する。
 9. Background runner cancellation: while background `Run Next` is active, cancel the VS Code progress notification and confirm `.codexflow/state.json` records the phase as `cancelled` rather than `succeeded`.
-10. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
-11. Dashboard の `Issues 初期化` を実行する。
-12. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
-13. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
-14. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
-15. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
-16. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
-17. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
-18. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
-19. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
-20. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
+10. `Run All Pending` では開始時に1回だけ確認が出て、各 phase 開始時には追加確認が出ないことを確認する。
+11. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
+12. Dashboard の `Issues 初期化` を実行する。
+13. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
+14. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
+15. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
+16. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
+17. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
+18. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
+19. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
+20. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
+21. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 
@@ -291,3 +292,10 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 全体検証: `npm test` -> 93 tests passed。docs ZIP 生成、QCDS `S+` / 100、platform runtime gate、VSIX readiness、closed alpha guard も passed。
 - GUI 未実施理由: Windows Computer Use helper を再試行したが、`sandboxCwd must use the file URI scheme` で初期化できず、実 VS Code UI のクリック QA は今回も未実施。
 - 残確認: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` は、Computer Use helper が動く環境または人手でクリックできる VS Code 画面で確認する。
+
+## 14. 2026-07-05 Codex Flow UI ユーザー確認記録
+
+- ユーザー確認: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、`次工程を実行`、`全工程を実行` が動作することを確認した。
+- 確認中の指摘: `全工程を実行` で phase ごとに確認が入っていた。
+- 対応: `全工程を実行` は開始時に1回だけ確認し、各 phase では追加確認を出さない仕様に変更した。
+- 注意: 実行確認により repo-local の `.codexflow/state.json`、`.codexflow/logs/**`、`docs/codex-sessions.*`、`docs/handoff/*.md` が更新される場合がある。これらの実行結果を commit するかどうかは、phase 実行記録として残す判断がある場合だけにする。

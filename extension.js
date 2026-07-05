@@ -994,11 +994,32 @@ async function runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProv
 
 async function runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
   const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
-  const runner = vscode.workspace.getConfiguration('codexFriendlyProjectStarter').get('codexFlowRunner', 'background');
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const runner = config.get('codexFlowRunner', 'background');
   if (runner !== 'background') {
     vscode.window.showWarningMessage('Codex Flow: Run All は background runner でのみ終了検知できます。次工程 prompt をコピーします。');
     await copyNextCodexFlowPromptCommand(context, workspaceRoot);
     return;
+  }
+  const initial = loadCodexFlowForWorkspace(workspaceRoot);
+  if (!initial.flow || !initial.validation.valid) {
+    vscode.window.showWarningMessage('Codex Flow: Run All を開始できません。Dashboard で flow validation を確認してください。');
+    return;
+  }
+  const initialPhase = resolveNextCodexFlowPhase(initial.flow, initial.state);
+  if (!initialPhase) {
+    vscode.window.showInformationMessage('Codex Flow: pending phase はありません。');
+    return;
+  }
+  if (config.get('confirmBeforeCodexRun', true)) {
+    const remainingCount = countRunnableCodexFlowPhases(initial.flow, initial.state);
+    const answer = await vscode.window.showWarningMessage(
+      `Codex Flow: ${remainingCount} 件の残工程を background runner で順番に実行します。\nAccess: ${codexFlowRunConfig(config, initial.flow).sandboxMode}\n失敗時は flow.stopOnFailure に従って停止します。\n続行しますか?`,
+      { modal: false },
+      'Run All Codex Flow',
+      'Cancel'
+    );
+    if (answer !== 'Run All Codex Flow') return;
   }
   let guard = 0;
   while (guard < 50) {
@@ -1010,7 +1031,7 @@ async function runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProv
     }
     const phase = resolveNextCodexFlowPhase(flow, state);
     if (!phase) break;
-    const result = await runCodexFlowPhase(context, workspaceRoot, flow, state, phase);
+    const result = await runCodexFlowPhase(context, workspaceRoot, flow, state, phase, { skipConfirmation: true });
     if (!result || result.runRecord.status !== 'succeeded') {
       if (flow.stopOnFailure) break;
     }
@@ -1078,6 +1099,14 @@ async function repairFailedCodexFlowPhaseCommand(context, treeProvider, workItem
   workItemsProvider?.refresh();
 }
 
+function countRunnableCodexFlowPhases(flow, state = {}) {
+  const statusMap = state?.phaseStatus || {};
+  return (flow?.phases || []).filter((phase) => {
+    const status = statusMap[phase.id] || 'pending';
+    return status === 'pending' || status === 'failed' || status === 'cancelled' || status === 'manual-handoff';
+  }).length;
+}
+
 async function runCodexFlowPhase(context, workspaceRoot, flow, state, phase, options = {}) {
   const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
   const runner = config.get('codexFlowRunner', 'background');
@@ -1088,7 +1117,7 @@ async function runCodexFlowPhase(context, workspaceRoot, flow, state, phase, opt
   if (runner === 'terminal') {
     return terminalCodexFlowHandoff(context, workspaceRoot, flow, state, phase, runConfig, options);
   }
-  if (config.get('confirmBeforeCodexRun', true)) {
+  if (!options.skipConfirmation && config.get('confirmBeforeCodexRun', true)) {
     const answer = await vscode.window.showWarningMessage(
       `Codex Flow: ${phase.id} を background runner で実行します。\nAccess: ${runConfig.sandboxMode}\nChecks: ${(phase.checks || []).join(' / ') || 'none'}\n続行しますか?`,
       { modal: false },

@@ -61,6 +61,11 @@
       "detail": "Codex Flow commands and dashboard actions exist"
     },
     {
+      "id": "codex-flow-run-all-confirmation",
+      "pass": true,
+      "detail": "Codex Flow Run All confirms once and skips per-phase confirmation"
+    },
+    {
       "id": "work-composer-command",
       "pass": true,
       "detail": "Work Item Composer commands exist"

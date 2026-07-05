@@ -28,7 +28,7 @@ Codex Flow は Work Items の上位 orchestration です。要件、設計、実
 3. `Codex Starter: Codex Flow Dashboard を開く` を実行する。Flow summary、progress、next phase、phase list、last run、handoff、checks を確認できる。
 4. `Copy Next Prompt` は次工程 prompt を組み立てて clipboard に入れ、VS Code Codex sidebar へ貼り付ける半自動導線として使う。
 5. `Run Next` は `codexFriendlyProjectStarter.codexFlowRunner` に従って実行する。既定の `background` は Codex CLI を background 実行し、JSONL、final message、checks、state、session record を保存する。
-6. `Run All Pending` は background runner で pending phase を順番に実行し、失敗時は `stopOnFailure` に従って停止する。
+6. `Run All Pending` は background runner で pending phase を順番に実行し、失敗時は `stopOnFailure` に従って停止する。`confirmBeforeCodexRun` が有効な場合も確認は開始時の1回だけで、phase ごとの追加確認は出さない。
 7. phase が failed になった場合は `Repair Failed` を実行する。failed prompt、final message、checks output、Git status を含む repair prompt が生成される。
 8. `Open Latest Handoff` は `docs/handoff/latest.md` を Markdown WebView で開く。各 phase は `docs/handoff/<phase-id>.md` と latest handoff を必須成果物として扱う。
 
@@ -214,5 +214,5 @@ VS Code の表示言語が日本語の場合、Dashboard、QCDS Status、Markdow
 - `codexFriendlyProjectStarter.codexFlowMaxRepairAttempts`: failed phase の repair 最大回数。既定 1。
 - `codexFriendlyProjectStarter.codexFlowCheckTimeoutMs`: Codex Flow checks 1件あたりの timeout。既定 120000ms。
 - `codexFriendlyProjectStarter.recordCodexSessions`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` に記録するか。
-- `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。
+- `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。Codex Flow の `Run All Pending` は開始時に1回だけ確認する。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。
