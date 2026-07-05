@@ -61,6 +61,11 @@
       "detail": "Codex Flow commands and dashboard actions exist"
     },
     {
+      "id": "codex-flow-package-import",
+      "pass": true,
+      "detail": "Codex Flow Package validation and import helper exists"
+    },
+    {
       "id": "codex-flow-control-actions",
       "pass": true,
       "detail": "Codex Flow stop, logs, git diff summary, and phase metadata contract exists"

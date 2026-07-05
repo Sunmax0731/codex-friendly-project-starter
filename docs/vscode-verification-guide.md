@@ -303,3 +303,37 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 確認中の指摘: `全工程を実行` で phase ごとに確認が入っていた。
 - 対応: `全工程を実行` は開始時に1回だけ確認し、各 phase では追加確認を出さない仕様に変更した。
 - 注意: 実行確認により repo-local の `.codexflow/state.json`、`.codexflow/logs/**`、`docs/codex-sessions.*`、`docs/handoff/*.md` が更新される場合がある。これらの実行結果を commit するかどうかは、phase 実行記録として残す判断がある場合だけにする。
+
+## Codex Flow Package Import / Validate verification
+
+Use these checks when verifying the VS Code command surface for ChatGPT-generated Codex Flow Package ZIPs.
+
+1. Open a target workspace in the Extension Development Host.
+2. Run `Codex Friendly: Validate Codex Flow Package` from the Command Palette.
+3. Select a ZIP that contains `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, optional `.codexflow/state.json`, `AGENTS.md`, and `README.codexflow.md`.
+4. Confirm that the validation report opens in the `Codex Flow Package` output channel and includes valid or invalid status, errors, warnings, files to import, files to skip, overwrite candidates, phase count, prompt count, and docs count.
+5. Confirm that validation does not write any file to the workspace.
+6. Run `Codex Friendly: Import Codex Flow Package` and select the same ZIP.
+7. If existing files would be overwritten, confirm that the modal prompt lists workspace-relative overwrite candidates.
+8. Approve import and confirm that overwritten files are backed up under `.codexflow/backups/import-YYYYMMDD-HHmmss/`.
+9. Confirm that `.codexflow/flow.json`, package docs, and package prompts are imported.
+10. Confirm that an existing `.codexflow/state.json` is preserved; if it is missing, confirm that it is initialized.
+11. Confirm that missing `docs/handoff/latest.md` is initialized.
+12. Confirm that the Flow Dashboard opens after import.
+13. Confirm that `Run Next Codex Flow Phase` and `Run All Codex Flow Phases` remain explicit user actions and are not started by import.
+
+Security checks:
+
+- Reject traversal and absolute paths: `../evil.md`, `docs/../../evil.md`, `..\\evil.md`, `/evil.md`, `C:/evil.md`, UNC paths, `~`, and null byte paths.
+- Reject disallowed code and executable paths: `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
+- Skip package runtime artifacts: `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**`.
+- Reject duplicate case-insensitive path collisions such as `docs/requirements.md` and `docs/Requirements.md`.
+- Reject packages over 500 entries, over 50 MB total uncompressed size, or over 10 MB for one file.
+- Reject symlink entries when ZIP metadata exposes Unix symlink mode bits.
+
+Execution route notes:
+
+- The ZIP is a workspace import transport and is not passed directly to Codex.
+- After import, Codex Flow builds runtime prompts from the imported workspace files.
+- The background runner is the primary route for phase execution.
+- VS Code Codex clipboard handoff is an assisted fallback route for manual confirmation.

@@ -125,3 +125,32 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 ## GitHub
 
 Public repository: https://github.com/Sunmax0731/codex-friendly-project-starter
+
+## Codex Flow Package Import / Validate
+
+A Codex Flow Package is a ZIP created outside VS Code, typically by ChatGPT before implementation starts. It is a transport format for Codex Flow documents and phase prompts, not a file that is passed directly to Codex CLI.
+
+Expected package contents:
+
+```text
+docs/
+  requirements.md
+  design.md
+  handoff/latest.md
+prompts/codexflow/
+  00_first.md
+  10_project_setup.md
+.codexflow/
+  flow.json
+  state.json
+AGENTS.md
+README.codexflow.md
+```
+
+Use `Codex Friendly: Validate Codex Flow Package` to dry-run a ZIP. It writes nothing to the workspace and reports validity, errors, warnings, files to import, skipped files, overwrite candidates, phase count, prompt count, and docs count in the `Codex Flow Package` output channel.
+
+Use `Codex Friendly: Import Codex Flow Package` to validate first, confirm overwrite candidates, back up existing files under `.codexflow/backups/import-YYYYMMDD-HHmmss/`, and extract only allowed files into the selected workspace. Existing `.codexflow/state.json` is preserved and is not overwritten automatically. Missing `.codexflow/state.json` and `docs/handoff/latest.md` are initialized after import. The Flow Dashboard opens after import; phases are not started automatically.
+
+Allowed ZIP paths are `docs/**`, `prompts/**`, `.codexflow/**`, `AGENTS.md`, and `README.codexflow.md`. Runtime-local `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` are skipped. Code or executable paths such as `src/**`, `extension.js`, `package.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh` are rejected.
+
+After import, open `Codex Friendly: Open Flow Dashboard` and run `Run Next Codex Flow Phase` or `Run All Codex Flow Phases` explicitly. The background runner remains the primary execution route. VS Code Codex clipboard handoff is an assisted fallback route for manual confirmation, not the default automated flow.
