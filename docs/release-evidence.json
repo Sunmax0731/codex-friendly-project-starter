@@ -15,18 +15,18 @@
     "command": "npx --yes @vscode/vsce package --out dist\\codex-friendly-project-starter-0.1.0.vsix",
     "npmCache": "E:\\DevEnv\\npm-cache",
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
-    "sizeBytes": 105588,
-    "sha256": "96E7E9CECA4208B49870E9A1E4943107A66230968503DEBAFBDB96E5EB047185",
-    "packagedAt": "2026-05-18T22:24:35+09:00",
-    "note": ".vscodeignore を維持し、tests/tools/docs/dist などの開発用ファイルを VSIX から除外した。Codex tool PATH、model / インテリジェンス選択、選択 Work Items 起動、GitHub Issues 取込、Issue/TODO の phase-aware 作成、Work Item Composer の clipboard 画像添付、非 Git folder での --skip-git-repo-check 自動付与を含む。"
+    "sizeBytes": 125237,
+    "sha256": "1025AD7AC64D9E9E9AD5B3E9878458DB20A1C112481DFCF621AF8FFCA1B957EA",
+    "packagedAt": "2026-07-05T13:23:39+09:00",
+    "note": ".vscodeignore を更新し、tests/tools/docs/dist に加えて repo-local の .codexflow/prompts/tmp も VSIX から除外した。Phase 60 の Codex Flow cancellation handling、Codex tool PATH、model / インテリジェンス選択、選択 Work Items 起動、GitHub Issues 取込、Issue/TODO の phase-aware 作成、Work Item Composer の clipboard 画像添付、非 Git folder での --skip-git-repo-check 自動付与を含む。"
   },
   "localInstall": {
     "installed": true,
-    "installedAt": "2026-05-18T22:24:35+09:00",
+    "installedAt": "2026-07-05T13:24:29+09:00",
     "command": "E:\\DevEnv\\VSCode\\App\\bin\\code.cmd --install-extension D:\\AI\\VSCodeExtension\\codex-friendly-project-starter\\dist\\codex-friendly-project-starter-0.1.0.vsix --force",
     "installedExtension": "sunmax0731.codex-friendly-project-starter@0.1.0",
     "verifiedInstalledSource": "C:\\Users\\gkkjh\\.vscode\\extensions\\sunmax0731.codex-friendly-project-starter-0.1.0",
-    "verifiedContains": "--skip-git-repo-check"
+    "verifiedContains": "Codex Flow cancellation handling in src/codex-flow-runner.cjs; no .codexflow/tmp/prompts/docs/tests/tools/Issues/Tasks directories in installed extension"
   },
   "evidence": {
     "automatedValidation": "npm test",

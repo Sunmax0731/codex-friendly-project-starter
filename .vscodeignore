@@ -10,6 +10,9 @@ Tasks/**
 samples/**
 tests/**
 tools/**
+.codexflow/**
+prompts/**
+tmp/**
 AGENTS.md
 SKILL.md
 TODO.md
