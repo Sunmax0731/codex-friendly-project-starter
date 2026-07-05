@@ -102,3 +102,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 不具合修正: smoke で、fallback handoff 生成時に `docs/handoff/latest.md` が初期内容のまま残る問題を確認した。`ensureFallbackHandoff` を修正し、phase handoff を `latest.md` に同期する回帰テストを追加した。
 - 不具合修正: Windows PowerShell の `Tee-Object -FilePath` が JSONL を UTF-16LE で保存しうることを確認した。Codex CLI launcher は JSONL を UTF-8 で追記する実装へ変更し、runner 側にも UTF-16LE / 非 JSON 行の sanitizer 回帰テストを追加した。既存 smoke の `.jsonl` は UTF-8 の有効な JSONL として検証済み。
 - 修正後 smoke: `20260705T021647Z` の attempt 2 を修正後 launcher で再実行し、`.prompt.md`、`.jsonl`、`.final.md`、`.checks.json`、`.launcher.ps1` の再生成、state 更新、`docs/codex-sessions.jsonl` 追記を確認した。`.jsonl` は UTF-8 として parse 済みで、Codex CLI の process cleanup 行は sanitizer の `codex-flow-runner-non-json-output` 診断イベントとして保持された。
+
+## 2026-07-05 Codex Flow GUI QA 再試行記録
+
+- 実施日時: 2026-07-05 11:31-11:33 JST
+- 対象 branch: `codex/codex-flow-gui-qa`
+- Extension Host: `code --new-window --user-data-dir=.vscode-test/codex-flow-gui-qa-user-data --extensions-dir=.vscode-test/codex-flow-gui-qa-extensions --extensionDevelopmentPath=D:\AI\VSCodeExtension\codex-friendly-project-starter D:\AI\VSCodeExtension\codex-friendly-project-starter` で起動した。
+- 起動確認: `code --status --user-data-dir .vscode-test\codex-flow-gui-qa-user-data` で `[Extension Development Host]` window、extension-host process、workspace `codex-friendly-project-starter` を確認した。
+- Activation 確認: `.vscode-test/codex-flow-gui-qa-user-data/logs/20260705T113117/window1/exthost/exthost.log` に `ExtensionService#_doActivateExtension sunmax0731.codex-friendly-project-starter` が記録された。
+- 未実施: Command Palette / Dashboard 上の `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` の実クリック操作は未実施。Windows Computer Use helper の初期化が前回と同じ `sandboxCwd must use the file URI scheme` で失敗し、実クリックへ進めなかった。
+- 継続状態: repo-local の `.codexflow/state.json` は `00_smoke: succeeded` のまま、`10_requirements` 以降の実作業 phase は pending のまま残っている。未追跡 `tmp/` はユーザー提供設計パッケージとして触らない。

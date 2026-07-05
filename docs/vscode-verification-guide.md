@@ -273,3 +273,11 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - 修正: fallback handoff 生成時に `docs/handoff/latest.md` が更新されない問題を確認し、`ensureFallbackHandoff` が phase handoff を latest に同期するよう修正した。
 - 修正: Windows PowerShell の `Tee-Object -FilePath` によって `.jsonl` が UTF-16LE になる経路を確認し、launcher は UTF-8 明示の追記に変更した。runner 側では UTF-16LE と非 JSON 行を sanitizer で扱う回帰テストを追加し、smoke artifact の JSONL を有効な UTF-8 JSONL として検証した。
 - 修正後確認: `20260705T021647Z` の attempt 2 を修正後 launcher で再実行し、`.prompt.md`、`.jsonl`、`.final.md`、`.checks.json`、`.launcher.ps1`、state、`docs/codex-sessions.jsonl` の更新を確認した。`.jsonl` は UTF-8 として parse 済みで、Codex CLI の process cleanup 行は sanitizer の診断イベントとして保持された。
+
+## 12. 2026-07-05 Codex Flow GUI QA 再試行記録
+
+- Extension Host 起動: 隔離プロファイル `.vscode-test/codex-flow-gui-qa-user-data` と `.vscode-test/codex-flow-gui-qa-extensions` を使い、`--extensionDevelopmentPath=D:\AI\VSCodeExtension\codex-friendly-project-starter` で起動した。
+- 起動状態: `code --status --user-data-dir .vscode-test\codex-flow-gui-qa-user-data` で `[Extension Development Host]` window、extension-host process、対象 workspace を確認した。
+- Activation: `.vscode-test/codex-flow-gui-qa-user-data/logs/20260705T113117/window1/exthost/exthost.log` に `ExtensionService#_doActivateExtension sunmax0731.codex-friendly-project-starter` があり、拡張固有の activation failure は確認されなかった。
+- GUI 未実施理由: Windows Computer Use helper の初期化が前回と同じ `sandboxCwd must use the file URI scheme` で失敗したため、Command Palette / Dashboard の実クリック確認は未実施。未確認項目は `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行`。
+- 次回再開条件: Computer Use helper が初期化できる環境、または人手でクリックできる VS Code 画面から、上記未確認項目だけを実施する。Phase 20 runner 基盤と `00_smoke` background runner smoke は既に検証済みなので重複実装しない。
