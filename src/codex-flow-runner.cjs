@@ -6,6 +6,7 @@ const { buildCodexExecScript } = require('./codex-cli.cjs');
 const {
   normalizeCodexFlow,
   normalizeCodexFlowState,
+  validateCodexFlow,
   resolveNextCodexFlowPhase,
   assembleCodexFlowPhasePrompt,
   createCodexFlowRunRecord,
@@ -23,10 +24,15 @@ const execFileAsync = promisify(execFile);
 
 async function prepareCodexFlowPhaseRun(input = {}) {
   const rootPath = input.rootPath || process.cwd();
-  const flow = normalizeCodexFlow(input.flow || {});
+  const flowValidation = validateCodexFlow(input.flow || {}, { rootPath });
+  if (!flowValidation.valid) throw new Error('Codex Flow validation failed: ' + flowValidation.errors.join(' / '));
+  const flow = normalizeCodexFlow(flowValidation.flow || input.flow || {});
   const state = normalizeCodexFlowState(input.state || {});
-  const phase = input.phase || resolveNextCodexFlowPhase(flow, state);
-  if (!phase) throw new Error('No pending Codex Flow phase');
+  const requestedPhase = input.phase || resolveNextCodexFlowPhase(flow, state);
+  if (!requestedPhase) throw new Error('No pending Codex Flow phase');
+  const selectedValidation = validateCodexFlow({ ...flow, phases: [requestedPhase] }, { rootPath });
+  if (!selectedValidation.valid) throw new Error('Codex Flow validation failed: ' + selectedValidation.errors.join(' / '));
+  const phase = selectedValidation.flow.phases[0];
   if (phase.sessionMode !== 'new-session') throw new Error(`Unsupported Codex Flow phase sessionMode: ${phase.sessionMode}`);
   const startedAt = input.startedAt || new Date().toISOString();
   const stamp = timestampForFile(startedAt);

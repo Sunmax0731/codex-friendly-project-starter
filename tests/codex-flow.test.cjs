@@ -19,7 +19,8 @@ const {
   phaseHandoffPath,
   phaseLogPath,
   phaseRetryMaxAttempts,
-  isSafeWorkspaceRelativePath
+  isSafeWorkspaceRelativePath,
+  isSafeRuntimeOutputPath
 } = require('../src/codex-flow.cjs');
 
 test('defaultCodexFlow creates safe standard phases', () => {
@@ -115,6 +116,76 @@ test('validateCodexFlow rejects unsafe phase paths and unsupported sessionMode',
   assert.ok(validation.errors.some((error) => error.includes('.git/handoff.md')));
   assert.ok(validation.errors.some((error) => error.includes('node_modules/codex-flow')));
   assert.ok(validation.errors.some((error) => error.includes('unsupported phase sessionMode')));
+});
+
+test('validateCodexFlow rejects unsafe runtime output paths', () => {
+  const cases = [
+    {
+      patch: { handoff: { latest: 'src/extension.js' } },
+      expected: 'flow.handoff.latest "src/extension.js"'
+    },
+    {
+      patch: { handoff: { directory: 'src/handoff' } },
+      expected: 'flow.handoff.directory "src/handoff"'
+    },
+    {
+      patch: { handoff: { template: 'package.json' } },
+      expected: 'flow.handoff.template "package.json"'
+    },
+    {
+      patch: { logs: { directory: 'src/logs' } },
+      expected: 'flow.logs.directory "src/logs"'
+    },
+    {
+      patch: { phases: [{ id: 'p1', prompt: 'prompts/codexflow/00_first.md', handoffPath: 'package.json' }] },
+      expected: 'phase "p1" handoffPath "package.json"'
+    },
+    {
+      patch: { phases: [{ id: 'p1', prompt: 'prompts/codexflow/00_first.md', logPath: 'src/logs/p1' }] },
+      expected: 'phase "p1" logPath "src/logs/p1"'
+    }
+  ];
+  for (const item of cases) {
+    const validation = validateCodexFlow({
+      flowId: 'runtime-policy',
+      phases: [{ id: 'p1', prompt: 'prompts/codexflow/00_first.md' }],
+      ...item.patch
+    });
+    assert.equal(validation.valid, false, item.expected);
+    assert.ok(validation.errors.some((error) => error.includes(item.expected)), validation.errors.join('\n'));
+    assert.ok(validation.errors.some((error) => error.includes('Invalid runtime output path')), validation.errors.join('\n'));
+  }
+});
+
+test('validateCodexFlow accepts safe custom runtime output paths', () => {
+  const validation = validateCodexFlow({
+    flowId: 'runtime-policy-safe',
+    handoff: {
+      directory: 'docs/handoff/custom',
+      latest: 'docs/handoff/latest.md',
+      template: 'docs/handoff/templates/default.md'
+    },
+    logs: {
+      directory: '.codexflow/logs/imported-flow'
+    },
+    phases: [{
+      id: 'p1',
+      prompt: 'prompts/codexflow/00_first.md',
+      handoffPath: 'docs/handoff/custom/p1.md',
+      logPath: '.codexflow/logs/custom/p1'
+    }]
+  });
+  assert.equal(validation.valid, true, validation.errors.join('\n'));
+});
+
+test('runtime output path helper rejects common unsafe path forms', () => {
+  assert.equal(isSafeRuntimeOutputPath('docs/handoff/latest.md', 'handoff'), true);
+  assert.equal(isSafeRuntimeOutputPath('docs/handoff', 'handoff'), false);
+  assert.equal(isSafeRuntimeOutputPath('docs/handoff', 'handoffDirectory'), true);
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs/custom/p1', 'log'), true);
+  for (const unsafePath of ['', '.', '../handoff.md', '..\\handoff.md', '/absolute/path', 'C:\\absolute\\path', 'C:/absolute/path', '\\\\server\\share', '~/path', 'docs/handoff/\0latest.md']) {
+    assert.equal(isSafeRuntimeOutputPath(unsafePath, 'handoff'), false, unsafePath);
+  }
 });
 
 test('ensureCodexFlowScaffold writes flow files without overwriting by default', () => {

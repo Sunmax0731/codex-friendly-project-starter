@@ -6,6 +6,7 @@ const test = require('node:test');
 const zlib = require('node:zlib');
 const {
   createCodexFlowPackageImportPlan,
+  formatCodexFlowPackageReport,
   importCodexFlowPackage,
   validateCodexFlowPackage
 } = require('../src/codex-flow-package.cjs');
@@ -18,6 +19,9 @@ test('valid Codex Flow Package validates flow, prompts, and counts', () => {
   assert.equal(validation.counts.phases, 1);
   assert.equal(validation.counts.prompts > 0, true);
   assert.equal(validation.flow.phases[0].prompt, 'prompts/codexflow/00_first.md');
+  assert.ok(validation.warnings.some((warning) => warning.includes('phase checks are imported')));
+  assert.deepEqual(validation.phaseChecks, [{ phaseId: '00_first', command: 'node --test' }]);
+  assert.match(formatCodexFlowPackageReport(validation), /## Phase Checks/);
 });
 
 test('path traversal and absolute ZIP entries are rejected', () => {
@@ -33,6 +37,7 @@ test('disallowed package paths are rejected', () => {
   const disallowed = [
     'src/extension.js',
     'package.json',
+    'package-lock.json',
     'node_modules/foo/index.js',
     '.git/config',
     '.vscode/settings.json',
@@ -86,6 +91,16 @@ test('single common root folder ZIP is accepted', () => {
   assert.ok(validation.filesToImport.some((file) => file.relativePath === '.codexflow/flow.json'));
 });
 
+test('multiple unrelated top-level folders are rejected', () => {
+  const zipPath = writeZip([
+    ['package-a/docs/requirements.md', '# Requirements\n'],
+    ['package-b/.codexflow/flow.json', JSON.stringify(validFlow(), null, 2) + '\n']
+  ]);
+  const validation = validateCodexFlowPackage(zipPath);
+  assert.equal(validation.valid, false);
+  assert.ok(validation.errors.some((error) => error.includes('one common root folder')));
+});
+
 test('case-insensitive duplicate package paths are rejected', () => {
   const zipPath = writeZip([
     ...validPackageEntries(),
@@ -126,6 +141,21 @@ test('existing files produce overwrite candidates and backup plan paths', () => 
   );
 });
 
+test('workspace directory and file conflicts are validation errors before import', () => {
+  const directoryConflictRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-package-dir-conflict-'));
+  fs.mkdirSync(path.join(directoryConflictRoot, 'docs', 'requirements.md'), { recursive: true });
+  const directoryValidation = validateCodexFlowPackage(writeZip(validPackageEntries()), { workspaceRoot: directoryConflictRoot });
+  assert.equal(directoryValidation.valid, false);
+  assert.ok(directoryValidation.errors.some((error) => error.includes('targets an existing directory')));
+
+  const fileConflictRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-package-file-conflict-'));
+  fs.mkdirSync(path.join(fileConflictRoot, 'prompts'), { recursive: true });
+  fs.writeFileSync(path.join(fileConflictRoot, 'prompts', 'codexflow'), 'not a directory\n', 'utf8');
+  const fileValidation = validateCodexFlowPackage(writeZip(validPackageEntries()), { workspaceRoot: fileConflictRoot });
+  assert.equal(fileValidation.valid, false);
+  assert.ok(fileValidation.errors.some((error) => error.includes('needs directory prompts/codexflow')));
+});
+
 test('import initializes missing state and handoff while preserving existing state', () => {
   const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-package-import-'));
   const zipPath = writeZip(validPackageEntries({ includeState: false, includeLatestHandoff: false }));
@@ -160,6 +190,30 @@ test('unsafe phase prompt, handoffPath, and logPath fields are rejected', () => 
     const validation = validateCodexFlowPackage(zipPath);
     assert.equal(validation.valid, false, JSON.stringify(patch));
     assert.ok(validation.errors.some((error) => /unsafe|missing/i.test(error)), JSON.stringify(validation.errors));
+  }
+});
+
+test('runtime output path policy is enforced for package flow fields', () => {
+  const cases = [
+    { handoff: { latest: 'src/extension.js' }, expected: 'flow.handoff.latest "src/extension.js"' },
+    { handoff: { directory: 'src/handoff' }, expected: 'flow.handoff.directory "src/handoff"' },
+    { handoff: { template: 'package.json' }, expected: 'flow.handoff.template "package.json"' },
+    { logs: { directory: 'src/logs' }, expected: 'flow.logs.directory "src/logs"' },
+    {
+      phases: [{ ...validFlow().phases[0], handoffPath: 'package.json' }],
+      expected: 'phase "00_first" handoffPath "package.json"'
+    },
+    {
+      phases: [{ ...validFlow().phases[0], logPath: 'src/logs/p1' }],
+      expected: 'phase "00_first" logPath "src/logs/p1"'
+    }
+  ];
+  for (const patch of cases) {
+    const flow = { ...validFlow(), ...patch };
+    const zipPath = writeZip(validPackageEntries({ flow }));
+    const validation = validateCodexFlowPackage(zipPath);
+    assert.equal(validation.valid, false, patch.expected);
+    assert.ok(validation.errors.some((error) => error.includes(patch.expected)), validation.errors.join('\n'));
   }
 });
 

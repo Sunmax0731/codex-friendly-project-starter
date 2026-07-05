@@ -257,4 +257,8 @@ Use `Codex Friendly: Import Codex Flow Package` when validation is clean enough 
 
 Allowed package paths are `docs/**`, `prompts/**`, `.codexflow/**`, `AGENTS.md`, and `README.codexflow.md`. `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` are skipped. Code or executable paths are rejected, including `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
 
+Imported runtime output paths are restricted before the package can be imported and again before any phase can run. Handoff output fields (`flow.handoff.latest`, `flow.handoff.template`, and `phase.handoffPath`) must stay under `docs/handoff/**`; `flow.handoff.directory` must be `docs/handoff` or a child under it. Log output fields (`flow.logs.directory` and `phase.logPath`) must stay under `.codexflow/logs/**`. Code paths such as `src/**`, `extension.js`, `package.json`, `package-lock.json`, `tests/**`, `dist/**`, `out/**`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, and `prompts/**` cannot be used as runtime outputs.
+
+Phase `checks` from the package are imported and may be executed later by `Run Next Codex Flow Phase` or `Run All Codex Flow Phases`. Validate and Import do not execute Codex Flow automatically.
+
 After import, use `Codex Friendly: Open Codex Flow Dashboard`, then explicitly choose `Run Next Codex Flow Phase` or `Run All Codex Flow Phases`. Import never starts execution automatically. The background runner remains the primary route. VS Code Codex clipboard handoff is still available as an assisted fallback route for manual confirmation.

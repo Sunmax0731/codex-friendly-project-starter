@@ -147,6 +147,7 @@ function validateCodexFlowPackage(zipPath, options = {}) {
 
   let rawFlow;
   let flow;
+  let phaseChecks = [];
   const flowEntry = byRelativePath.get(FLOW_FILE)?.entry;
   if (flowEntry) {
     try {
@@ -156,6 +157,8 @@ function validateCodexFlowPackage(zipPath, options = {}) {
       const normalizedValidation = validateCodexFlow(rawFlow);
       if (!normalizedValidation.valid) errors.push(...normalizedValidation.errors);
       flow = normalizedValidation.flow || normalizeCodexFlow(rawFlow);
+      phaseChecks = collectPhaseChecks(flow);
+      if (phaseChecks.length) warnings.push('Warning: phase checks are imported and may be executed later by Run Next / Run All.');
     } catch (error) {
       errors.push(`${FLOW_FILE} is not valid JSON: ${error.message || error}`);
     }
@@ -171,6 +174,7 @@ function validateCodexFlowPackage(zipPath, options = {}) {
   }
 
   const existingPaths = workspaceRoot ? existingWorkspaceFiles(workspaceRoot, filesToImport) : [];
+  if (workspaceRoot) errors.push(...workspaceImportConflictErrors(workspaceRoot, filesToImport));
   for (const recommended of RECOMMENDED_FILES) {
     if (!byRelativePath.has(recommended)) warnings.push(`recommended file is missing: ${recommended}`);
   }
@@ -196,6 +200,7 @@ function validateCodexFlowPackage(zipPath, options = {}) {
       docs: packageFiles.filter((file) => file.relativePath.startsWith('docs/')).length,
       totalUncompressedSize: zip.totalUncompressedSize
     },
+    phaseChecks,
     flow,
     rawFlow,
     _zip: zip,
@@ -307,6 +312,7 @@ function formatCodexFlowPackageReport(report, result = undefined) {
   appendList(lines, 'Files to Import', (report.filesToImport || []).map((file) => file.relativePath || file));
   appendList(lines, 'Files to Skip', (report.filesToSkip || []).map((file) => `${file.relativePath} (${file.reason})`));
   appendList(lines, 'Overwrite Candidates', report.overwriteCandidates || []);
+  appendList(lines, 'Phase Checks', (report.phaseChecks || []).map((check) => `${check.phaseId}: ${check.command}`));
   if (result) {
     lines.push('## Import Result', '');
     lines.push(`- Success: ${result.success ? 'true' : 'false'}`);
@@ -549,6 +555,29 @@ function existingWorkspaceFiles(workspaceRoot, files = []) {
     .sort((a, b) => a.localeCompare(b));
 }
 
+function workspaceImportConflictErrors(workspaceRoot, files = []) {
+  const errors = [];
+  for (const file of files) {
+    const relativePath = file.relativePath || file;
+    const target = resolveWorkspacePath(workspaceRoot, relativePath);
+    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+      errors.push(`workspace path conflict: package file ${relativePath} targets an existing directory`);
+      continue;
+    }
+    const segments = normalizePortablePath(relativePath).split('/').filter(Boolean);
+    let current = path.resolve(workspaceRoot);
+    for (let index = 0; index < segments.length - 1; index += 1) {
+      current = path.join(current, segments[index]);
+      if (fs.existsSync(current) && fs.statSync(current).isFile()) {
+        const directoryPath = segments.slice(0, index + 1).join('/');
+        errors.push(`workspace path conflict: package needs directory ${directoryPath} but an existing file is present`);
+        break;
+      }
+    }
+  }
+  return unique(errors);
+}
+
 function resolveWorkspacePath(workspaceRoot, relativePath) {
   if (!workspaceRoot || !isSafePackageRelativePath(relativePath)) throw new Error(`unsafe workspace path: ${relativePath}`);
   const root = path.resolve(workspaceRoot);
@@ -604,6 +633,16 @@ function publicFile(file) {
   };
 }
 
+function collectPhaseChecks(flow = {}) {
+  const checks = [];
+  for (const phase of flow.phases || []) {
+    for (const command of phase.checks || []) {
+      checks.push({ phaseId: phase.id || '', command });
+    }
+  }
+  return checks;
+}
+
 function skip(relativePath, reason) {
   return { relativePath, reason };
 }
@@ -629,6 +668,7 @@ function emptyReport(input = {}) {
     filesToImport: [],
     filesToSkip: [],
     overwriteCandidates: [],
+    phaseChecks: [],
     counts: { entries: 0, files: 0, phases: 0, prompts: 0, docs: 0, totalUncompressedSize: 0 }
   };
 }
