@@ -43,12 +43,18 @@
 - [x] architecture / design / implementation-plan / test-plan / manual-test / user-guide / traceability が更新されている
 - [x] `TODO.md`、QCDS docs、release readiness から Codex Flow の作業範囲を辿れる
 - [x] `D:\AI` default docs scaffold は `.codexflow/` を作らず、Codex Flow scaffold は独立 helper として扱うことが docs と tests に残っている
+- [x] Phase 50 release hardening で全 Node tests、platform runtime gate、VSIX readiness、QCDS、closed alpha guard、docs ZIP 生成を確認した
+- [x] 実 VS Code UI の未クリック項目は manual QA / handoff に未確認として残し、completed とは扱っていない
 
 ## Validation
 
 - [x] `node --test tests/default-docs.test.cjs tests/invocation-target.test.cjs tests/codex-flow.test.cjs`
 - [x] `node --test tests/codex-cli.test.cjs tests/codex-sessions.test.cjs tests/codex-flow-runner.test.cjs tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs`
 - [x] `node --test tests/workspace-docs.test.cjs tests/work-items.test.cjs tests/default-docs.test.cjs`
+- [x] `node --test tests/*.test.cjs` -> 93 tests passed
+- [x] `npm run platform:gate` -> pass true
+- [x] `npm run release:check` -> pass true
+- [x] `npm test` -> 93 tests passed、docs ZIP 生成、QCDS `S+` / 100、platform runtime gate pass、VSIX readiness pass、closed alpha guard pass
 
 ## Notes
 
@@ -56,3 +62,5 @@
 - sidebar は prompt copy の半自動 handoff として維持する。
 - Flow state は VS Code globalState ではなく repo-local `.codexflow/state.json` を source of truth にする。
 - Phase 40 では docs / Work Items / QCDS 統合だけを更新した。実 VS Code UI のクリック QA は `sandboxCwd must use the file URI scheme` のため未確認のまま残し、完了扱いにしない。
+- Phase 50 では VSIX package 再生成と local install は実施していない。readiness gate と既存 release evidence を確認した。
+- Phase 50 でも `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` の実クリック QA は未確認のまま残す。

@@ -27,3 +27,13 @@
 ## v0.1.0 の扱い
 
 GitHub prerelease はこの初期実装では作成しない。Public repo と `origin/main` の同期を完了条件にする。VSIX package は `dist/codex-friendly-project-starter-0.1.0.vsix` として生成し、ローカルインストール確認は `docs/vsix-package-guide.md` の手順でユーザー環境の手動確認に残す。
+
+## 2026-07-05 Phase 50 release gate status
+
+- `node --test tests/*.test.cjs` -> 93 tests passed。
+- `npm run platform:gate` -> pass true。
+- `npm run release:check` -> pass true。
+- `npm test` -> 93 tests passed、docs ZIP 生成、QCDS `S+` / 100、platform runtime gate pass、VSIX readiness pass、closed alpha guard pass。
+- `dist/codex-friendly-project-starter-docs.zip` は Phase 50 の `npm test` で再生成した。
+- VSIX package 生成と local install は Phase 50 では再実施していない。`docs/release-evidence.json` の既存 VSIX evidence と `npm run release:check` の静的 readiness を参照する。
+- 実 VS Code UI のクリック QA は未確認のまま残す。確認できていない `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` を completed とは扱わない。

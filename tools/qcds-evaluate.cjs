@@ -299,6 +299,15 @@ function renderMarkdown(evaluation) {
   for (const scenario of evaluation.scenarioResults) {
     lines.push('- ' + (scenario.pass ? '[x] ' : '[ ] ') + scenario.id + ': ' + (scenario.missing.length ? 'missing ' + scenario.missing.join(', ') : 'all expected fragments present'));
   }
+  lines.push(
+    '',
+    '## Codex Flow 評価観点',
+    '',
+    '- Quality: `.codexflow/flow.json` / `state.json` の schema、phase prompt assembly、runner log sanitizer、repair prompt、Dashboard 表示を unit tests と traceability で確認する。',
+    '- Cost: Flow scaffold は既存の docs scaffold と分離し、追加 runtime dependency なしで repo-local artifacts だけを作る。',
+    '- Delivery: `TODO.md`、`Issues/0024-codex-flow-orchestrator.md`、`docs/handoff/latest.md`、release checklist から phase 状態と次作業を辿れる。',
+    '- Satisfaction: 既定導線は VS Code Codex sidebar への prompt copy とし、background runner を使う場合も logs / checks / handoff がユーザーに見える。'
+  );
   lines.push('', '## 詳細', '');
   for (const item of Object.values(evaluation.dimensions)) {
     lines.push('### ' + item.label, '');

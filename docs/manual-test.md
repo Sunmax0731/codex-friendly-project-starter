@@ -132,3 +132,17 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - release package: Phase 40 指定検証は docs ZIP 生成を含まないため、`dist/codex-friendly-project-starter-docs.zip` は再生成していない。
 - Flow state: `.codexflow/state.json` は `00_smoke: succeeded` の既存状態を維持し、実作業 phase を実行済みに変更していない。
 - GUI 未実施状態: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` の実クリック確認は、Phase 30 から引き続き未実施。確認できていない操作を completed とは扱わない。
+
+## 2026-07-05 Phase 50 QA / release hardening 記録
+
+- 実施日時: 2026-07-05 12:32 JST
+- 対象 branch: `codex/50-qa-release-hardening`
+- 全 Node tests: `node --test tests/*.test.cjs` -> 93 tests passed。
+- Platform runtime gate: `npm run platform:gate` -> `{"product":"codex-friendly-project-starter","platform":"vscode-extension","pass":true}`。
+- VSIX readiness gate: `npm run release:check` -> `{"product":"codex-friendly-project-starter","version":"0.1.0","pass":true}`。
+- Release validation: `npm test` -> 93 tests passed、`dist/codex-friendly-project-starter-docs.zip` 再生成、QCDS `S+` / 100、platform runtime gate pass、VSIX readiness pass、closed alpha guard pass。
+- QCDS: `tools/qcds-evaluate.cjs` の生成出力に Codex Flow 評価観点を保持するよう更新し、`docs/qcds-evaluation.md` / `docs/qcds-strict-evaluation.md` が再生成後も Codex Flow の Quality / Cost / Delivery / Satisfaction 観点を失わないことを確認した。
+- release package: Phase 50 では VSIX package の再生成と local install は行っていない。静的 readiness と既存 evidence の確認に留めた。
+- GUI 未実施状態: 実 VS Code UI のクリック QA は今回も実施していない。`Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` は未確認のまま残し、completed とは扱わない。
+- Flow state: `.codexflow/state.json` は `00_smoke: succeeded` の既存状態だけを維持し、実作業 phase を実行済みに変更していない。
+- 未追跡 `tmp/` はユーザー提供設計パッケージとして削除・commit 対象にしない。

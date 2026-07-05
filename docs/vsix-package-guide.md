@@ -66,3 +66,10 @@ code
 - install command result
 - 実行した Codex Starter command
 - 未実施または失敗した確認項目
+
+## 2026-07-05 Phase 50 readiness
+
+- `npm run release:check` -> pass true。
+- `npm test` 内の VSIX readiness gate -> pass true。
+- Phase 50 では `npx --yes @vscode/vsce package` と `code --install-extension` は再実行していない。VSIX package 生成結果、size、SHA256、local install evidence は `docs/release-evidence.json` の既存記録を参照する。
+- 実 VS Code UI のクリック QA は未確認のため、Codex Flow dashboard / prompt copy / latest handoff / Work Dashboard Codex Flow actions は completed として扱わない。
