@@ -28,10 +28,15 @@ const RUNTIME_OUTPUT_POLICIES = {
     allowBase: false,
     message: 'flow.handoff.template must be under docs/handoff/**.'
   },
-  log: {
+  logDirectory: {
     base: '.codexflow/logs',
     allowBase: true,
-    message: 'logPath must be under .codexflow/logs/**.'
+    message: 'flow.logs.directory must be .codexflow/logs or under .codexflow/logs/**.'
+  },
+  phaseLog: {
+    base: '.codexflow/logs',
+    allowBase: false,
+    message: 'phase.logPath must be under .codexflow/logs/** and include a phase-specific child path.'
   }
 };
 
@@ -530,11 +535,11 @@ function runtimeOutputPathChecks(flow) {
     runtimeCheck('Invalid runtime output path: flow.handoff.directory', flow.handoff.directory, 'handoffDirectory'),
     runtimeCheck('Invalid runtime output path: flow.handoff.latest', flow.handoff.latest, 'handoff', 'flow.handoff.latest must be under docs/handoff/**.'),
     runtimeCheck('Invalid runtime output path: flow.handoff.template', flow.handoff.template, 'template'),
-    runtimeCheck('Invalid runtime output path: flow.logs.directory', flow.logs.directory, 'log', 'flow.logs.directory must be under .codexflow/logs/**.')
+    runtimeCheck('Invalid runtime output path: flow.logs.directory', flow.logs.directory, 'logDirectory')
   ];
   for (const phase of flow.phases || []) {
     checks.push(runtimeCheck(`Invalid runtime output path: phase "${phase.id}" handoffPath`, phase.handoffPath, 'handoff'));
-    checks.push(runtimeCheck(`Invalid runtime output path: phase "${phase.id}" logPath`, phase.logPath, 'log'));
+    checks.push(runtimeCheck(`Invalid runtime output path: phase "${phase.id}" logPath`, phase.logPath, 'phaseLog'));
   }
   return checks;
 }
@@ -596,6 +601,11 @@ function validateRuntimeOutputPathCommon(value, options = {}) {
 function runtimeOutputPolicy(kind) {
   if (kind === 'handoff-directory') return RUNTIME_OUTPUT_POLICIES.handoffDirectory;
   if (kind === 'handoffDirectory') return RUNTIME_OUTPUT_POLICIES.handoffDirectory;
+  if (kind === 'log-directory') return RUNTIME_OUTPUT_POLICIES.logDirectory;
+  if (kind === 'logDirectory') return RUNTIME_OUTPUT_POLICIES.logDirectory;
+  if (kind === 'phase-log') return RUNTIME_OUTPUT_POLICIES.phaseLog;
+  if (kind === 'phaseLog') return RUNTIME_OUTPUT_POLICIES.phaseLog;
+  if (kind === 'log') return RUNTIME_OUTPUT_POLICIES.phaseLog;
   return RUNTIME_OUTPUT_POLICIES[kind] || undefined;
 }
 

@@ -200,6 +200,10 @@ test('runtime output path policy is enforced for package flow fields', () => {
     { handoff: { template: 'package.json' }, expected: 'flow.handoff.template "package.json"' },
     { logs: { directory: 'src/logs' }, expected: 'flow.logs.directory "src/logs"' },
     {
+      phases: [{ ...validFlow().phases[0], logPath: '.codexflow/logs' }],
+      expected: 'phase "00_first" logPath ".codexflow/logs"'
+    },
+    {
       phases: [{ ...validFlow().phases[0], handoffPath: 'package.json' }],
       expected: 'phase "00_first" handoffPath "package.json"'
     },
@@ -215,6 +219,60 @@ test('runtime output path policy is enforced for package flow fields', () => {
     assert.equal(validation.valid, false, patch.expected);
     assert.ok(validation.errors.some((error) => error.includes(patch.expected)), validation.errors.join('\n'));
   }
+});
+
+test('empty runtime output fields in package flow fall back to safe defaults', () => {
+  const flow = {
+    ...validFlow(),
+    handoff: {
+      directory: '',
+      latest: '',
+      template: ''
+    },
+    logs: {
+      directory: '',
+      jsonl: true
+    },
+    phases: [{
+      ...validFlow().phases[0],
+      handoffPath: '',
+      logPath: ''
+    }]
+  };
+  const validation = validateCodexFlowPackage(writeZip(validPackageEntries({ flow })));
+  assert.equal(validation.valid, true, validation.errors.join('\n'));
+  assert.equal(validation.flow.handoff.directory, 'docs/handoff');
+  assert.equal(validation.flow.handoff.latest, 'docs/handoff/latest.md');
+  assert.equal(validation.flow.handoff.template, 'docs/handoff/template.md');
+  assert.equal(validation.flow.logs.directory, '.codexflow/logs');
+  assert.equal(validation.flow.phases[0].handoffPath, 'docs/handoff/00_first.md');
+  assert.equal(validation.flow.phases[0].logPath, '.codexflow/logs/00_first');
+});
+
+test('import with unsafe runtime output paths writes nothing to workspace', () => {
+  const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-package-unsafe-no-write-'));
+  fs.mkdirSync(path.join(workspaceRoot, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(workspaceRoot, 'docs', 'requirements.md'), '# Existing Requirements\n', 'utf8');
+  const flow = {
+    ...validFlow(),
+    handoff: {
+      ...validFlow().handoff,
+      latest: 'src/extension.js'
+    }
+  };
+  const result = importCodexFlowPackage(writeZip(validPackageEntries({ flow })), {
+    workspaceRoot,
+    overwrite: true,
+    timestamp: '20260705-123456'
+  });
+  assert.equal(result.success, false);
+  assert.ok(result.errors.some((error) => error.includes('validation failed')), result.errors.join('\n'));
+  assert.equal(fs.readFileSync(path.join(workspaceRoot, 'docs', 'requirements.md'), 'utf8'), '# Existing Requirements\n');
+  assert.equal(fs.existsSync(path.join(workspaceRoot, 'docs', 'design.md')), false);
+  assert.equal(fs.existsSync(path.join(workspaceRoot, 'prompts')), false);
+  assert.equal(fs.existsSync(path.join(workspaceRoot, '.codexflow')), false);
+  assert.equal(fs.existsSync(path.join(workspaceRoot, 'src')), false);
+  assert.equal(fs.existsSync(path.join(workspaceRoot, 'package.json')), false);
 });
 
 test('symlink-like ZIP entries and local runtime artifacts are handled safely', () => {

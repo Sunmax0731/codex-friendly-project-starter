@@ -327,8 +327,9 @@ Security checks:
 - Reject traversal and absolute paths: `../evil.md`, `docs/../../evil.md`, `..\\evil.md`, `/evil.md`, `C:/evil.md`, UNC paths, `~`, and null byte paths.
 - Reject disallowed code and executable paths: `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
 - Skip package runtime artifacts: `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**`.
-- Reject unsafe runtime output paths in `.codexflow/flow.json`: `flow.handoff.latest`, `flow.handoff.template`, and `phase.handoffPath` must be under `docs/handoff/**`; `flow.handoff.directory` must be `docs/handoff` or below; `flow.logs.directory` and `phase.logPath` must be under `.codexflow/logs/**`.
+- Reject unsafe runtime output paths in `.codexflow/flow.json`: `flow.handoff.latest`, `flow.handoff.template`, and `phase.handoffPath` must be under `docs/handoff/**`; `flow.handoff.directory` must be `docs/handoff` or below; `flow.logs.directory` may be `.codexflow/logs` or below; `phase.logPath` must be a child under `.codexflow/logs/**`.
 - Confirm that runtime output code paths such as `flow.handoff.latest: "src/extension.js"`, `phase.handoffPath: "package.json"`, `flow.logs.directory: "src/logs"`, and `phase.logPath: "src/logs/p1"` are validation errors.
+- Confirm that empty runtime output fields fall back to safe defaults, and that `phase.logPath: ".codexflow/logs"` is rejected even though `flow.logs.directory: ".codexflow/logs"` is allowed.
 - Reject duplicate case-insensitive path collisions such as `docs/requirements.md` and `docs/Requirements.md`.
 - Reject import preflight conflicts where a package file targets an existing workspace directory or a package directory requires a path that is already a workspace file.
 - Reject packages over 500 entries, over 50 MB total uncompressed size, or over 10 MB for one file.

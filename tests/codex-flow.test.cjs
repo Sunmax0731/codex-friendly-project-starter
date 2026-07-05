@@ -178,11 +178,57 @@ test('validateCodexFlow accepts safe custom runtime output paths', () => {
   assert.equal(validation.valid, true, validation.errors.join('\n'));
 });
 
+test('validateCodexFlow treats empty runtime output fields as safe defaults', () => {
+  const validation = validateCodexFlow({
+    flowId: 'runtime-empty-defaults',
+    handoff: {
+      directory: '',
+      latest: '',
+      template: ''
+    },
+    logs: {
+      directory: '',
+      jsonl: true
+    },
+    phases: [{
+      id: 'p1',
+      prompt: 'prompts/codexflow/00_first.md',
+      handoffPath: '',
+      logPath: ''
+    }]
+  });
+  assert.equal(validation.valid, true, validation.errors.join('\n'));
+  assert.equal(validation.flow.handoff.directory, 'docs/handoff');
+  assert.equal(validation.flow.handoff.latest, 'docs/handoff/latest.md');
+  assert.equal(validation.flow.handoff.template, 'docs/handoff/template.md');
+  assert.equal(validation.flow.logs.directory, '.codexflow/logs');
+  assert.equal(validation.flow.phases[0].handoffPath, 'docs/handoff/p1.md');
+  assert.equal(validation.flow.phases[0].logPath, '.codexflow/logs/p1');
+});
+
+test('validateCodexFlow requires phase logPath to use a child under the log directory', () => {
+  const validation = validateCodexFlow({
+    flowId: 'runtime-phase-log-base',
+    phases: [{
+      id: 'p1',
+      prompt: 'prompts/codexflow/00_first.md',
+      logPath: '.codexflow/logs'
+    }]
+  });
+  assert.equal(validation.valid, false);
+  assert.ok(validation.errors.some((error) => error.includes('phase "p1" logPath ".codexflow/logs"')), validation.errors.join('\n'));
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs', 'logDirectory'), true);
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs', 'phaseLog'), false);
+});
+
 test('runtime output path helper rejects common unsafe path forms', () => {
   assert.equal(isSafeRuntimeOutputPath('docs/handoff/latest.md', 'handoff'), true);
   assert.equal(isSafeRuntimeOutputPath('docs/handoff', 'handoff'), false);
   assert.equal(isSafeRuntimeOutputPath('docs/handoff', 'handoffDirectory'), true);
   assert.equal(isSafeRuntimeOutputPath('.codexflow/logs/custom/p1', 'log'), true);
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs/custom/p1', 'phaseLog'), true);
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs', 'logDirectory'), true);
+  assert.equal(isSafeRuntimeOutputPath('.codexflow/logs', 'log'), false);
   for (const unsafePath of ['', '.', '../handoff.md', '..\\handoff.md', '/absolute/path', 'C:\\absolute\\path', 'C:/absolute/path', '\\\\server\\share', '~/path', 'docs/handoff/\0latest.md']) {
     assert.equal(isSafeRuntimeOutputPath(unsafePath, 'handoff'), false, unsafePath);
   }

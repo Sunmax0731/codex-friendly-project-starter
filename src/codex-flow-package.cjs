@@ -480,7 +480,8 @@ function validateFlowJsonForPackage(flow, packageFileMap) {
       }
     }
     for (const field of ['handoffPath', 'logPath']) {
-      if (phase[field] !== undefined && !isSafePackageRelativePath(phase[field])) errors.push(`unsafe phase ${field} for ${phaseLabel}: ${phase[field]}`);
+      const pathValue = clean(phase[field]);
+      if (phase[field] !== undefined && pathValue && !isSafePackageRelativePath(pathValue)) errors.push(`unsafe phase ${field} for ${phaseLabel}: ${phase[field]}`);
     }
     if (phase.sessionMode !== undefined && phase.sessionMode !== 'new-session') {
       errors.push(`phase sessionMode must be new-session for ${phaseLabel}`);

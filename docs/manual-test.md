@@ -231,8 +231,10 @@ phase optional fields の検収例:
 17. Confirm that an existing `.codexflow/state.json` is preserved and is not overwritten automatically.
 18. Confirm that a ZIP with `.codexflow/flow.json` runtime outputs such as `flow.handoff.latest: "src/extension.js"`, `phase.handoffPath: "package.json"`, `flow.logs.directory: "src/logs"`, or `phase.logPath: "src/logs/p1"` is rejected as a validation error.
 19. Confirm that safe custom runtime outputs such as `docs/handoff/custom/p1.md` and `.codexflow/logs/custom/p1` validate successfully.
-20. After importing a valid package, manually edit workspace `.codexflow/flow.json` to set a runtime output to a code path, then run `Run Next Codex Flow Phase`. Confirm that execution stops before prompt/log/launcher artifacts are written to `src/**` or `package.json`.
-21. Confirm that Validate/Import reports imported phase `checks` as later-run metadata and does not execute them during Validate or Import.
+20. Confirm that empty runtime output fields in `.codexflow/flow.json` fall back to safe defaults under `docs/handoff/**` and `.codexflow/logs/<phase-id>`.
+21. Confirm that `flow.logs.directory: ".codexflow/logs"` validates, while `phase.logPath: ".codexflow/logs"` is rejected because phase artifacts need a child path under `.codexflow/logs/**`.
+22. After importing a valid package, manually edit workspace `.codexflow/flow.json` to set a runtime output to a code path, then run `Run Next Codex Flow Phase`. Confirm that execution stops before prompt/log/launcher artifacts are written to `src/**` or `package.json`.
+23. Confirm that Validate/Import reports imported phase `checks` as later-run metadata and does not execute them during Validate or Import.
 
 Expected behavior:
 
@@ -240,6 +242,7 @@ Expected behavior:
 - `Import Codex Flow Package` always validates first and stops before writing if validation has errors.
 - Existing overwritten files are backed up under `.codexflow/backups/import-YYYYMMDD-HHmmss/` with relative paths preserved.
 - `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` from the ZIP are skipped.
-- Runtime handoff outputs are restricted to `docs/handoff/**`; runtime log outputs are restricted to `.codexflow/logs/**`.
+- Runtime handoff outputs are restricted to `docs/handoff/**`; runtime log outputs are restricted to `.codexflow/logs/**`, with phase logs requiring a child path below `.codexflow/logs/**`.
+- Empty runtime output fields are treated as unset and fall back to safe defaults.
 - Import does not start `Run Next` or `Run All` automatically.
 - The background runner remains the primary route after import; clipboard handoff is an assisted fallback route.
