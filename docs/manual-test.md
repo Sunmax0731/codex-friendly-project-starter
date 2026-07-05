@@ -112,3 +112,13 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Activation 確認: `.vscode-test/codex-flow-gui-qa-user-data/logs/20260705T113117/window1/exthost/exthost.log` に `ExtensionService#_doActivateExtension sunmax0731.codex-friendly-project-starter` が記録された。
 - 未実施: Command Palette / Dashboard 上の `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` の実クリック操作は未実施。Windows Computer Use helper の初期化が前回と同じ `sandboxCwd must use the file URI scheme` で失敗し、実クリックへ進めなかった。
 - 継続状態: repo-local の `.codexflow/state.json` は `00_smoke: succeeded` のまま、`10_requirements` 以降の実作業 phase は pending のまま残っている。未追跡 `tmp/` はユーザー提供設計パッケージとして触らない。
+
+## 2026-07-05 Phase 30 再検証記録
+
+- 実施日時: 2026-07-05 11:47 JST
+- 対象 branch: `codex/30-commands-dashboard`
+- 実装確認: `package.json`、`package.nls.json`、`package.nls.ja.json`、`src/codex-flow-webview.cjs`、`extension.js`、`src/webview.cjs`、関連 tests に Phase 30 の commands / dashboard actions / i18n / webview が既に存在することを確認した。既存 Work Dashboard action message contract の変更は行っていない。
+- 指定検証: `node --test tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs` -> 29 tests passed。
+- 全体検証: `npm test` -> 93 tests passed。docs ZIP 生成、QCDS `S+` / 100、platform runtime gate、VSIX readiness、closed alpha guard も passed。
+- GUI 未実施理由: Windows Computer Use helper を再試行したが、`sandboxCwd must use the file URI scheme` で初期化できず、実 VS Code UI のクリック QA は今回も未実施。
+- 残確認: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行` は、Computer Use helper が動く環境または人手でクリックできる VS Code 画面で確認する。

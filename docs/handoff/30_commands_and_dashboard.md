@@ -1,8 +1,8 @@
 # Handoff: 30_commands_and_dashboard
 
 - Phase: 30_commands_and_dashboard
-- Status: ready-for-verification
-- Updated: 2026-07-05T11:45:00+09:00
+- Status: automated-verified-gui-click-blocked
+- Updated: 2026-07-05T11:47:57+09:00
 
 ## 次セッション作業依頼プロンプト
 
@@ -74,3 +74,13 @@ node --test tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-ite
 
 - `node --test tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs` -> 29 tests passed
 - `npm test` -> 93 tests passed, QCDS `S+` / 100, platform runtime gate passed, VSIX readiness passed, closed alpha guard passed
+
+## 2026-07-05 11:47 JST 再検証結果
+
+- 作業 branch は `codex/30-commands-dashboard`。
+- `git status --short --branch` は開始時点で `tmp/` 以外の汚れなし。`tmp/` はユーザー提供設計パッケージとして未追跡のまま触らない。
+- Phase 30 対象の実装は既存のまま要件を満たすことを再確認した。重複実装や Work Dashboard action message contract の変更は行っていない。
+- `node --test tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs` -> 29 tests passed。
+- `npm test` -> 93 tests passed、docs ZIP 生成、QCDS `S+` / 100、platform runtime gate、VSIX readiness、closed alpha guard passed。
+- Windows Computer Use helper は手順どおり再試行したが、`sandboxCwd must use the file URI scheme` で初期化できず、実 VS Code UI のクリック QA は今回も未実施。
+- 残る未確認項目は実クリックのみ: `Initialize Codex Flow`、`Open Codex Flow Dashboard`、`Copy Next Prompt`、`Open Latest Handoff`、Work Dashboard の `Codex Flow` / `次工程を実行` / `全工程を実行`。
