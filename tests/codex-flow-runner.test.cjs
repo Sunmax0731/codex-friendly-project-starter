@@ -51,7 +51,7 @@ test('prepareCodexFlowPhaseRun respects phase logPath and handoffPath', async ()
       name: 'Core',
       prompt: 'prompts/codexflow/20_core.md',
       handoffPath: 'docs/handoff/core/20_core.md',
-      logPath: '.codexflow/custom-logs/20_core',
+      logPath: '.codexflow/logs/custom/20_core',
       sessionMode: 'new-session',
       checks: []
     }]
@@ -68,9 +68,40 @@ test('prepareCodexFlowPhaseRun respects phase logPath and handoffPath', async ()
     runConfig: { sandboxMode: 'workspace-write' },
     startedAt: '2026-07-05T00:00:00.000Z'
   });
-  assert.ok(prepared.promptPath.endsWith(path.join('.codexflow', 'custom-logs', '20_core', '20260705T000000Z.prompt.md')));
+  assert.ok(prepared.promptPath.endsWith(path.join('.codexflow', 'logs', 'custom', '20_core', '20260705T000000Z.prompt.md')));
   assert.equal(prepared.runRecord.handoffPath, 'docs/handoff/core/20_core.md');
   assert.match(fs.readFileSync(prepared.promptPath, 'utf8'), /docs\/handoff\/core\/20_core\.md/);
+});
+
+test('prepareCodexFlowPhaseRun rejects unsafe runtime output paths before writing artifacts', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-runner-unsafe-paths-'));
+  fs.mkdirSync(path.join(root, 'prompts', 'codexflow'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'prompts', 'codexflow', 'p1.md'), '# P1\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'README.md'), '# README\n', 'utf8');
+  const flow = defaultCodexFlow(root, {
+    name: 'Unsafe Runner Paths',
+    phases: [{
+      id: 'p1',
+      prompt: 'prompts/codexflow/p1.md',
+      handoffPath: 'docs/handoff/p1.md',
+      logPath: 'src/logs/p1',
+      sessionMode: 'new-session',
+      checks: []
+    }]
+  });
+  await assert.rejects(
+    () => prepareCodexFlowPhaseRun({
+      rootPath: root,
+      flow,
+      state: { flowId: flow.flowId, phaseStatus: {} },
+      phase: flow.phases[0],
+      gitContext: { branch: 'codex/test', head: 'abc123', status: '' },
+      startedAt: '2026-07-05T00:00:00.000Z'
+    }),
+    /Invalid runtime output path: phase "p1" logPath "src\/logs\/p1"/
+  );
+  assert.equal(fs.existsSync(path.join(root, 'src')), false);
+  assert.equal(fs.existsSync(path.join(root, 'package.json')), false);
 });
 
 test('runCodexFlowChecks reports pass and failure results', async () => {

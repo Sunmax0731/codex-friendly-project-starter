@@ -311,7 +311,7 @@ Use these checks when verifying the VS Code command surface for ChatGPT-generate
 1. Open a target workspace in the Extension Development Host.
 2. Run `Codex Friendly: Validate Codex Flow Package` from the Command Palette.
 3. Select a ZIP that contains `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, optional `.codexflow/state.json`, `AGENTS.md`, and `README.codexflow.md`.
-4. Confirm that the validation report opens in the `Codex Flow Package` output channel and includes valid or invalid status, errors, warnings, files to import, files to skip, overwrite candidates, phase count, prompt count, and docs count.
+4. Confirm that the validation report opens in the `Codex Flow Package` output channel and includes valid or invalid status, errors, warnings, files to import, files to skip, overwrite candidates, phase count, prompt count, docs count, and phase checks when checks are present.
 5. Confirm that validation does not write any file to the workspace.
 6. Run `Codex Friendly: Import Codex Flow Package` and select the same ZIP.
 7. If existing files would be overwritten, confirm that the modal prompt lists workspace-relative overwrite candidates.
@@ -327,7 +327,10 @@ Security checks:
 - Reject traversal and absolute paths: `../evil.md`, `docs/../../evil.md`, `..\\evil.md`, `/evil.md`, `C:/evil.md`, UNC paths, `~`, and null byte paths.
 - Reject disallowed code and executable paths: `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
 - Skip package runtime artifacts: `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**`.
+- Reject unsafe runtime output paths in `.codexflow/flow.json`: `flow.handoff.latest`, `flow.handoff.template`, and `phase.handoffPath` must be under `docs/handoff/**`; `flow.handoff.directory` must be `docs/handoff` or below; `flow.logs.directory` and `phase.logPath` must be under `.codexflow/logs/**`.
+- Confirm that runtime output code paths such as `flow.handoff.latest: "src/extension.js"`, `phase.handoffPath: "package.json"`, `flow.logs.directory: "src/logs"`, and `phase.logPath: "src/logs/p1"` are validation errors.
 - Reject duplicate case-insensitive path collisions such as `docs/requirements.md` and `docs/Requirements.md`.
+- Reject import preflight conflicts where a package file targets an existing workspace directory or a package directory requires a path that is already a workspace file.
 - Reject packages over 500 entries, over 50 MB total uncompressed size, or over 10 MB for one file.
 - Reject symlink entries when ZIP metadata exposes Unix symlink mode bits.
 
@@ -337,3 +340,5 @@ Execution route notes:
 - After import, Codex Flow builds runtime prompts from the imported workspace files.
 - The background runner is the primary route for phase execution.
 - VS Code Codex clipboard handoff is an assisted fallback route for manual confirmation.
+- Validate/Import does not execute Codex Flow or phase checks. Phase checks may run only after the user explicitly starts `Run Next Codex Flow Phase` or `Run All Codex Flow Phases`.
+- Runner execution validates runtime output paths again, so manually edited workspace `flow.json` cannot write prompts, logs, launchers, or handoffs into `src/**`, `package.json`, or other blocked code paths.

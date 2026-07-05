@@ -12,6 +12,28 @@ const VALID_FLOW_MODES = new Set(['new-session-handoff', 'resume-last', 'manual-
 const VALID_PHASE_STATUS = new Set(['pending', 'running', 'succeeded', 'failed', 'cancelled', 'manual-handoff', 'skipped']);
 const VALID_SANDBOX_MODES = new Set(['read-only', 'workspace-write', 'danger-full-access']);
 const VALID_PHASE_SESSION_MODES = new Set(['new-session']);
+const RUNTIME_OUTPUT_POLICIES = {
+  handoff: {
+    base: 'docs/handoff',
+    allowBase: false,
+    message: 'handoffPath must be under docs/handoff/**.'
+  },
+  handoffDirectory: {
+    base: 'docs/handoff',
+    allowBase: true,
+    message: 'flow.handoff.directory must be docs/handoff or under docs/handoff/**.'
+  },
+  template: {
+    base: 'docs/handoff',
+    allowBase: false,
+    message: 'flow.handoff.template must be under docs/handoff/**.'
+  },
+  log: {
+    base: '.codexflow/logs',
+    allowBase: true,
+    message: 'logPath must be under .codexflow/logs/**.'
+  }
+};
 
 const DEFAULT_CODEX_FLOW_DOCS = [
   'README.md',
@@ -177,15 +199,12 @@ function validateCodexFlow(flow, options = {}) {
   const relativePaths = [
     normalized.targetRoot,
     ...normalized.docs,
-    normalized.handoff.directory,
-    normalized.handoff.latest,
-    normalized.handoff.template,
-    normalized.logs.directory,
-    ...normalized.phases.flatMap((phase) => [phase.prompt, phase.handoffPath, phase.logPath])
+    ...normalized.phases.map((phase) => phase.prompt)
   ];
   for (const relativePath of relativePaths) {
     if (!isSafeWorkspaceRelativePath(relativePath)) errors.push(`unsafe workspace path: ${relativePath}`);
   }
+  errors.push(...validateRuntimeOutputPaths(normalized, { workspaceRoot: options.rootPath || options.workspaceRoot }));
   for (const phase of normalized.phases) {
     if (!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(phase.id)) errors.push(`invalid phase id: ${phase.id}`);
     if (!VALID_PHASE_SESSION_MODES.has(phase.sessionMode)) errors.push(`unsupported phase sessionMode for ${phase.id}: ${phase.sessionMode}`);
@@ -202,6 +221,8 @@ function validateCodexFlow(flow, options = {}) {
 function ensureCodexFlowScaffold(rootPath, input = {}, options = {}) {
   if (!rootPath) throw new Error('rootPath is required');
   const flow = normalizeCodexFlow(input.flow || defaultCodexFlow(rootPath, input));
+  const validation = validateCodexFlow(flow, { rootPath });
+  if (!validation.valid) throw new Error('invalid Codex Flow scaffold: ' + validation.errors.join(' / '));
   const state = normalizeCodexFlowState(input.state || defaultCodexFlowState(flow));
   const files = [
     file(FLOW_FILE, JSON.stringify(flow, null, 2) + '\n'),
@@ -417,6 +438,8 @@ function updateCodexFlowStateAfterRun(state = {}, runRecord = {}) {
 
 function ensureFallbackHandoff(rootPath, flow, phase, runRecord = {}, finalMessage = '') {
   const normalizedFlow = normalizeCodexFlow(flow);
+  const validation = validateCodexFlow({ ...normalizedFlow, phases: [phase] }, { rootPath });
+  if (!validation.valid) throw new Error('Codex Flow validation failed: ' + validation.errors.join(' / '));
   const handoffRelative = phaseHandoffPath(normalizedFlow, phase);
   const latestRelative = normalizedFlow.handoff.latest;
   const handoffPath = resolveFlowPath(rootPath, handoffRelative);
@@ -477,6 +500,8 @@ function latestRunForPhase(state = {}, phaseId = '') {
 function isSafeWorkspaceRelativePath(relativePath) {
   const value = clean(relativePath);
   if (!value) return false;
+  if (value.includes('\0')) return false;
+  if (value === '~' || value.startsWith('~/') || value.startsWith('~\\')) return false;
   if (/^[A-Za-z]:[\\/]/.test(value)) return false;
   if (value.startsWith('/') || value.startsWith('\\')) return false;
   const portable = toPortablePath(value);
@@ -484,6 +509,98 @@ function isSafeWorkspaceRelativePath(relativePath) {
   const segments = normalized.split('/').filter(Boolean).map((segment) => segment.toLowerCase());
   if (segments.includes('.git') || segments.includes('node_modules')) return false;
   return normalized !== '..' && !normalized.startsWith('../') && normalized !== '/' && !normalized.startsWith('/../');
+}
+
+function validateRuntimeOutputPaths(flow, options = {}) {
+  const errors = [];
+  for (const check of runtimeOutputPathChecks(flow)) {
+    const validation = validateRuntimeOutputPath(check.value, check.kind, options);
+    if (!validation.safe) {
+      const reason = validation.reason.startsWith('runtime output path')
+        ? validation.reason
+        : (check.message || validation.reason);
+      errors.push(`${check.prefix} ${JSON.stringify(check.value)}. ${reason}`);
+    }
+  }
+  return errors;
+}
+
+function runtimeOutputPathChecks(flow) {
+  const checks = [
+    runtimeCheck('Invalid runtime output path: flow.handoff.directory', flow.handoff.directory, 'handoffDirectory'),
+    runtimeCheck('Invalid runtime output path: flow.handoff.latest', flow.handoff.latest, 'handoff', 'flow.handoff.latest must be under docs/handoff/**.'),
+    runtimeCheck('Invalid runtime output path: flow.handoff.template', flow.handoff.template, 'template'),
+    runtimeCheck('Invalid runtime output path: flow.logs.directory', flow.logs.directory, 'log', 'flow.logs.directory must be under .codexflow/logs/**.')
+  ];
+  for (const phase of flow.phases || []) {
+    checks.push(runtimeCheck(`Invalid runtime output path: phase "${phase.id}" handoffPath`, phase.handoffPath, 'handoff'));
+    checks.push(runtimeCheck(`Invalid runtime output path: phase "${phase.id}" logPath`, phase.logPath, 'log'));
+  }
+  return checks;
+}
+
+function runtimeCheck(prefix, value, kind, message = '') {
+  return { prefix, value, kind, message };
+}
+
+function isSafeRuntimeOutputPath(relativePath, kind, options = {}) {
+  return validateRuntimeOutputPath(relativePath, kind, options).safe;
+}
+
+function validateRuntimeOutputPath(relativePath, kind, options = {}) {
+  const value = clean(relativePath);
+  const policy = runtimeOutputPolicy(kind);
+  if (!policy) return { safe: false, reason: `unknown runtime output path kind: ${kind || ''}` };
+  const commonError = validateRuntimeOutputPathCommon(value, options);
+  if (commonError) return { safe: false, reason: commonError };
+  const normalized = normalizeRuntimePortablePath(value);
+  const lower = normalized.toLowerCase();
+  const allowed = policy.allowBase
+    ? lower === policy.base || lower.startsWith(policy.base + '/')
+    : lower.startsWith(policy.base + '/');
+  if (!allowed) return { safe: false, normalizedPath: normalized, reason: policy.message };
+  return { safe: true, normalizedPath: normalized, reason: '' };
+}
+
+function validateRuntimeOutputPathCommon(value, options = {}) {
+  if (!value) return 'runtime output path must not be empty.';
+  if (value === '.') return 'runtime output path must not be ".".';
+  if (value.includes('\0')) return 'runtime output path must not contain null bytes.';
+  if (value === '~' || value.startsWith('~/') || value.startsWith('~\\')) return 'runtime output path must not be home-relative.';
+  if (/^[A-Za-z]:/.test(value)) return 'runtime output path must be workspace-relative, not drive-prefixed.';
+  if (/^\\\\/.test(value)) return 'runtime output path must not be a UNC path.';
+  if (value.startsWith('/') || value.startsWith('\\')) return 'runtime output path must be workspace-relative, not absolute.';
+  const portable = toPortablePath(value);
+  if (portable.startsWith('//')) return 'runtime output path must not be absolute or UNC.';
+  const rawSegments = portable.split('/').filter(Boolean);
+  if (!rawSegments.length) return 'runtime output path must not be empty.';
+  if (rawSegments.includes('..')) return 'runtime output path must not contain ".." segments.';
+  const normalized = normalizeRuntimePortablePath(value);
+  if (!normalized || normalized === '.' || normalized === '..' || normalized.startsWith('../') || normalized.startsWith('/')) {
+    return 'runtime output path must stay inside the workspace.';
+  }
+  if (options.workspaceRoot || options.rootPath) {
+    const root = path.resolve(options.workspaceRoot || options.rootPath);
+    const target = path.resolve(root, ...normalized.split('/').filter(Boolean));
+    const caseInsensitive = process.platform === 'win32';
+    const rootCompare = caseInsensitive ? root.toLowerCase() : root;
+    const targetCompare = caseInsensitive ? target.toLowerCase() : target;
+    const rootPrefix = rootCompare.endsWith(path.sep) ? rootCompare : rootCompare + path.sep;
+    if (targetCompare !== rootCompare && !targetCompare.startsWith(rootPrefix)) {
+      return 'runtime output path must resolve inside the workspace.';
+    }
+  }
+  return '';
+}
+
+function runtimeOutputPolicy(kind) {
+  if (kind === 'handoff-directory') return RUNTIME_OUTPUT_POLICIES.handoffDirectory;
+  if (kind === 'handoffDirectory') return RUNTIME_OUTPUT_POLICIES.handoffDirectory;
+  return RUNTIME_OUTPUT_POLICIES[kind] || undefined;
+}
+
+function normalizeRuntimePortablePath(value) {
+  return path.posix.normalize(toPortablePath(value)).replace(/^\.\//, '');
 }
 
 function defaultPhasePrompt(phase, flow) {
@@ -846,5 +963,7 @@ module.exports = {
   resolveFlowPath,
   relativeFlowPath,
   timestampForFile,
-  isSafeWorkspaceRelativePath
+  isSafeWorkspaceRelativePath,
+  isSafeRuntimeOutputPath,
+  validateRuntimeOutputPath
 };
