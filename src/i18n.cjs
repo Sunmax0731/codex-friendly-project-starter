@@ -39,7 +39,11 @@ const MESSAGES = {
     'flow.runAll': 'Run All Pending',
     'flow.copyNextPrompt': 'Copy Next Prompt',
     'flow.repairFailed': 'Repair Failed',
-    'flow.openLatestHandoff': 'Open Latest Handoff'
+    'flow.openLatestHandoff': 'Open Latest Handoff',
+    'flow.stopCurrent': 'Stop Current Phase',
+    'flow.openPhaseLog': 'Open Phase Log',
+    'flow.openFlowFile': 'Open flow.json',
+    'flow.gitDiffSummary': 'Git diff summary'
   },
   ja: {
     'dashboard.title': 'Codex Work Dashboard',
@@ -81,7 +85,11 @@ const MESSAGES = {
     'flow.runAll': '全工程を実行',
     'flow.copyNextPrompt': '次工程 Prompt をコピー',
     'flow.repairFailed': '失敗工程を修復',
-    'flow.openLatestHandoff': '最新 Handoff を開く'
+    'flow.openLatestHandoff': '最新 Handoff を開く',
+    'flow.stopCurrent': '現在の工程を停止',
+    'flow.openPhaseLog': '工程ログを開く',
+    'flow.openFlowFile': 'flow.json を開く',
+    'flow.gitDiffSummary': 'Git diff summary'
   }
 };
 

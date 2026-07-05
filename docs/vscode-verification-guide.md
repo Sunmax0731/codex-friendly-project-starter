@@ -41,22 +41,26 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 3. `Project Phase`、`TODO`、`Issues`、`QCDS`、`Release readiness` の group を確認し、legacy `Tasks` group が表示されないことを確認する。
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
 5. Dashboard の `Codex Flow 初期化` または `Ctrl+Shift+P` から `Codex Starter: Initialize Codex Flow` を実行する。
-6. `Codex Starter: Open Codex Flow Dashboard` を実行し、Flow summary、phase list、Run Next、Run All、Copy Next Prompt、Open Latest Handoff が表示されることを確認する。
-7. `Copy Next Prompt` を実行し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が含まれることを確認する。
-8. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background` で `Run Next` を実行し、`.codexflow/logs/**`、`.codexflow/state.json`、`docs/codex-sessions.jsonl` に flow / phase metadata が残ることを確認する。
-9. Background runner cancellation: while background `Run Next` is active, cancel the VS Code progress notification and confirm `.codexflow/state.json` records the phase as `cancelled` rather than `succeeded`.
-10. `Run All Pending` では開始時に1回だけ確認が出て、各 phase 開始時には追加確認が出ないことを確認する。
-11. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
-12. Dashboard の `Issues 初期化` を実行する。
-13. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
-14. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
-15. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
-16. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
-17. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
-18. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
-19. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
-20. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
-21. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
+6. `Codex Starter: Open Codex Flow Dashboard` を実行し、Flow summary、phase list、Run Next、Run All、Stop Current Phase、Copy Next Prompt、Open Latest Handoff、Open Phase Log、Open flow.json、Git diff summary が表示されることを確認する。
+7. `Copy Next Prompt` を実行し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が含まれることを確認する。Git context は branch、HEAD、status、diff stat、last commit を含む。
+8. `.codexflow/flow.json` の任意 phase に `metadata` object と `retryPolicy.maxAttempts`、`handoffPath`、`logPath`、`sessionMode: "new-session"` を追加し、Codex Flow Dashboard の phase 行と `Copy Next Prompt` の Flow metadata / Required handoff output に表示されることを確認する。
+9. `.codexflow/flow.json` の phase path に絶対パス、`../`、`.git/**`、`node_modules/**`、または未対応 `sessionMode` を指定した場合は validation error になり、実行できないことを確認する。
+10. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background` で `Run Next` を実行し、`.codexflow/state.json` に `running`、startedAt、runId、artifact paths が即時記録されることを確認する。
+11. 実行完了後、`.codexflow/logs/**`、`.codexflow/state.json`、`docs/codex-sessions.jsonl` に flow / phase metadata が残り、status が `succeeded` または `failed` に遷移することを確認する。
+12. Background runner cancellation: while background `Run Next` is active, run `Codex Starter: Stop Current Codex Flow Phase` or cancel the VS Code progress notification and confirm `.codexflow/state.json` records the phase as `cancelled` rather than `succeeded`.
+13. `Open Phase Log` で latest run の prompt、`.jsonl`、`.final.md`、`.checks.json`、launcher を選んで開けることを確認する。`Open flow.json` で `.codexflow/flow.json` が開き、`Git diff summary` で branch、HEAD、status、diff stat、last commit が clipboard に入ることを確認する。
+12. `Run All Pending` では開始時に1回だけ確認が出て、各 phase 開始時には追加確認が出ないことを確認する。
+13. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
+14. Dashboard の `Issues 初期化` を実行する。
+15. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
+16. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
+17. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
+18. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
+19. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
+20. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
+21. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
+22. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
+23. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 
@@ -67,7 +71,7 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - Dashboard に TODO と Issue の progress bar が表示される。
 - Dashboard に `Project Phase` と `Work Items by Phase` が表示され、Issue の `Created`、TODO / Issue の工程、未着手 / 着手済み / 解決済み状態が同じ方針で表示される。
 - Dashboard 上部の日常操作に `Codex Flow`、`次工程を実行`、`全工程を実行`、`Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` が表示され、初回セットアップに `FirstPrompt`、`Codex Flow 初期化`、`Issues 初期化`、`D:\AI Docs 生成`、`Codex CLI 確認` が表示される。legacy Task 作成 / Tasks 初期化ボタンは表示されない。
-- Codex Flow Dashboard は missing flow の empty state と initialized flow の phase status を表示し、Run Next / Run All / Copy Prompt / Repair / Handoff 操作を提供する。
+- Codex Flow Dashboard は missing flow の empty state と initialized flow の phase status を表示し、Run Next / Run All / Stop Current Phase / Copy Prompt / Repair / Handoff / Open Phase Log / Open flow.json / Git diff summary 操作を提供する。
 - Dashboard 上部と Work Items title action から `GitHub Issuesインポート` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。

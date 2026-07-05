@@ -38,6 +38,10 @@
     "onCommand:codex-friendly-project-starter.copyNextCodexFlowPrompt",
     "onCommand:codex-friendly-project-starter.repairFailedCodexFlowPhase",
     "onCommand:codex-friendly-project-starter.openLatestCodexFlowHandoff",
+    "onCommand:codex-friendly-project-starter.stopCurrentCodexFlowPhase",
+    "onCommand:codex-friendly-project-starter.openLatestCodexFlowPhaseLog",
+    "onCommand:codex-friendly-project-starter.openCodexFlowFile",
+    "onCommand:codex-friendly-project-starter.copyCodexFlowGitDiffSummary",
     "onCommand:codex-friendly-project-starter.openQcdsStatus",
     "onCommand:codex-friendly-project-starter.openMarkdownWebview",
     "onCommand:codex-friendly-project-starter.refreshMarkdownWebview",
@@ -152,6 +156,26 @@
         "command": "codex-friendly-project-starter.openLatestCodexFlowHandoff",
         "title": "%command.openLatestCodexFlowHandoff.title%",
         "icon": "$(go-to-file)"
+      },
+      {
+        "command": "codex-friendly-project-starter.stopCurrentCodexFlowPhase",
+        "title": "%command.stopCurrentCodexFlowPhase.title%",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "codex-friendly-project-starter.openLatestCodexFlowPhaseLog",
+        "title": "%command.openLatestCodexFlowPhaseLog.title%",
+        "icon": "$(output)"
+      },
+      {
+        "command": "codex-friendly-project-starter.openCodexFlowFile",
+        "title": "%command.openCodexFlowFile.title%",
+        "icon": "$(json)"
+      },
+      {
+        "command": "codex-friendly-project-starter.copyCodexFlowGitDiffSummary",
+        "title": "%command.copyCodexFlowGitDiffSummary.title%",
+        "icon": "$(git-compare)"
       },
       {
         "command": "codex-friendly-project-starter.openQcdsStatus",

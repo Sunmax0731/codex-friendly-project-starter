@@ -21,16 +21,22 @@
 
 ## Codex Flow で工程を順番に進める
 
-Codex Flow は Work Items の上位 orchestration です。要件、設計、実装、テスト、リリース確認などの phase prompt を `.codexflow/flow.json` で管理し、前工程の `docs/handoff/latest.md` を次工程へ渡す。
+Codex Flow は Work Items の上位 orchestration です。要件、設計、実装、テスト、リリース確認などの phase prompt を `.codexflow/flow.json` で管理し、前工程の `docs/handoff/latest.md` を次工程へ渡す。主経路は background runner による Codex CLI 自動実行で、VS Code Codex sidebar への clipboard handoff は手動確認しながら進めたい場合の補助経路です。
 
 1. Dashboard の `Codex Flow 初期化`、または Command Palette の `Codex Starter: Codex Flow を初期化` を実行する。
 2. `.codexflow/flow.json`、`.codexflow/state.json`、`prompts/codexflow/*.md`、`docs/handoff/template.md`、`docs/handoff/latest.md` が作成される。既存ファイルは既定で上書きされない。
 3. `Codex Starter: Codex Flow Dashboard を開く` を実行する。Flow summary、progress、next phase、phase list、last run、handoff、checks を確認できる。
 4. `Copy Next Prompt` は次工程 prompt を組み立てて clipboard に入れ、VS Code Codex sidebar へ貼り付ける半自動導線として使う。
-5. `Run Next` は `codexFriendlyProjectStarter.codexFlowRunner` に従って実行する。既定の `background` は Codex CLI を background 実行し、JSONL、final message、checks、state、session record を保存する。
-6. `Run All Pending` は background runner で pending phase を順番に実行し、失敗時は `stopOnFailure` に従って停止する。`confirmBeforeCodexRun` が有効な場合も確認は開始時の1回だけで、phase ごとの追加確認は出さない。
-7. phase が failed になった場合は `Repair Failed` を実行する。failed prompt、final message、checks output、Git status を含む repair prompt が生成される。
+5. `Run Next` は `codexFriendlyProjectStarter.codexFlowRunner` に従って実行する。既定の `background` は Codex CLI を phase ごとの新しい session として background 実行し、JSONL、final message、checks、running state、session record を保存する。
+6. `Run All Pending` は background runner で pending phase を順番に実行し、失敗時は phase の `stopOnFailure` に従って停止する。`confirmBeforeCodexRun` が有効な場合も確認は開始時の1回だけで、phase ごとの追加確認は出さない。
+7. phase が failed になった場合は `Repair Failed` を実行する。failed prompt、final message、checks output、Git status を含む repair prompt が生成される。修復回数の上限は phase の `retryPolicy.maxAttempts`、flow の `maxRepairAttempts`、既定値の順で決まる。
 8. `Open Latest Handoff` は `docs/handoff/latest.md` を Markdown WebView で開く。各 phase は `docs/handoff/<phase-id>.md` と latest handoff を必須成果物として扱う。
+9. `Stop Current Phase` は実行中 background runner の AbortController を止め、`.codexflow/state.json` に対象 phase を `cancelled` として記録する。VS Code progress notification の cancel も同じ経路を使う。
+10. `Open Phase Log` は latest run の prompt、`.jsonl`、`.final.md`、`.checks.json`、launcher を選んで開く。phase 行から実行した場合は、その phase の latest run を対象にする。
+11. `Open flow.json` は `.codexflow/flow.json` を source editor で開く。`Git diff summary` は branch、HEAD、status、diff stat、last commit を clipboard にコピーする。
+12. phase 定義には任意の `metadata` object を追加できる。metadata は Dashboard の phase 行と phase prompt の Flow metadata に表示されるが、実行制御には使わない。
+13. phase top-level optional fields として `stopOnFailure`、`retryPolicy.maxAttempts`、`handoffPath`、`logPath`、`sessionMode`、`metadata` を使える。`sessionMode` は未指定時も `new-session` で、現時点の正式対応値も `new-session` のみです。path 系 field は workspace relative path のみ許可され、絶対パス、`../`、`.git/**`、`node_modules/**` は validation error になる。
+14. background runner 開始後は `.codexflow/state.json` の phase status が `running` になり、startedAt、run id、prompt / jsonl / final / checks / launcher / handoff artifact path が記録される。完了時は `succeeded` / `failed` / `cancelled` に遷移し、Dashboard でも running phase と最新 artifact を確認できる。
 
 Flow artifacts は workspace 内に保存される。
 
@@ -40,9 +46,10 @@ Flow artifacts は workspace 内に保存される。
 - `.codexflow/logs/<phase-id>/*.jsonl`
 - `.codexflow/logs/<phase-id>/*.final.md`
 - `.codexflow/logs/<phase-id>/*.checks.json`
+- `.codexflow/logs/<phase-id>/*.launcher.ps1`
 - `docs/handoff/*.md`
 
-Background runner cancellation: if the VS Code progress notification is cancelled, the runner aborts the Codex CLI/check path, records the phase as `cancelled`, and keeps generated artifacts under `.codexflow/logs/<phase-id>/`.
+Background runner cancellation: if `Stop Current Phase` is used or the VS Code progress notification is cancelled, the runner aborts the Codex CLI/check path, records the phase as `cancelled`, and keeps generated artifacts under `.codexflow/logs/<phase-id>/`.
 
 `danger-full-access` と `git push` は既定にならない。auto commit も既定 false で、必要な場合は Flow 定義と設定で明示する。
 
