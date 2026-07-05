@@ -44,17 +44,18 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 6. `Codex Starter: Open Codex Flow Dashboard` を実行し、Flow summary、phase list、Run Next、Run All、Copy Next Prompt、Open Latest Handoff が表示されることを確認する。
 7. `Copy Next Prompt` を実行し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が含まれることを確認する。
 8. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background` で `Run Next` を実行し、`.codexflow/logs/**`、`.codexflow/state.json`、`docs/codex-sessions.jsonl` に flow / phase metadata が残ることを確認する。
-9. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
-10. Dashboard の `Issues 初期化` を実行する。
-7. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
-8. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
-9. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
-10. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
-11. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
-12. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
-13. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
-14. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
-15. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
+9. Background runner cancellation: while background `Run Next` is active, cancel the VS Code progress notification and confirm `.codexflow/state.json` records the phase as `cancelled` rather than `succeeded`.
+10. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
+11. Dashboard の `Issues 初期化` を実行する。
+12. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
+13. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
+14. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
+15. Dashboard の `GitHub Issuesインポート` または Command Palette の `Codex Starter: Import GitHub Issues` を実行し、public repository の open GitHub Issue を 1 件選んで local work item に取り込む。
+16. 作成された TODO / Issue の行にある `Start` を押し、model、インテリジェンス、アクセス権限の QuickPick、確認ダイアログの内容を確認する。
+17. Dashboard の checkbox で複数 Work Item を選び、`選択WorkItemを開始` を実行する。
+18. Command Palette の `Codex Starter: Start Selected Work Items with Codex` を実行し、QuickPick multi-select から複数 Work Item を選ぶ。
+19. Dashboard の `全WorkItemを開始` または `Codex Starter: Start All Work Items with Codex` を実行し、確認ダイアログの内容を確認する。
+20. `Codex Starter: Refresh Work Items` または Dashboard の `Refresh` を実行する。
 
 期待結果:
 

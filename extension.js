@@ -1100,22 +1100,29 @@ async function runCodexFlowPhase(context, workspaceRoot, flow, state, phase, opt
   const result = await vscode.window.withProgress({
     location: vscode.ProgressLocation.Notification,
     title: `Codex Flow: ${phase.id} を実行中...`,
-    cancellable: false
-  }, async (progress) => {
+    cancellable: true
+  }, async (progress, token) => {
     progress.report({ message: 'Codex CLI background runner' });
-    return runCodexFlowPhaseWithCodexCli({
-      rootPath: workspaceRoot,
-      flow,
-      state,
-      phase,
-      promptOverride: options.promptOverride,
-      runConfig,
-      cliPath: config.get('codexCliPath', 'codex'),
-      profile: config.get('codexProfile', ''),
-      toolPaths: collectCodexToolPaths(config),
-      timeoutMs: Math.max(5000, Number(config.get('codexFlowCheckTimeoutMs', 120000)) || 120000) * 10,
-      checkTimeoutMs: config.get('codexFlowCheckTimeoutMs', 120000)
-    });
+    const controller = new AbortController();
+    const cancellation = token.onCancellationRequested(() => controller.abort());
+    try {
+      return await runCodexFlowPhaseWithCodexCli({
+        rootPath: workspaceRoot,
+        flow,
+        state,
+        phase,
+        promptOverride: options.promptOverride,
+        runConfig,
+        cliPath: config.get('codexCliPath', 'codex'),
+        profile: config.get('codexProfile', ''),
+        toolPaths: collectCodexToolPaths(config),
+        timeoutMs: Math.max(5000, Number(config.get('codexFlowCheckTimeoutMs', 120000)) || 120000) * 10,
+        checkTimeoutMs: config.get('codexFlowCheckTimeoutMs', 120000),
+        signal: controller.signal
+      });
+    } finally {
+      cancellation.dispose();
+    }
   });
   writeCodexFlowState(workspaceRoot, updateCodexFlowStateAfterRun(state, result.runRecord));
   recordCodexFlowSession(workspaceRoot, flow, result.runRecord, runConfig, options.sourceLabel || `Codex Flow: ${phase.id}`);

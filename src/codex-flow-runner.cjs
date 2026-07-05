@@ -107,42 +107,60 @@ async function runCodexFlowPhaseWithCodexCli(input = {}) {
   await fs.promises.writeFile(prepared.launcherPath, launcherScript, 'utf8');
   let exitCode = 0;
   let executionError = '';
-  try {
-    await execFileAsync('powershell', [
-      '-NoLogo',
-      '-NoProfile',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-File',
-      prepared.launcherPath
-    ], {
-      cwd: prepared.rootPath,
-      windowsHide: true,
-      timeout: Number.isFinite(executionTimeoutMs) && executionTimeoutMs > 0 ? Math.max(5000, executionTimeoutMs) : undefined,
-      maxBuffer: 8 * 1024 * 1024
-    });
-  } catch (error) {
-    exitCode = Number.isFinite(Number(error?.code)) ? Number(error.code) : 1;
-    executionError = String(error?.message || error);
-    await appendExecutionError(prepared.jsonlPath, error);
+  let cancelled = false;
+  if (isCancellationRequested(input.signal)) {
+    cancelled = true;
+    exitCode = 130;
+    executionError = 'Codex Flow phase cancelled before Codex CLI started.';
+    await appendCancellation(prepared.jsonlPath, executionError);
+  } else {
+    try {
+      await execFileAsync('powershell', [
+        '-NoLogo',
+        '-NoProfile',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        prepared.launcherPath
+      ], {
+        cwd: prepared.rootPath,
+        windowsHide: true,
+        timeout: Number.isFinite(executionTimeoutMs) && executionTimeoutMs > 0 ? Math.max(5000, executionTimeoutMs) : undefined,
+        maxBuffer: 8 * 1024 * 1024,
+        signal: input.signal
+      });
+    } catch (error) {
+      cancelled = isCancellationError(error) || isCancellationRequested(input.signal);
+      exitCode = cancelled ? 130 : (Number.isFinite(Number(error?.code)) ? Number(error.code) : 1);
+      executionError = String(error?.message || error);
+      if (cancelled) {
+        await appendCancellation(prepared.jsonlPath, executionError);
+      } else {
+        await appendExecutionError(prepared.jsonlPath, error);
+      }
+    }
   }
   await sanitizeCodexJsonlOutput(prepared.jsonlPath);
-  const checks = exitCode === 0
+  const checks = cancelled
+    ? { status: 'cancelled', results: [] }
+    : exitCode === 0
     ? await runCodexFlowChecks({
       rootPath: prepared.rootPath,
       checks: phase.checks,
-      timeoutMs: input.checkTimeoutMs
+      timeoutMs: input.checkTimeoutMs,
+      signal: input.signal
     })
     : { status: 'skipped', results: [] };
   await fs.promises.writeFile(prepared.checksPath, JSON.stringify(checks, null, 2) + '\n', 'utf8');
   const finalMessage = await fs.promises.readFile(prepared.finalMessagePath, 'utf8').catch(() => '');
-  const status = exitCode === 0 && checks.status === 'passed' ? 'succeeded' : 'failed';
+  const wasCancelled = cancelled || checks.status === 'cancelled' || isCancellationRequested(input.signal);
+  const status = wasCancelled ? 'cancelled' : (exitCode === 0 && checks.status === 'passed' ? 'succeeded' : 'failed');
   const runRecord = createCodexFlowRunRecord({
     ...prepared.runRecord,
     phase,
     status,
     finishedAt: new Date().toISOString(),
-    exitCode,
+    exitCode: wasCancelled ? 130 : exitCode,
     checksStatus: checks.status,
     error: executionError,
     promptPath: prepared.runRecord.promptPath,
@@ -163,12 +181,26 @@ async function runCodexFlowChecks(input = {}) {
   const results = [];
   for (const command of checks) {
     const startedAt = new Date().toISOString();
+    if (isCancellationRequested(input.signal)) {
+      results.push({
+        command,
+        status: 'cancelled',
+        exitCode: 130,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        stdout: '',
+        stderr: '',
+        error: 'cancelled before check started'
+      });
+      break;
+    }
     try {
       const { stdout, stderr } = await execAsync(command, {
         cwd: rootPath,
         windowsHide: true,
         timeout: timeoutMs,
-        maxBuffer: 2 * 1024 * 1024
+        maxBuffer: 2 * 1024 * 1024,
+        signal: input.signal
       });
       results.push({
         command,
@@ -180,21 +212,24 @@ async function runCodexFlowChecks(input = {}) {
         stderr
       });
     } catch (error) {
+      const cancelled = isCancellationError(error) || isCancellationRequested(input.signal);
       results.push({
         command,
-        status: error?.killed ? 'timeout' : 'failed',
-        exitCode: Number.isFinite(Number(error?.code)) ? Number(error.code) : 1,
+        status: cancelled ? 'cancelled' : (error?.killed ? 'timeout' : 'failed'),
+        exitCode: cancelled ? 130 : (Number.isFinite(Number(error?.code)) ? Number(error.code) : 1),
         startedAt,
         finishedAt: new Date().toISOString(),
         stdout: String(error?.stdout || ''),
         stderr: String(error?.stderr || error?.message || ''),
         error: String(error?.message || error)
       });
+      if (cancelled) break;
     }
   }
+  const cancelled = results.some((result) => result.status === 'cancelled') || isCancellationRequested(input.signal);
   const failed = results.some((result) => result.status !== 'passed' || result.exitCode !== 0);
   return {
-    status: failed ? 'failed' : 'passed',
+    status: cancelled ? 'cancelled' : (failed ? 'failed' : 'passed'),
     results
   };
 }
@@ -297,6 +332,14 @@ async function appendExecutionError(jsonlPath, error) {
   await fs.promises.appendFile(jsonlPath, JSON.stringify(payload) + '\n', 'utf8').catch(() => {});
 }
 
+async function appendCancellation(jsonlPath, message) {
+  const payload = {
+    type: 'codex-flow-runner-cancelled',
+    message: String(message || 'cancelled')
+  };
+  await fs.promises.appendFile(jsonlPath, JSON.stringify(payload) + '\n', 'utf8').catch(() => {});
+}
+
 async function sanitizeCodexJsonlOutput(jsonlPath) {
   const content = await readTextFileFlexible(jsonlPath);
   if (!content) return { changed: false, invalidLines: [] };
@@ -361,6 +404,14 @@ function toPortablePath(value) {
 
 function toSlash(value) {
   return String(value || '').replace(/\\/g, '/');
+}
+
+function isCancellationRequested(signal) {
+  return signal?.aborted === true || signal?.isCancellationRequested === true;
+}
+
+function isCancellationError(error) {
+  return error?.name === 'AbortError' || error?.code === 'ABORT_ERR';
 }
 
 module.exports = {

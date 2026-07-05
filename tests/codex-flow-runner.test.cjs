@@ -6,6 +6,7 @@ const test = require('node:test');
 const { defaultCodexFlow, ensureCodexFlowScaffold } = require('../src/codex-flow.cjs');
 const {
   prepareCodexFlowPhaseRun,
+  runCodexFlowPhaseWithCodexCli,
   runCodexFlowChecks,
   buildCodexFlowRepairPrompt,
   sanitizeCodexJsonlOutput
@@ -52,6 +53,49 @@ test('runCodexFlowChecks reports pass and failure results', async () => {
   });
   assert.equal(failed.status, 'failed');
   assert.notEqual(failed.results[0].exitCode, 0);
+});
+
+test('runCodexFlowChecks reports cancelled when aborted before a check starts', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-checks-cancel-'));
+  const controller = new AbortController();
+  controller.abort();
+  const cancelled = await runCodexFlowChecks({
+    rootPath: root,
+    checks: ['node -e "process.exit(0)"'],
+    timeoutMs: 30000,
+    signal: controller.signal
+  });
+  assert.equal(cancelled.status, 'cancelled');
+  assert.equal(cancelled.results[0].status, 'cancelled');
+  assert.equal(cancelled.results[0].exitCode, 130);
+});
+
+test('runCodexFlowPhaseWithCodexCli records cancelled when aborted before launch', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-runner-cancel-'));
+  fs.writeFileSync(path.join(root, 'README.md'), '# README\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'SKILL.md'), '# SKILL\n', 'utf8');
+  ensureCodexFlowScaffold(root, { name: 'Cancelled Runner Sample' });
+  const flow = defaultCodexFlow(root, { name: 'Cancelled Runner Sample' });
+  const phase = flow.phases[0];
+  const controller = new AbortController();
+  controller.abort();
+  const result = await runCodexFlowPhaseWithCodexCli({
+    rootPath: root,
+    flow,
+    state: { flowId: flow.flowId, phaseStatus: {} },
+    phase,
+    cliPath: 'codex-command-that-should-not-run',
+    gitContext: { branch: 'codex/test', head: 'abc123', status: '' },
+    runConfig: { sandboxMode: 'read-only' },
+    startedAt: '2026-07-05T00:00:00.000Z',
+    signal: controller.signal
+  });
+  assert.equal(result.runRecord.status, 'cancelled');
+  assert.equal(result.runRecord.exitCode, 130);
+  assert.equal(result.checks.status, 'cancelled');
+  const jsonl = fs.readFileSync(result.jsonlPath, 'utf8').trim().split(/\r?\n/).map((line) => JSON.parse(line));
+  assert.equal(jsonl[0].type, 'codex-flow-runner-cancelled');
 });
 
 test('sanitizeCodexJsonlOutput preserves valid events and records non-json output', async () => {

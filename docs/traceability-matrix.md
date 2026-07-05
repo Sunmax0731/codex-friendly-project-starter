@@ -42,6 +42,7 @@
 | Codex Flow を初期化し repo-local flow state を管理する | `src/codex-flow.cjs`, `extension.js`, `package.json` | `tests/codex-flow.test.cjs`, `Issues/0024-codex-flow-orchestrator.md` |
 | Codex Flow phase prompt を docs / Git / handoff から合成する | `src/codex-flow.cjs` | `tests/codex-flow.test.cjs`, `docs/user-guide.md` |
 | Codex Flow phase を background Codex CLI で実行し JSONL / final / checks を残す | `src/codex-flow-runner.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/codex-flow-runner.test.cjs`, `tests/codex-cli.test.cjs`, `docs/manual-test.md` |
+| Codex Flow background runner cancellation records `cancelled` without false success | `src/codex-flow-runner.cjs`, `extension.js` | `tests/codex-flow-runner.test.cjs`, `docs/manual-test.md`, `docs/vscode-verification-guide.md` |
 | failed phase の repair prompt を生成する | `src/codex-flow-runner.cjs`, `extension.js` | `tests/codex-flow-runner.test.cjs`, `Issues/0024-codex-flow-orchestrator.md` |
 | Codex Flow Dashboard を表示し Work Dashboard から遷移する | `src/codex-flow-webview.cjs`, `src/webview.cjs`, `src/i18n.cjs`, `extension.js` | `tests/codex-flow-webview.test.cjs`, `tests/work-items.test.cjs`, `tests/i18n.test.cjs` |
 | blocked の原因を follow-up Issue に起こす | `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `docs/manual-test.md` |

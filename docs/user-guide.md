@@ -42,6 +42,8 @@ Flow artifacts は workspace 内に保存される。
 - `.codexflow/logs/<phase-id>/*.checks.json`
 - `docs/handoff/*.md`
 
+Background runner cancellation: if the VS Code progress notification is cancelled, the runner aborts the Codex CLI/check path, records the phase as `cancelled`, and keeps generated artifacts under `.codexflow/logs/<phase-id>/`.
+
 `danger-full-access` と `git push` は既定にならない。auto commit も既定 false で、必要な場合は Flow 定義と設定で明示する。
 
 `D:\AI` 既定 docs 生成とは別の機能です。Default Docs scaffold は `AGENTS.md`、`SKILL.md`、`docs/*.md`、`Issues/*.md`、工程別 agent / skill docs を用意するだけで、`.codexflow/` は作らない。Codex Flow を使う場合は、その後に `Codex Flow 初期化` を実行し、生成済み docs を Flow の参照 docs として使う。

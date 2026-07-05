@@ -47,7 +47,7 @@ Work Item が closed にならない場合は `src/work-items.cjs` の blocked f
 
 Codex Flow は Work Items の上位 orchestration として扱う。source of truth は VS Code globalState ではなく workspace 内の `.codexflow/flow.json`、`.codexflow/state.json`、`.codexflow/logs/**`、`docs/handoff/*.md` である。各 phase は既定で新規 Codex session とし、前工程の文脈は `docs/handoff/latest.md`、Git 状態、参照 docs、phase prompt から合成する。
 
-Flow の完全自動実行は `codexFriendlyProjectStarter.codexFlowRunner=background` で行う。runner は `codex exec --json -o <final>` の stdout を `.jsonl` に保存し、checks を実行して state を更新する。`terminal` と `vscode-codex` は終了検知をしないため manual-handoff として記録する。
+Flow の完全自動実行は `codexFriendlyProjectStarter.codexFlowRunner=background` で行う。runner は `codex exec --json -o <final>` の stdout を `.jsonl` に保存し、checks を実行して state を更新する。VS Code progress cancellation は Codex CLI / checks を abort し、phase を `cancelled` として記録する。`terminal` と `vscode-codex` は終了検知をしないため manual-handoff として記録する。
 
 Default Docs scaffold と Codex Flow scaffold は別責務にする。`src/default-docs.cjs` は root docs、`docs/*.md`、`Issues/*.md`、`agents/phases/*/AGENTS.md`、`skills/*/SKILL.md` を生成し、`.codexflow/` や `prompts/codexflow/` は作らない。Codex Flow 初期化だけが `.codexflow/flow.json`、`state.json`、phase prompts、handoff template を生成し、既存 docs を `flow.docs` の参照対象として利用する。
 
