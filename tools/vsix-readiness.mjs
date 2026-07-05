@@ -13,6 +13,8 @@ const requiredCommands = [
   'codex-friendly-project-starter.openWorkDashboard',
   'codex-friendly-project-starter.openCodexFlowDashboard',
   'codex-friendly-project-starter.initializeCodexFlow',
+  'codex-friendly-project-starter.importCodexFlowPackage',
+  'codex-friendly-project-starter.validateCodexFlowPackage',
   'codex-friendly-project-starter.runNextCodexFlowPhase',
   'codex-friendly-project-starter.runAllCodexFlowPhases',
   'codex-friendly-project-starter.copyNextCodexFlowPrompt',

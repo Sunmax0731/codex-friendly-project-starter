@@ -32,6 +32,8 @@
     "onCommand:codex-friendly-project-starter.refreshWorkItems",
     "onCommand:codex-friendly-project-starter.openWorkDashboard",
     "onCommand:codex-friendly-project-starter.initializeCodexFlow",
+    "onCommand:codex-friendly-project-starter.importCodexFlowPackage",
+    "onCommand:codex-friendly-project-starter.validateCodexFlowPackage",
     "onCommand:codex-friendly-project-starter.openCodexFlowDashboard",
     "onCommand:codex-friendly-project-starter.runNextCodexFlowPhase",
     "onCommand:codex-friendly-project-starter.runAllCodexFlowPhases",
@@ -126,6 +128,16 @@
         "command": "codex-friendly-project-starter.initializeCodexFlow",
         "title": "%command.initializeCodexFlow.title%",
         "icon": "$(repo-create)"
+      },
+      {
+        "command": "codex-friendly-project-starter.importCodexFlowPackage",
+        "title": "%command.importCodexFlowPackage.title%",
+        "icon": "$(file-zip)"
+      },
+      {
+        "command": "codex-friendly-project-starter.validateCodexFlowPackage",
+        "title": "%command.validateCodexFlowPackage.title%",
+        "icon": "$(shield)"
       },
       {
         "command": "codex-friendly-project-starter.openCodexFlowDashboard",

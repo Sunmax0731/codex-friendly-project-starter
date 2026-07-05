@@ -72,6 +72,12 @@ const {
   renderCodexFlowDashboardWebview
 } = require('./src/codex-flow-webview.cjs');
 const {
+  createCodexFlowPackageImportPlan,
+  formatCodexFlowPackageReport,
+  importCodexFlowPackage,
+  validateCodexFlowPackage
+} = require('./src/codex-flow-package.cjs');
+const {
   createCodexSessionRecord,
   recordCodexSession
 } = require('./src/codex-sessions.cjs');
@@ -101,6 +107,7 @@ let lastMarkdownWebview = null;
 const markdownWebviewPanels = new Map();
 const activeCodexFlowRuns = new Map();
 const OPENAI_PROMPT_GUIDANCE_STATE_KEY = 'openAiPromptGuidanceState.v1';
+let codexFlowPackageOutputChannel = null;
 
 function activate(context) {
   const treeProvider = new AgentDocsTreeProvider();
@@ -133,6 +140,8 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.copyMarkdownPath', (item) => copyMarkdownPathCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeCodexFlow', () => initializeCodexFlowCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.importCodexFlowPackage', () => importCodexFlowPackageCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.validateCodexFlowPackage', () => validateCodexFlowPackageCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openCodexFlowDashboard', () => openCodexFlowDashboard(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.runNextCodexFlowPhase', () => runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.runAllCodexFlowPhases', () => runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider)),
@@ -888,6 +897,135 @@ async function handleDashboardMessage(args) {
     workItemsProvider?.refresh();
     await renderDashboardPanel(panel, nonce, workspaceRoot);
   }
+}
+
+async function validateCodexFlowPackageCommand(context, treeProvider, workItemsProvider, initial = {}) {
+  const workspaceRoot = initial.workspaceRoot || await pickCodexFlowPackageWorkspaceRoot();
+  if (!workspaceRoot) return;
+  const zipPath = initial.zipPath || await pickCodexFlowPackageZipPath();
+  if (!zipPath) return;
+  const validation = validateCodexFlowPackage(zipPath, { workspaceRoot });
+  showCodexFlowPackageReport(validation);
+  if (!validation.valid) {
+    const action = await vscode.window.showErrorMessage(
+      `Codex Flow Package: invalid (${validation.errors.length} errors). See the Codex Flow Package output for details.`,
+      'Open Report'
+    );
+    if (action === 'Open Report') showCodexFlowPackageOutput();
+    return;
+  }
+  const action = await vscode.window.showInformationMessage(
+    `Codex Flow Package: valid. ${validation.filesToImport.length} files can be imported, ${validation.overwriteCandidates.length} overwrite candidates.`,
+    'Import Now',
+    'Open Report'
+  );
+  if (action === 'Import Now') {
+    await importCodexFlowPackageCommand(context, treeProvider, workItemsProvider, { workspaceRoot, zipPath });
+    return;
+  }
+  if (action === 'Open Report') showCodexFlowPackageOutput();
+}
+
+async function importCodexFlowPackageCommand(context, treeProvider, workItemsProvider, initial = {}) {
+  const workspaceRoot = initial.workspaceRoot || await pickCodexFlowPackageWorkspaceRoot();
+  if (!workspaceRoot) return;
+  const zipPath = initial.zipPath || await pickCodexFlowPackageZipPath();
+  if (!zipPath) return;
+  const validation = validateCodexFlowPackage(zipPath, { workspaceRoot });
+  const plan = validation.valid ? createCodexFlowPackageImportPlan(validation, { workspaceRoot }) : undefined;
+  showCodexFlowPackageReport(validation);
+  if (!validation.valid) {
+    const action = await vscode.window.showErrorMessage(
+      `Codex Flow Package: import cancelled because validation failed (${validation.errors.length} errors).`,
+      'Open Report'
+    );
+    if (action === 'Open Report') showCodexFlowPackageOutput();
+    return;
+  }
+  const confirmation = buildCodexFlowPackageImportConfirmation(validation, plan);
+  const answer = await vscode.window.showWarningMessage(
+    confirmation,
+    { modal: plan.overwriteCandidates.length > 0 },
+    'Import Package',
+    'Cancel'
+  );
+  if (answer !== 'Import Package') return;
+  const result = importCodexFlowPackage(zipPath, { workspaceRoot, validation, plan, overwrite: true });
+  showCodexFlowPackageReport(validation, result);
+  if (!result.success) {
+    const action = await vscode.window.showErrorMessage(
+      `Codex Flow Package: import failed. ${result.imported.length} files may have been written; see report.`,
+      'Open Report'
+    );
+    if (action === 'Open Report') showCodexFlowPackageOutput();
+    return;
+  }
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+  await openCodexFlowDashboard(context, treeProvider, workItemsProvider, workspaceRoot);
+  vscode.window.showInformationMessage(
+    `Codex Flow Package: imported ${result.imported.length} files. Flow Dashboard opened; start phases manually with Run Next or Run All.`
+  );
+}
+
+async function pickCodexFlowPackageWorkspaceRoot() {
+  const folders = vscode.workspace.workspaceFolders || [];
+  if (!folders.length) {
+    vscode.window.showErrorMessage('Codex Flow Package: open a workspace before importing or validating a package.');
+    return '';
+  }
+  if (folders.length === 1) return folders[0].uri.fsPath;
+  const selected = await vscode.window.showQuickPick(folders.map((folder) => ({
+    label: folder.name,
+    description: folder.uri.fsPath,
+    folder
+  })), { placeHolder: 'Select the workspace folder for the Codex Flow Package' });
+  return selected?.folder?.uri?.fsPath || '';
+}
+
+async function pickCodexFlowPackageZipPath() {
+  const selected = await vscode.window.showOpenDialog({
+    canSelectFiles: true,
+    canSelectFolders: false,
+    canSelectMany: false,
+    filters: { 'ZIP files': ['zip'] },
+    title: 'Select Codex Flow Package ZIP'
+  });
+  return selected?.[0]?.fsPath || '';
+}
+
+function buildCodexFlowPackageImportConfirmation(validation, plan) {
+  const lines = [
+    `Import ${validation.filesToImport.length} Codex Flow package files into ${plan.workspaceRoot}?`,
+    `Warnings: ${validation.warnings.length}`,
+    `Overwrite candidates: ${plan.overwriteCandidates.length}`
+  ];
+  if (plan.overwriteCandidates.length) {
+    lines.push('', 'The following files will be overwritten after backup:');
+    for (const relativePath of plan.overwriteCandidates.slice(0, 12)) lines.push(`- ${relativePath}`);
+    if (plan.overwriteCandidates.length > 12) lines.push(`- ... and ${plan.overwriteCandidates.length - 12} more`);
+    lines.push('', `Backup directory: ${plan.backupDirectory}`);
+  }
+  if (validation.warnings.length) {
+    lines.push('', 'Warnings are listed in the Codex Flow Package output.');
+  }
+  return lines.join('\n');
+}
+
+function showCodexFlowPackageReport(validation, result = undefined) {
+  const output = getCodexFlowPackageOutput();
+  output.clear();
+  output.appendLine(formatCodexFlowPackageReport(validation, result));
+  output.show(true);
+}
+
+function showCodexFlowPackageOutput() {
+  getCodexFlowPackageOutput().show(true);
+}
+
+function getCodexFlowPackageOutput() {
+  if (!codexFlowPackageOutputChannel) codexFlowPackageOutputChannel = vscode.window.createOutputChannel('Codex Flow Package');
+  return codexFlowPackageOutputChannel;
 }
 
 async function initializeCodexFlowCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {

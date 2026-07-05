@@ -223,3 +223,38 @@ VS Code の表示言語が日本語の場合、Dashboard、QCDS Status、Markdow
 - `codexFriendlyProjectStarter.recordCodexSessions`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` に記録するか。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。Codex Flow の `Run All Pending` は開始時に1回だけ確認する。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。
+
+## Codex Flow Package ZIP import
+
+A Codex Flow Package is a ZIP that carries pre-implementation planning material from ChatGPT into the current VS Code workspace. It is a transport format, not a Codex input. Codex CLI is started later from the imported workspace files through Codex Flow runtime prompt generation.
+
+Expected ZIP layout:
+
+```text
+docs/
+  requirements.md
+  specification.md
+  design.md
+  architecture.md
+  test-plan.md
+  handoff/latest.md
+prompts/codexflow/
+  00_first.md
+  10_project_setup.md
+  20_core_implementation.md
+.codexflow/
+  flow.json
+  state.json
+AGENTS.md
+README.codexflow.md
+```
+
+The ZIP may also contain one single top-level folder, for example `my-feature-codexflow/docs/...`. The importer treats that folder as the package root. ZIPs with multiple unrelated top-level folders are invalid.
+
+Use `Codex Friendly: Validate Codex Flow Package` when you want a dry run. Choose the ZIP file and read the `Codex Flow Package` output channel. Validation writes nothing to the workspace. It reports valid or invalid status, errors, warnings, files to import, files to skip, overwrite candidates, phase count, prompt count, and docs count.
+
+Use `Codex Friendly: Import Codex Flow Package` when validation is clean enough to proceed. The command validates first, asks before overwriting files, backs up existing overwritten files under `.codexflow/backups/import-YYYYMMDD-HHmmss/`, extracts only allowed files, initializes missing `.codexflow/state.json` and `docs/handoff/latest.md`, and opens the Flow Dashboard. Existing `.codexflow/state.json` is preserved and is not overwritten automatically.
+
+Allowed package paths are `docs/**`, `prompts/**`, `.codexflow/**`, `AGENTS.md`, and `README.codexflow.md`. `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` are skipped. Code or executable paths are rejected, including `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
+
+After import, use `Codex Friendly: Open Codex Flow Dashboard`, then explicitly choose `Run Next Codex Flow Phase` or `Run All Codex Flow Phases`. Import never starts execution automatically. The background runner remains the primary route. VS Code Codex clipboard handoff is still available as an assisted fallback route for manual confirmation.

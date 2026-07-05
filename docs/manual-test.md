@@ -209,3 +209,32 @@ phase optional fields の検収例:
 - 確認中の指摘: `全工程を実行` で phase ごとに確認が入っていた。
 - 対応: `全工程を実行` は開始時に1回だけ確認し、各 phase では追加確認を出さない仕様に変更した。
 - 注意: 実行確認により repo-local の `.codexflow/state.json`、`.codexflow/logs/**`、`docs/codex-sessions.*`、`docs/handoff/*.md` が更新される場合がある。これらの実行結果を commit するかどうかは、phase 実行記録として残す判断がある場合だけにする。
+
+## Codex Flow Package Import / Validate manual checks
+
+1. Prepare a valid Codex Flow Package ZIP with `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, optional `.codexflow/state.json`, `AGENTS.md`, and `README.codexflow.md`.
+2. Start the VS Code Extension Development Host.
+3. Run `Codex Friendly: Validate Codex Flow Package`.
+4. Select the ZIP file.
+5. Confirm that a valid report appears in the `Codex Flow Package` output channel.
+6. Run `Codex Friendly: Import Codex Flow Package`.
+7. Select the same ZIP file.
+8. If overwrite candidates exist, confirm that an overwrite prompt appears and lists the affected workspace-relative files.
+9. Confirm that `.codexflow/flow.json` is placed in the target workspace.
+10. Confirm that imported `docs/` and `prompts/` files are placed in the target workspace.
+11. Confirm that `.codexflow/state.json` is initialized when it was missing.
+12. Confirm that `docs/handoff/latest.md` is initialized when it was missing.
+13. Confirm that the Flow Dashboard opens after import.
+14. Confirm that `Run Next Codex Flow Phase` targets the imported next phase. Do not treat Import itself as phase execution.
+15. Confirm that a ZIP containing path traversal entries such as `../evil.md`, `docs/../../evil.md`, `..\\evil.md`, `C:/evil.md`, or `/evil.md` is rejected and writes nothing to the workspace.
+16. Confirm that a ZIP containing disallowed paths such as `src/extension.js`, `package.json`, `node_modules/foo/index.js`, `.git/config`, `.vscode/settings.json`, `malware.exe`, or `scripts/postinstall.sh` is rejected and writes nothing to the workspace.
+17. Confirm that an existing `.codexflow/state.json` is preserved and is not overwritten automatically.
+
+Expected behavior:
+
+- `Validate Codex Flow Package` is a dry run and writes no workspace files.
+- `Import Codex Flow Package` always validates first and stops before writing if validation has errors.
+- Existing overwritten files are backed up under `.codexflow/backups/import-YYYYMMDD-HHmmss/` with relative paths preserved.
+- `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` from the ZIP are skipped.
+- Import does not start `Run Next` or `Run All` automatically.
+- The background runner remains the primary route after import; clipboard handoff is an assisted fallback route.

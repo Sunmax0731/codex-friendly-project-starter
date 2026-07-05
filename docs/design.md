@@ -159,3 +159,23 @@ path 系 field は workspace relative path のみ許可し、絶対パス、`../
 - エディタ decoration は強すぎないテーマ色を使う。
 - Work Dashboard は VS Code theme color と固定行高の progress bar を使い、TODO/Issue の数が変わっても layout が大きく崩れないようにする。
 - Icon button は `aria-label` と `title` を持ち、キーボード focus 時にも hover と同じ背景を使う。
+
+## Codex Flow Package Import / Validate
+
+Codex Flow Package import is a document and prompt transport feature. It accepts a ZIP generated before development, usually by ChatGPT, and imports only Codex Flow planning assets into the current VS Code workspace. The ZIP is not passed directly to Codex CLI. Codex CLI receives the runtime prompt synthesized later from the imported `docs/`, `prompts/codexflow/`, `.codexflow/flow.json`, Git state, logs, and handoff files.
+
+The package root may be either the ZIP root or one single top-level folder. Multiple unrelated top-level folders are rejected. Allowed package paths are:
+
+- `docs/**`
+- `prompts/**`
+- `.codexflow/**`
+- `AGENTS.md`
+- `README.codexflow.md`
+
+Runtime-local paths `.codexflow/logs/**`, `.codexflow/run-prompts/**`, and `.codexflow/backups/**` are skipped because they are execution artifacts, not package source. Code and executable paths are rejected, including `src/**`, `extension.js`, `package.json`, `package-lock.json`, `node_modules/**`, `.git/**`, `.github/**`, `.vscode/**`, `tests/**`, `out/**`, `dist/**`, `*.vsix`, `*.exe`, `*.dll`, `*.bat`, `*.cmd`, `*.ps1`, and `*.sh`.
+
+Validation runs before import and checks ZIP path safety, common root detection, duplicate case-insensitive path collisions, size limits, required `.codexflow/flow.json`, package docs referenced by `flow.json`, phase prompt files, and phase optional fields. The size limits are 500 entries, 50 MB total uncompressed size, and 10 MB per file. Symlink entries are rejected when the ZIP metadata exposes Unix symlink mode bits; ZIP formats that omit that metadata cannot be identified as symlinks, so extraction still restricts all target paths to the workspace root.
+
+Import creates an import plan, reports files to import, skipped files, warnings, overwrite candidates, phase count, prompt count, and docs count, then asks for confirmation before overwriting. Existing files are backed up under `.codexflow/backups/import-YYYYMMDD-HHmmss/` while preserving relative paths. Existing `.codexflow/state.json` is preserved and never overwritten automatically; if it is missing, import initializes it through the existing Codex Flow state helper. Missing `docs/handoff/latest.md` is initialized with a first-run handoff.
+
+After import, the Flow Dashboard opens. Import does not automatically run any phase. Users explicitly start execution with `Codex Friendly: Run Next Codex Flow Phase` or `Codex Friendly: Run All Codex Flow Phases`. The background runner remains the primary route for Codex Flow execution; VS Code Codex clipboard handoff remains an assisted fallback route for manual confirmation.
