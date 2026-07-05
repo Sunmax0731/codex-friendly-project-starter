@@ -1,5 +1,5 @@
 const path = require('node:path');
-const { normalizeCodexFlow, normalizeCodexFlowState, resolveNextCodexFlowPhase, latestRunForPhase } = require('./codex-flow.cjs');
+const { normalizeCodexFlow, normalizeCodexFlowState, resolveNextCodexFlowPhase, latestRunForPhase, phaseHandoffPath } = require('./codex-flow.cjs');
 const { t, normalizeLocale } = require('./i18n.cjs');
 
 function buildCodexFlowDashboardModel(rootPath, flow, state, options = {}) {
@@ -20,15 +20,24 @@ function buildCodexFlowDashboardModel(rootPath, flow, state, options = {}) {
   const phases = normalizedFlow.phases.map((phase) => {
     const status = normalizedState.phaseStatus[phase.id] || 'pending';
     const lastRun = latestRunForPhase(normalizedState, phase.id);
+    const phaseState = normalizedState.phases?.[phase.id] || {};
     return {
       ...phase,
       status,
       lastRun,
+      startedAt: phaseState.startedAt || lastRun?.startedAt || '',
+      runId: phaseState.runId || lastRun?.runId || '',
+      artifacts: phaseState.artifacts || artifactsFromRun(lastRun),
       checksCount: phase.checks.length,
-      handoffPath: toSlash(path.join(rootPath || '', ...toPathSegments(normalizedFlow.handoff.directory), `${phase.id}.md`))
+      metadataSummary: summarizePhaseMetadata(phase.metadata),
+      handoffPath: toSlash(path.join(rootPath || '', ...toPathSegments(phaseHandoffPath(normalizedFlow, phase)))),
+      logPath: toSlash(path.join(rootPath || '', ...toPathSegments(phase.logPath || ''))),
+      retryMaxAttempts: phase.retryPolicy?.maxAttempts ?? normalizedFlow.maxRepairAttempts,
+      sessionMode: phase.sessionMode || 'new-session'
     };
   });
   const succeeded = phases.filter((phase) => phase.status === 'succeeded').length;
+  const runningPhase = phases.find((phase) => phase.status === 'running');
   const nextPhase = resolveNextCodexFlowPhase(normalizedFlow, normalizedState);
   return {
     rootPath,
@@ -43,8 +52,11 @@ function buildCodexFlowDashboardModel(rootPath, flow, state, options = {}) {
       percent: phases.length ? Math.round((succeeded / phases.length) * 100) : 0
     },
     nextPhase,
+    runningPhase,
     lastRun: normalizedState.phaseRuns[normalizedState.phaseRuns.length - 1],
-    latestHandoffPath: toSlash(path.join(rootPath || '', ...toPathSegments(normalizedFlow.handoff.latest)))
+    latestHandoffPath: toSlash(path.join(rootPath || '', ...toPathSegments(normalizedFlow.handoff.latest))),
+    flowPath: toSlash(path.join(rootPath || '', '.codexflow', 'flow.json')),
+    gitContext: options.gitContext || {}
   };
 }
 
@@ -100,6 +112,7 @@ function renderCodexFlowDashboardWebview(nonce, model, options = {}) {
       <button class="icon-button" data-action="refreshCodexFlowDashboard" aria-label="${escapeHtml(t('webview.refresh', locale))}" title="${escapeHtml(t('webview.refresh', locale))}">↻</button>
       <button class="icon-button" data-action="openLatestCodexFlowHandoff" aria-label="${escapeHtml(t('flow.openLatestHandoff', locale))}" title="${escapeHtml(t('flow.openLatestHandoff', locale))}">↗</button>
       <button class="icon-button" data-action="copyNextCodexFlowPrompt" aria-label="${escapeHtml(t('flow.copyNextPrompt', locale))}" title="${escapeHtml(t('flow.copyNextPrompt', locale))}">⧉</button>
+      <button class="icon-button" data-action="openCodexFlowFile" aria-label="${escapeHtml(t('flow.openFlowFile', locale))}" title="${escapeHtml(t('flow.openFlowFile', locale))}">{}</button>
     </span>
   </div>
   <div id="app"></div>
@@ -114,6 +127,10 @@ function renderCodexFlowDashboardWebview(nonce, model, options = {}) {
     copyNext: t('flow.copyNextPrompt', locale),
     repair: t('flow.repairFailed', locale),
     openHandoff: t('flow.openLatestHandoff', locale),
+    stopCurrent: t('flow.stopCurrent', locale),
+    openLog: t('flow.openPhaseLog', locale),
+    openFlow: t('flow.openFlowFile', locale),
+    gitDiff: t('flow.gitDiffSummary', locale),
     refresh: t('dashboard.refresh', locale)
   }).replace(/</g, '\\u003c')};
   const app = document.getElementById('app');
@@ -132,16 +149,23 @@ function renderCodexFlowDashboardWebview(nonce, model, options = {}) {
       '<button data-action="initializeCodexFlow">' + labels.initialize + '</button>',
       '<button data-action="runNextCodexFlowPhase">' + labels.runNext + '</button>',
       '<button data-action="runAllCodexFlowPhases">' + labels.runAll + '</button>',
+      '<button class="secondary" data-action="stopCurrentCodexFlowPhase">' + labels.stopCurrent + '</button>',
       '<button class="secondary" data-action="copyNextCodexFlowPrompt">' + labels.copyNext + '</button>',
       failedPhaseExists() ? '<button class="secondary" data-action="repairFailedCodexFlowPhase">' + labels.repair + '</button>' : '',
       '<button class="subtle" data-action="openLatestCodexFlowHandoff">' + labels.openHandoff + '</button>',
+      '<button class="subtle" data-action="openLatestCodexFlowPhaseLog">' + labels.openLog + '</button>',
+      '<button class="subtle" data-action="openCodexFlowFile">' + labels.openFlow + '</button>',
+      '<button class="subtle" data-action="copyCodexFlowGitDiffSummary">' + labels.gitDiff + '</button>',
       '</section>',
       '<section class="summary">',
       card('Flow', flow.name, flow.mode),
       card('Progress', model.progress.succeeded + ' / ' + model.progress.total, model.progress.percent + '%'),
       card('Next Phase', next, flow.sandbox),
+      card('Running Phase', model.runningPhase ? model.runningPhase.id : 'none', model.runningPhase ? model.runningPhase.startedAt : ''),
       card('Last Run', model.lastRun ? model.lastRun.status : 'none', model.lastRun ? model.lastRun.finishedAt : ''),
+      card('Git', model.gitContext && model.gitContext.branch ? model.gitContext.branch : 'unknown', model.gitContext && model.gitContext.head ? 'HEAD ' + model.gitContext.head : ''),
       '</section>',
+      gitSummaryHtml(),
       '<div class="bar" aria-label="Codex Flow progress ' + model.progress.percent + '%"><span class="fill" style="width:' + model.progress.percent + '%"></span></div>',
       '<section class="phase-list">' + model.phases.map(phaseHtml).join('') + '</section>'
     ].join('');
@@ -154,9 +178,21 @@ function renderCodexFlowDashboardWebview(nonce, model, options = {}) {
   function card(label, value, detail) {
     return '<div class="card"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '') + '</strong><span class="detail">' + escapeHtml(detail || '') + '</span></div>';
   }
+  function gitSummaryHtml() {
+    const git = model.gitContext || {};
+    if (!git.branch && !git.head && !git.status && !git.diffStat && !git.lastCommit) return '';
+    return '<section class="card"><h2>Git diff summary</h2><div class="detail">Last commit: ' + escapeHtml(git.lastCommit || 'unknown') + '</div><div class="detail">Status: ' + escapeHtml(git.status || '(clean)') + '</div><div class="detail">Diff stat: ' + escapeHtml(git.diffStat || '(no diff)') + '</div></section>';
+  }
   function phaseHtml(phase) {
     const last = phase.lastRun || {};
-    return '<article class="phase"><div><div class="badges"><span class="tag tag-' + escapeHtml(phase.status) + '">' + escapeHtml(phase.status) + '</span><span class="tag">' + escapeHtml(phase.checksCount + ' checks') + '</span></div><h2>' + escapeHtml(phase.id + ' / ' + phase.name) + '</h2><div class="path">' + escapeHtml(phase.prompt) + '</div><div class="detail">last: ' + escapeHtml(last.runId || 'none') + ' ' + escapeHtml(last.checksStatus || '') + '</div></div><span class="row-actions"><button data-action="runCodexFlowPhase" data-phase-id="' + escapeHtml(phase.id) + '">Run</button><button class="secondary" data-action="copyCodexFlowPhasePrompt" data-phase-id="' + escapeHtml(phase.id) + '">Copy Prompt</button><button class="subtle" data-action="openCodexFlowPhasePrompt" data-phase-id="' + escapeHtml(phase.id) + '">Open Prompt</button><button class="subtle" data-action="openCodexFlowPhaseHandoff" data-phase-id="' + escapeHtml(phase.id) + '">Open Handoff</button></span></article>';
+    const artifacts = phase.artifacts || {};
+    const metadata = phase.metadataSummary ? '<div class="detail">metadata: ' + escapeHtml(phase.metadataSummary) + '</div>' : '';
+    const runtime = '<div class="detail">session: ' + escapeHtml(phase.sessionMode) + ' / stopOnFailure: ' + escapeHtml(String(phase.stopOnFailure !== false)) + ' / retry max: ' + escapeHtml(String(phase.retryMaxAttempts)) + '</div>';
+    const paths = '<div class="path">handoff: ' + escapeHtml(phase.handoffPath) + '</div><div class="path">logs: ' + escapeHtml(phase.logPath) + '</div>';
+    const running = phase.status === 'running'
+      ? '<div class="detail">running: ' + escapeHtml(phase.runId || last.runId || 'run') + ' started ' + escapeHtml(phase.startedAt || '') + '</div><div class="path">artifact: ' + escapeHtml(artifacts.jsonl || artifacts.prompt || '') + '</div>'
+      : '';
+    return '<article class="phase"><div><div class="badges"><span class="tag tag-' + escapeHtml(phase.status) + '">' + escapeHtml(phase.status) + '</span><span class="tag">' + escapeHtml(phase.checksCount + ' checks') + '</span></div><h2>' + escapeHtml(phase.id + ' / ' + phase.name) + '</h2><div class="path">' + escapeHtml(phase.prompt) + '</div>' + runtime + paths + metadata + running + '<div class="detail">last: ' + escapeHtml(last.runId || 'none') + ' ' + escapeHtml(last.checksStatus || '') + '</div></div><span class="row-actions"><button data-action="runCodexFlowPhase" data-phase-id="' + escapeHtml(phase.id) + '">Run</button><button class="secondary" data-action="copyCodexFlowPhasePrompt" data-phase-id="' + escapeHtml(phase.id) + '">Copy Prompt</button><button class="subtle" data-action="openCodexFlowPhasePrompt" data-phase-id="' + escapeHtml(phase.id) + '">Open Prompt</button><button class="subtle" data-action="openCodexFlowPhaseHandoff" data-phase-id="' + escapeHtml(phase.id) + '">Open Handoff</button><button class="subtle" data-action="openCodexFlowPhaseLog" data-phase-id="' + escapeHtml(phase.id) + '">' + labels.openLog + '</button></span></article>';
   }
   function failedPhaseExists() {
     return model.phases && model.phases.some((phase) => phase.status === 'failed');
@@ -183,6 +219,33 @@ function toPathSegments(relativePath) {
 
 function toSlash(value) {
   return String(value || '').replace(/\\/g, '/');
+}
+
+function summarizePhaseMetadata(metadata = {}) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return '';
+  return Object.entries(metadata)
+    .filter(([key]) => key)
+    .map(([key, value]) => `${key}: ${summarizeMetadataValue(value)}`)
+    .join(', ');
+}
+
+function summarizeMetadataValue(value) {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return value.map(summarizeMetadataValue).join('|');
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function artifactsFromRun(run = {}) {
+  if (!run) return {};
+  return {
+    prompt: run.promptPath || '',
+    jsonl: run.jsonlPath || '',
+    final: run.finalMessagePath || '',
+    checks: run.checksPath || '',
+    launcher: run.launcherPath || '',
+    handoff: run.handoffPath || ''
+  };
 }
 
 function escapeHtml(value) {

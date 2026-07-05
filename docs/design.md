@@ -71,10 +71,26 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - `Codex Starter: Open Codex Flow Dashboard` で開く。
 - Flow name、mode、sandbox、progress、next phase、last run、latest handoff を summary として表示する。
 - `.codexflow/flow.json` が無い場合は empty state と `Codex Flow 初期化` action を表示する。
-- phase list は status badge、phase id / name、prompt path、checks count、last run、last checks status を表示する。
-- action は `Run`、`Copy Prompt`、`Open Prompt`、`Open Handoff`、上部 action は `Run Next`、`Run All Pending`、`Copy Next Prompt`、`Repair Failed`、`Open Latest Handoff`、`Refresh` とする。
-- `background` runner は終了検知、logs、checks、state 更新を行う。`terminal` と `vscode-codex` は prompt / launcher を保存し、manual-handoff として扱う。
+- Codex Flow の主経路は `background` runner による Codex CLI 自動実行とする。`terminal` と `vscode-codex` は prompt / launcher を保存し、手動確認や assisted execution 用の fallback / manual-handoff として扱う。
+- 各 phase は `sessionMode: "new-session"` の新規 Codex CLI 実行単位として扱う。resume session 方式は現時点では正式対応しない。
+- phase prompt は phase prompt file、referenced docs、Git context、previous handoff を合成し、`docs/handoff/latest.md` と phase 固有 handoff を required output として明示する。これにより前工程の文脈は handoff / Git / logs / docs で引き継ぐ。
+- background runner は phase 開始時に `.codexflow/state.json` へ `running`、phase id、startedAt、run id、artifact paths を書き、完了時に `succeeded` / `failed` / `cancelled` へ遷移させる。Dashboard summary には running phase が分かる表示を置く。
+- phase list は status badge、phase id / name、prompt path、checks count、session mode、phase handoff path、log path、metadata、last run、last checks status を表示する。
+- action は `Run`、`Copy Prompt`、`Open Prompt`、`Open Handoff`、`Open Phase Log`、上部 action は `Run Next`、`Run All Pending`、`Stop Current Phase`、`Copy Next Prompt`、`Repair Failed`、`Open Latest Handoff`、`Open Phase Log`、`Open flow.json`、`Git diff summary`、`Refresh` とする。
 - button は text と title / aria-label を持ち、WebView CSP は nonce を使う。
+
+#### Codex Flow phase metadata
+
+`.codexflow/flow.json` の phase は、既存の `id`、`name`、`prompt`、`checks` に加えて次の top-level optional fields を持てる。
+
+- `stopOnFailure`: phase 単位で flow global の `stopOnFailure` を上書きする。
+- `retryPolicy.maxAttempts`: failed / repair / retry 系の最大修復回数を phase 単位で上書きする。未指定時は `flow.maxRepairAttempts`、さらに未指定時は既定値 1 を使う。
+- `handoffPath`: phase 固有 handoff の workspace relative path。runtime prompt と fallback handoff 生成で使う。
+- `logPath`: phase 固有 logs の workspace relative base directory。prompt / jsonl / final / checks / launcher artifacts の保存先に使う。
+- `sessionMode`: 既定は `new-session`。現時点の正式対応値も `new-session` のみで、未対応値は validation error とする。
+- `metadata`: free-form object。実行制御には使わず、Dashboard と phase prompt の説明情報として表示する。
+
+path 系 field は workspace relative path のみ許可し、絶対パス、`../`、`.git/**`、`node_modules/**` は validation error とする。不明な top-level field は実行挙動へ反映しない。
 
 ### QCDS Status
 

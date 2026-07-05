@@ -11,6 +11,7 @@ const DEFAULT_LOG_DIRECTORY = '.codexflow/logs';
 const VALID_FLOW_MODES = new Set(['new-session-handoff', 'resume-last', 'manual-handoff']);
 const VALID_PHASE_STATUS = new Set(['pending', 'running', 'succeeded', 'failed', 'cancelled', 'manual-handoff', 'skipped']);
 const VALID_SANDBOX_MODES = new Set(['read-only', 'workspace-write', 'danger-full-access']);
+const VALID_PHASE_SESSION_MODES = new Set(['new-session']);
 
 const DEFAULT_CODEX_FLOW_DOCS = [
   'README.md',
@@ -93,7 +94,16 @@ function normalizeCodexFlow(value = {}) {
   const sandbox = VALID_SANDBOX_MODES.has(clean(value.sandbox)) ? clean(value.sandbox) : 'workspace-write';
   const handoff = value.handoff || {};
   const logs = value.logs || {};
-  const phases = normalizePhases(value.phases);
+  const stopOnFailure = value.stopOnFailure !== false;
+  const maxRepairAttempts = clampInteger(value.maxRepairAttempts, 0, 5, 1);
+  const handoffDirectory = clean(handoff.directory) || DEFAULT_HANDOFF_DIRECTORY;
+  const logDirectory = clean(logs.directory) || DEFAULT_LOG_DIRECTORY;
+  const phases = normalizePhases(value.phases, {
+    stopOnFailure,
+    maxRepairAttempts,
+    handoffDirectory,
+    logDirectory
+  });
   return {
     schemaVersion: 1,
     flowId,
@@ -101,24 +111,24 @@ function normalizeCodexFlow(value = {}) {
     mode,
     targetRoot: clean(value.targetRoot) || '.',
     sandbox,
-    stopOnFailure: value.stopOnFailure !== false,
-    maxRepairAttempts: clampInteger(value.maxRepairAttempts, 0, 5, 1),
+    stopOnFailure,
+    maxRepairAttempts,
     autoCommit: value.autoCommit === true,
     docs: normalizeStringList(value.docs || DEFAULT_CODEX_FLOW_DOCS),
     handoff: {
-      directory: clean(handoff.directory) || DEFAULT_HANDOFF_DIRECTORY,
+      directory: handoffDirectory,
       latest: clean(handoff.latest) || DEFAULT_HANDOFF_LATEST,
       template: clean(handoff.template) || DEFAULT_HANDOFF_TEMPLATE
     },
     logs: {
-      directory: clean(logs.directory) || DEFAULT_LOG_DIRECTORY,
+      directory: logDirectory,
       jsonl: logs.jsonl !== false
     },
     phases
   };
 }
 
-function normalizePhases(phases) {
+function normalizePhases(phases, defaults = {}) {
   const source = Array.isArray(phases) && phases.length ? phases : DEFAULT_CODEX_FLOW_PHASES;
   const seen = new Set();
   const normalized = [];
@@ -127,14 +137,35 @@ function normalizePhases(phases) {
     const prompt = clean(phase?.prompt);
     if (!id || !prompt || seen.has(id)) continue;
     seen.add(id);
-    normalized.push({
+    const metadata = normalizePhaseMetadata(phase?.metadata);
+    const stopOnFailure = phase?.stopOnFailure === undefined ? defaults.stopOnFailure !== false : phase.stopOnFailure !== false;
+    const maxAttempts = phase?.retryPolicy && typeof phase.retryPolicy === 'object' && !Array.isArray(phase.retryPolicy)
+      ? clampInteger(phase.retryPolicy.maxAttempts, 0, 5, defaults.maxRepairAttempts ?? 1)
+      : clampInteger(defaults.maxRepairAttempts, 0, 5, 1);
+    const sessionMode = clean(phase?.sessionMode) || 'new-session';
+    const handoffPath = clean(phase?.handoffPath)
+      || toSlash(path.posix.join(toPortablePath(defaults.handoffDirectory || DEFAULT_HANDOFF_DIRECTORY), `${id}.md`));
+    const logPath = clean(phase?.logPath)
+      || toSlash(path.posix.join(toPortablePath(defaults.logDirectory || DEFAULT_LOG_DIRECTORY), id));
+    const normalizedPhase = {
       id,
       name: clean(phase?.name) || id,
       prompt,
-      checks: normalizeStringList(phase?.checks)
-    });
+      checks: normalizeStringList(phase?.checks),
+      stopOnFailure,
+      retryPolicy: {
+        maxAttempts
+      },
+      handoffPath,
+      logPath,
+      sessionMode,
+      metadata
+    };
+    normalized.push(normalizedPhase);
   }
-  return normalized.length ? normalized : DEFAULT_CODEX_FLOW_PHASES.map((phase) => ({ ...phase, checks: phase.checks.slice() }));
+  return normalized.length
+    ? normalized
+    : normalizePhases(DEFAULT_CODEX_FLOW_PHASES, defaults);
 }
 
 function validateCodexFlow(flow, options = {}) {
@@ -150,13 +181,14 @@ function validateCodexFlow(flow, options = {}) {
     normalized.handoff.latest,
     normalized.handoff.template,
     normalized.logs.directory,
-    ...normalized.phases.map((phase) => phase.prompt)
+    ...normalized.phases.flatMap((phase) => [phase.prompt, phase.handoffPath, phase.logPath])
   ];
   for (const relativePath of relativePaths) {
     if (!isSafeWorkspaceRelativePath(relativePath)) errors.push(`unsafe workspace path: ${relativePath}`);
   }
   for (const phase of normalized.phases) {
     if (!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(phase.id)) errors.push(`invalid phase id: ${phase.id}`);
+    if (!VALID_PHASE_SESSION_MODES.has(phase.sessionMode)) errors.push(`unsupported phase sessionMode for ${phase.id}: ${phase.sessionMode}`);
   }
   if (options.requirePromptFiles) {
     for (const phase of normalized.phases) {
@@ -231,6 +263,7 @@ function normalizeCodexFlowState(value = {}) {
     updatedAt: clean(value.updatedAt),
     currentPhaseId: clean(value.currentPhaseId),
     phaseStatus,
+    phases: normalizePhaseStates(value.phases, phaseStatus, Array.isArray(value.phaseRuns) ? value.phaseRuns : []),
     phaseRuns: Array.isArray(value.phaseRuns) ? value.phaseRuns.map(normalizeRunRecord) : []
   };
 }
@@ -290,7 +323,13 @@ function assembleCodexFlowPhasePrompt(input = {}) {
     `- Current phase id: ${phase.id}`,
     `- Current phase status: ${state.phaseStatus[phase.id] || 'pending'}`,
     `- Current state phase: ${state.currentPhaseId || 'not-started'}`,
+    `- Session mode: ${phase.sessionMode || 'new-session'}`,
+    `- Phase handoff path: ${requiredHandoffPath}`,
+    `- Phase log path: ${phaseLogPath(flow, phase)}`,
+    `- Stop on failure: ${phase.stopOnFailure !== false ? 'true' : 'false'}`,
+    `- Retry max attempts: ${phaseRetryMaxAttempts(flow, phase)}`,
     `- Auto commit: ${flow.autoCommit ? 'true' : 'false'}`,
+    `- Phase metadata: ${formatPhaseMetadataInline(phase.metadata)}`,
     '',
     '## Codex run configuration',
     '',
@@ -312,10 +351,10 @@ function assembleCodexFlowPhasePrompt(input = {}) {
     '',
     formatReferencedDocs(docs),
     '',
-    '## 必須成果物',
+    '## Required handoff output',
     '',
-    `- \`${requiredHandoffPath}\``,
     `- \`${flow.handoff.latest}\``,
+    `- \`${requiredHandoffPath}\``,
     '',
     'handoff には以下を含めること。',
     '',
@@ -367,11 +406,12 @@ function updateCodexFlowStateAfterRun(state = {}, runRecord = {}) {
   const next = normalizeCodexFlowState(state);
   const run = normalizeRunRecord(runRecord);
   if (!run.phaseId) return next;
-  next.updatedAt = run.finishedAt || new Date().toISOString();
+  next.updatedAt = run.finishedAt || run.startedAt || new Date().toISOString();
   next.phaseStatus[run.phaseId] = VALID_PHASE_STATUS.has(run.status) ? run.status : 'failed';
   next.currentPhaseId = run.status === 'succeeded' ? '' : run.phaseId;
   const existing = next.phaseRuns.filter((item) => item.runId !== run.runId);
   next.phaseRuns = [...existing, run];
+  next.phases[run.phaseId] = phaseStateFromRun(run);
   return next;
 }
 
@@ -400,7 +440,20 @@ function ensureFallbackHandoff(rootPath, flow, phase, runRecord = {}, finalMessa
 }
 
 function phaseHandoffPath(flow, phase = {}) {
-  return toSlash(path.posix.join(toPortablePath(flow?.handoff?.directory || DEFAULT_HANDOFF_DIRECTORY), `${phase.id || 'phase'}.md`));
+  return clean(phase.handoffPath)
+    || toSlash(path.posix.join(toPortablePath(flow?.handoff?.directory || DEFAULT_HANDOFF_DIRECTORY), `${phase.id || 'phase'}.md`));
+}
+
+function phaseLogPath(flow, phase = {}) {
+  return clean(phase.logPath)
+    || toSlash(path.posix.join(toPortablePath(flow?.logs?.directory || DEFAULT_LOG_DIRECTORY), `${phase.id || 'phase'}`));
+}
+
+function phaseRetryMaxAttempts(flow, phase = {}) {
+  if (phase?.retryPolicy && typeof phase.retryPolicy === 'object' && !Array.isArray(phase.retryPolicy)) {
+    return clampInteger(phase.retryPolicy.maxAttempts, 0, 5, clampInteger(flow?.maxRepairAttempts, 0, 5, 1));
+  }
+  return clampInteger(flow?.maxRepairAttempts, 0, 5, 1);
 }
 
 function resolveFlowPath(rootPath, relativePath) {
@@ -428,6 +481,8 @@ function isSafeWorkspaceRelativePath(relativePath) {
   if (value.startsWith('/') || value.startsWith('\\')) return false;
   const portable = toPortablePath(value);
   const normalized = path.posix.normalize(portable);
+  const segments = normalized.split('/').filter(Boolean).map((segment) => segment.toLowerCase());
+  if (segments.includes('.git') || segments.includes('node_modules')) return false;
   return normalized !== '..' && !normalized.startsWith('../') && normalized !== '/' && !normalized.startsWith('/../');
 }
 
@@ -451,10 +506,10 @@ function defaultPhasePrompt(phase, flow) {
     '- `danger-full-access` を前提にしない。',
     '- unrelated refactor をしない。',
     '',
-    '## Handoff',
+    '## Required handoff output',
     '',
-    `- \`${phaseHandoffPath(flow, phase)}\``,
-    `- \`${flow.handoff.latest}\``
+    `- \`${flow.handoff.latest}\``,
+    `- \`${phaseHandoffPath(flow, phase)}\``
   ].join('\n') + '\n';
 }
 
@@ -559,6 +614,73 @@ function normalizeRunRecord(run = {}) {
   return record;
 }
 
+function normalizePhaseStates(value = {}, phaseStatus = {}, runs = []) {
+  const result = {};
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    for (const [phaseId, phaseState] of Object.entries(value)) {
+      const normalizedPhaseId = clean(phaseId);
+      if (!normalizedPhaseId) continue;
+      result[normalizedPhaseId] = normalizePhaseState({ phaseId: normalizedPhaseId, ...phaseState });
+    }
+  }
+  for (const rawRun of runs) {
+    const run = normalizeRunRecord(rawRun);
+    if (!run.phaseId) continue;
+    result[run.phaseId] = phaseStateFromRun(run);
+    if (!phaseStatus[run.phaseId]) phaseStatus[run.phaseId] = run.status;
+  }
+  for (const [phaseId, status] of Object.entries(phaseStatus || {})) {
+    if (!result[phaseId]) result[phaseId] = normalizePhaseState({ phaseId, status });
+    else result[phaseId] = normalizePhaseState({ ...result[phaseId], status });
+  }
+  return result;
+}
+
+function normalizePhaseState(value = {}) {
+  const status = VALID_PHASE_STATUS.has(clean(value.status)) ? clean(value.status) : 'pending';
+  const artifacts = value.artifacts && typeof value.artifacts === 'object' && !Array.isArray(value.artifacts)
+    ? value.artifacts
+    : {};
+  const state = {
+    phaseId: clean(value.phaseId),
+    status,
+    startedAt: clean(value.startedAt),
+    finishedAt: clean(value.finishedAt),
+    runId: clean(value.runId),
+    checksStatus: clean(value.checksStatus),
+    artifacts: {
+      prompt: clean(artifacts.prompt),
+      jsonl: clean(artifacts.jsonl),
+      final: clean(artifacts.final),
+      checks: clean(artifacts.checks),
+      launcher: clean(artifacts.launcher),
+      handoff: clean(artifacts.handoff)
+    }
+  };
+  if (Number.isFinite(Number(value.attempt))) state.attempt = Number(value.attempt);
+  return state;
+}
+
+function phaseStateFromRun(run = {}) {
+  return normalizePhaseState({
+    phaseId: run.phaseId,
+    status: run.status,
+    startedAt: run.startedAt,
+    finishedAt: run.finishedAt,
+    runId: run.runId,
+    attempt: run.attempt,
+    checksStatus: run.checksStatus,
+    artifacts: {
+      prompt: run.promptPath,
+      jsonl: run.jsonlPath,
+      final: run.finalMessagePath,
+      checks: run.checksPath,
+      launcher: run.launcherPath,
+      handoff: run.handoffPath
+    }
+  });
+}
+
 function formatRunConfig(runConfig = {}) {
   return [
     `- Model: ${runConfig.model || 'Codex CLI default'}`,
@@ -568,15 +690,30 @@ function formatRunConfig(runConfig = {}) {
 }
 
 function formatGitContext(gitContext = {}) {
-  if (!gitContext || (!gitContext.branch && !gitContext.head && !gitContext.status)) return '- Git context was not captured.';
+  if (!gitContext || (!gitContext.branch && !gitContext.head && !gitContext.status && !gitContext.diffStat && !gitContext.lastCommit)) return '- Git context was not captured.';
   return [
     `- Branch: ${gitContext.branch || 'unknown'}`,
     `- HEAD: ${gitContext.head || 'unknown'}`,
+    `- Last commit: ${gitContext.lastCommit || 'unknown'}`,
+    '',
+    '### Status',
     '',
     '```text',
     clean(gitContext.status) || '(clean)',
+    '```',
+    '',
+    '### Diff stat',
+    '',
+    '```text',
+    clean(gitContext.diffStat) || '(no diff)',
     '```'
   ].join('\n');
+}
+
+function formatPhaseMetadataInline(metadata = {}) {
+  const normalized = normalizePhaseMetadata(metadata);
+  if (!Object.keys(normalized).length) return 'none';
+  return JSON.stringify(normalized);
 }
 
 function formatReferencedDocs(docs = []) {
@@ -641,6 +778,36 @@ function normalizeStringList(value) {
   return result;
 }
 
+function normalizePhaseMetadata(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return normalizeJsonObject(value);
+}
+
+function normalizeJsonObject(value) {
+  const result = {};
+  for (const [key, raw] of Object.entries(value || {})) {
+    const normalizedKey = clean(key);
+    if (!normalizedKey) continue;
+    const normalizedValue = normalizeJsonValue(raw);
+    if (normalizedValue !== undefined) result[normalizedKey] = normalizedValue;
+  }
+  return result;
+}
+
+function normalizeJsonValue(value) {
+  if (value === null) return null;
+  if (typeof value === 'string') return clean(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value === 'boolean') return value;
+  if (Array.isArray(value)) {
+    return value
+      .map(normalizeJsonValue)
+      .filter((item) => item !== undefined);
+  }
+  if (value && typeof value === 'object') return normalizeJsonObject(value);
+  return undefined;
+}
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -656,6 +823,7 @@ module.exports = {
   DEFAULT_CODEX_FLOW_PHASES,
   VALID_FLOW_MODES,
   VALID_PHASE_STATUS,
+  VALID_PHASE_SESSION_MODES,
   defaultCodexFlow,
   normalizeCodexFlow,
   validateCodexFlow,
@@ -672,6 +840,8 @@ module.exports = {
   updateCodexFlowStateAfterRun,
   ensureFallbackHandoff,
   phaseHandoffPath,
+  phaseLogPath,
+  phaseRetryMaxAttempts,
   latestRunForPhase,
   resolveFlowPath,
   relativeFlowPath,

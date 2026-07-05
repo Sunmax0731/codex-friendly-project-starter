@@ -11,6 +11,8 @@ const {
   createCodexFlowRunRecord,
   ensureFallbackHandoff,
   phaseHandoffPath,
+  phaseLogPath,
+  phaseRetryMaxAttempts,
   resolveFlowPath,
   relativeFlowPath,
   timestampForFile
@@ -25,10 +27,11 @@ async function prepareCodexFlowPhaseRun(input = {}) {
   const state = normalizeCodexFlowState(input.state || {});
   const phase = input.phase || resolveNextCodexFlowPhase(flow, state);
   if (!phase) throw new Error('No pending Codex Flow phase');
+  if (phase.sessionMode !== 'new-session') throw new Error(`Unsupported Codex Flow phase sessionMode: ${phase.sessionMode}`);
   const startedAt = input.startedAt || new Date().toISOString();
   const stamp = timestampForFile(startedAt);
   const attempt = nextAttemptForPhase(state, phase.id);
-  const runDirectoryRelative = toSlash(path.posix.join(toPortablePath(flow.logs.directory), phase.id));
+  const runDirectoryRelative = phaseLogPath(flow, phase);
   const runDirectory = resolveFlowPath(rootPath, runDirectoryRelative);
   fs.mkdirSync(runDirectory, { recursive: true });
   const promptPath = path.join(runDirectory, `${stamp}.prompt.md`);
@@ -86,6 +89,7 @@ async function prepareCodexFlowPhaseRun(input = {}) {
 
 async function runCodexFlowPhaseWithCodexCli(input = {}) {
   const prepared = await prepareCodexFlowPhaseRun(input);
+  if (typeof input.onPrepared === 'function') input.onPrepared(prepared);
   const flow = prepared.flow;
   const phase = prepared.phase;
   const runConfig = input.runConfig || {};
@@ -253,7 +257,7 @@ function buildCodexFlowRepairPrompt(input = {}) {
     `- Phase: ${phase.id || failedRun.phaseId || ''} / ${phase.name || failedRun.phaseName || ''}`,
     `- Failed run: ${failedRun.runId || ''}`,
     `- Attempt: ${failedRun.attempt || 1}`,
-    `- Max repair attempts: ${flow.maxRepairAttempts}`,
+    `- Max repair attempts: ${phaseRetryMaxAttempts(flow, phase)}`,
     '',
     '## Repair scope',
     '',
@@ -306,7 +310,31 @@ async function collectGitContext(rootPath) {
   const branch = await gitOutput(rootPath, ['branch', '--show-current']);
   const head = await gitOutput(rootPath, ['rev-parse', '--short', 'HEAD']);
   const status = await gitOutput(rootPath, ['status', '--short']);
-  return { branch, head, status };
+  const diffStat = await gitOutput(rootPath, ['diff', '--stat', '--find-renames', 'HEAD']);
+  const lastCommit = await gitOutput(rootPath, ['log', '-1', '--pretty=format:%h %ad %an %s', '--date=short']);
+  return { branch, head, status, diffStat, lastCommit };
+}
+
+function formatGitDiffSummary(gitContext = {}) {
+  return [
+    '# Codex Flow Git Diff Summary',
+    '',
+    `- Branch: ${cleanText(gitContext.branch) || 'unknown'}`,
+    `- HEAD: ${cleanText(gitContext.head) || 'unknown'}`,
+    `- Last commit: ${cleanText(gitContext.lastCommit) || 'unknown'}`,
+    '',
+    '## Status',
+    '',
+    '```text',
+    cleanText(gitContext.status) || '(clean)',
+    '```',
+    '',
+    '## Diff stat',
+    '',
+    '```text',
+    cleanText(gitContext.diffStat) || '(no diff)',
+    '```'
+  ].join('\n') + '\n';
 }
 
 async function gitOutput(rootPath, args) {
@@ -414,6 +442,10 @@ function isCancellationError(error) {
   return error?.name === 'AbortError' || error?.code === 'ABORT_ERR';
 }
 
+function cleanText(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
 module.exports = {
   prepareCodexFlowPhaseRun,
   runCodexFlowPhaseWithCodexCli,
@@ -421,5 +453,6 @@ module.exports = {
   buildCodexFlowRepairPrompt,
   sanitizeCodexJsonlOutput,
   readReferencedDocs,
-  collectGitContext
+  collectGitContext,
+  formatGitDiffSummary
 };

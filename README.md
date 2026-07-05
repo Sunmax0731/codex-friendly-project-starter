@@ -11,7 +11,7 @@ Codex Friendly Project Starter は、VS Code で開発プロジェクトを始�
 - Work Item Start: Dashboard または Work Items Tree の TODO / Issue から `Start` を押すと、その作業単位を入口にした開始プロンプトを Codex CLI へ渡せます。
 - Start Selected Work Items: Dashboard の checkbox または Command Palette の複数選択から、選んだ TODO / Issues だけを連結した作業範囲として Codex CLI へ渡せます。
 - Start All Work Items: Dashboard または Command Palette から未完了 TODO / Issues を優先度順の一括バックログとして Codex CLI へ渡せます。
-- Codex Flow: `.codexflow/flow.json` と `prompts/codexflow/*.md` を生成し、工程ごとの Codex session を background runner / terminal / VS Code Codex handoff で順番に進められます。phase prompt は docs、Git 状態、`docs/handoff/latest.md` を合成し、logs / final message / checks / state / session record を workspace 内に残します。
+- Codex Flow: `.codexflow/flow.json` と `prompts/codexflow/*.md` を生成し、工程ごとの新しい Codex CLI session を background runner で順番に自動実行する導線です。phase prompt は docs、Git 状態、`docs/handoff/latest.md` を合成し、logs / final message / checks / running state / session record を workspace 内に残します。VS Code Codex sidebar への clipboard handoff は、各工程を手動確認しながら進めたい場合の補助導線であり、自動工程実行の必須経路ではありません。
 - QCDS Status: `docs/qcds-strict-metrics.json` の `dimensions` 形式、または `grades` 形式の現在値を読み取り、Quality / Cost / Delivery / Satisfaction を専用 WebView で項目別に表示します。各項目では grade、score、check、紐づく TODO / Issue を確認できます。metrics が未生成でも4観点の D- fallback を表示し、空の QCDS group にならないようにします。A- 以下の観点には改善調査 / TODO 化 action を表示し、同じ観点の改善 Issue は再利用します。
 - Markdown WebView: `AGENTS.md`、`SKILL.md`、`TODO.md`、`Issues/*.md`、`Tasks/*.md`、`docs/*.md` を専用 WebView で表示し、Markdown link から関連 work item へ移動できます。既に同じ文書の WebView がある場合は既存 panel を active にし、上部操作は tooltip / aria-label 付き icon button に統一します。root `AGENTS.md` / `SKILL.md` は子階層 docs を統合表示し、JSON は元ファイルを変更せずに整形表示します。
 - Work Item Composer: GUI フォームと自然言語メモから `Issues/*.md` を作成できます。自然言語の構造化は Codex CLI の read-only `codex exec` を優先し、失敗時だけローカル補完へ戻します。Snipping Tool などで clipboard に入れた画像は `Ctrl+V` で貼り付け、repo-local attachment として Issue に残せます。作成した TODO には Issue と同じ phase tag を残し、未整理へ落ちにくくします。
@@ -62,8 +62,11 @@ VS Code 起動後、Activity Bar の `Codex Starter` と Dashboard の GUI ボ�
 - `Codex Starter: Open Codex Flow Dashboard`
 - `Codex Starter: Run Next Codex Flow Phase`
 - `Codex Starter: Run All Codex Flow Phases`
+- `Codex Starter: Stop Current Codex Flow Phase`
 - `Codex Starter: Copy Next Codex Flow Prompt`
 - `Codex Starter: Repair Failed Codex Flow Phase`
+- `Codex Starter: Open Latest Codex Flow Phase Log`
+- `Codex Starter: Open Codex Flow Definition (flow.json)`
 - `Codex Starter: Open Latest Codex Flow Handoff`
 - `Codex Starter: Open QCDS Status`
 - `Codex Starter: Open Markdown WebView`

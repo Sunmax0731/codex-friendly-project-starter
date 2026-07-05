@@ -9,7 +9,8 @@ const {
   runCodexFlowPhaseWithCodexCli,
   runCodexFlowChecks,
   buildCodexFlowRepairPrompt,
-  sanitizeCodexJsonlOutput
+  sanitizeCodexJsonlOutput,
+  formatGitDiffSummary
 } = require('../src/codex-flow-runner.cjs');
 
 test('prepareCodexFlowPhaseRun writes prompt and log paths under phase directory', async () => {
@@ -35,6 +36,41 @@ test('prepareCodexFlowPhaseRun writes prompt and log paths under phase directory
   assert.ok(prepared.checksPath.endsWith(path.join('.codexflow', 'logs', phase.id, '20260705T000000Z.checks.json')));
   assert.match(fs.readFileSync(prepared.promptPath, 'utf8'), /Codex Flow Phase/);
   assert.equal(prepared.runRecord.promptPath.replace(/\\/g, '/'), `.codexflow/logs/${phase.id}/20260705T000000Z.prompt.md`);
+});
+
+test('prepareCodexFlowPhaseRun respects phase logPath and handoffPath', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-flow-runner-custom-paths-'));
+  fs.writeFileSync(path.join(root, 'README.md'), '# README\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8');
+  fs.writeFileSync(path.join(root, 'SKILL.md'), '# SKILL\n', 'utf8');
+  ensureCodexFlowScaffold(root, { name: 'Runner Custom Paths' });
+  const flow = defaultCodexFlow(root, {
+    name: 'Runner Custom Paths',
+    phases: [{
+      id: '20_core',
+      name: 'Core',
+      prompt: 'prompts/codexflow/20_core.md',
+      handoffPath: 'docs/handoff/core/20_core.md',
+      logPath: '.codexflow/custom-logs/20_core',
+      sessionMode: 'new-session',
+      checks: []
+    }]
+  });
+  fs.mkdirSync(path.join(root, 'prompts', 'codexflow'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'prompts', 'codexflow', '20_core.md'), '# Core\n', 'utf8');
+  const phase = flow.phases[0];
+  const prepared = await prepareCodexFlowPhaseRun({
+    rootPath: root,
+    flow,
+    state: { flowId: flow.flowId, phaseStatus: {} },
+    phase,
+    gitContext: { branch: 'codex/test', head: 'abc123', status: '' },
+    runConfig: { sandboxMode: 'workspace-write' },
+    startedAt: '2026-07-05T00:00:00.000Z'
+  });
+  assert.ok(prepared.promptPath.endsWith(path.join('.codexflow', 'custom-logs', '20_core', '20260705T000000Z.prompt.md')));
+  assert.equal(prepared.runRecord.handoffPath, 'docs/handoff/core/20_core.md');
+  assert.match(fs.readFileSync(prepared.promptPath, 'utf8'), /docs\/handoff\/core\/20_core\.md/);
 });
 
 test('runCodexFlowChecks reports pass and failure results', async () => {
@@ -80,6 +116,7 @@ test('runCodexFlowPhaseWithCodexCli records cancelled when aborted before launch
   const phase = flow.phases[0];
   const controller = new AbortController();
   controller.abort();
+  let preparedSeen;
   const result = await runCodexFlowPhaseWithCodexCli({
     rootPath: root,
     flow,
@@ -89,8 +126,13 @@ test('runCodexFlowPhaseWithCodexCli records cancelled when aborted before launch
     gitContext: { branch: 'codex/test', head: 'abc123', status: '' },
     runConfig: { sandboxMode: 'read-only' },
     startedAt: '2026-07-05T00:00:00.000Z',
-    signal: controller.signal
+    signal: controller.signal,
+    onPrepared: (prepared) => {
+      preparedSeen = prepared;
+    }
   });
+  assert.ok(preparedSeen);
+  assert.equal(preparedSeen.runRecord.phaseId, phase.id);
   assert.equal(result.runRecord.status, 'cancelled');
   assert.equal(result.runRecord.exitCode, 130);
   assert.equal(result.checks.status, 'cancelled');
@@ -141,7 +183,7 @@ test('sanitizeCodexJsonlOutput can recover UTF-16LE JSONL written by Windows Pow
 
 test('buildCodexFlowRepairPrompt includes failed prompt, final message, and checks', () => {
   const flow = defaultCodexFlow(process.cwd(), { name: 'Repair Sample' });
-  const phase = flow.phases[0];
+  const phase = { ...flow.phases[0], retryPolicy: { maxAttempts: 3 } };
   const prompt = buildCodexFlowRepairPrompt({
     flow,
     phase,
@@ -156,4 +198,20 @@ test('buildCodexFlowRepairPrompt includes failed prompt, final message, and chec
   assert.match(prompt, /Failed Prompt/);
   assert.match(prompt, /Tests failed/);
   assert.match(prompt, /node --test/);
+  assert.match(prompt, /Max repair attempts: 3/);
+});
+
+test('formatGitDiffSummary includes branch head status diff stat and last commit', () => {
+  const summary = formatGitDiffSummary({
+    branch: 'codex/test',
+    head: 'abc123',
+    status: ' M src/example.cjs',
+    diffStat: ' src/example.cjs | 2 ++',
+    lastCommit: 'abc123 2026-07-05 Tester Add flow'
+  });
+  assert.match(summary, /Branch: codex\/test/);
+  assert.match(summary, /HEAD: abc123/);
+  assert.match(summary, /Last commit: abc123 2026-07-05 Tester Add flow/);
+  assert.match(summary, /M src\/example\.cjs/);
+  assert.match(summary, /src\/example\.cjs \| 2 \+\+/);
 });

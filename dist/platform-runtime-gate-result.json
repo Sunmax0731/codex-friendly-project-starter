@@ -61,6 +61,11 @@
       "detail": "Codex Flow commands and dashboard actions exist"
     },
     {
+      "id": "codex-flow-control-actions",
+      "pass": true,
+      "detail": "Codex Flow stop, logs, git diff summary, and phase metadata contract exists"
+    },
+    {
       "id": "codex-flow-run-all-confirmation",
       "pass": true,
       "detail": "Codex Flow Run All confirms once and skips per-phase confirmation"
