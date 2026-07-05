@@ -30,6 +30,18 @@ test('recordCodexSession writes project markdown and jsonl indexes', () => {
       modelReasoningEffort: 'high',
       sandboxMode: 'danger-full-access'
     },
+    flow: {
+      flowId: 'codex-flow-test',
+      flowName: 'Test Flow',
+      phaseId: '10_test',
+      phaseName: 'Test phase',
+      runId: 'flow-run-test',
+      status: 'succeeded',
+      promptPath: '.codexflow/logs/10_test/run.prompt.md',
+      jsonlPath: '.codexflow/logs/10_test/run.jsonl',
+      finalMessagePath: '.codexflow/logs/10_test/run.final.md',
+      checksPath: '.codexflow/logs/10_test/run.checks.json'
+    },
     workItems: [{
       kind: 'issue',
       title: 'Session test',
@@ -48,7 +60,11 @@ test('recordCodexSession writes project markdown and jsonl indexes', () => {
   assert.match(markdown, /danger-full-access/);
   assert.match(markdown, /issue:Issues\/0001-session-test\.md:1/);
   assert.match(markdown, /\| 2026-05-12T00:00:00\.000Z \| codex-session-test \| Work Item: Session test \| danger-full-access \| gpt-5\.4 \| high \| issue:Issues\/0001-session-test\.md:1 \| \[prompt\]\(prompt\.md\) \|/);
-  assert.equal(JSON.parse(jsonl).id, 'codex-session-test');
+  const parsed = JSON.parse(jsonl);
+  assert.equal(parsed.id, 'codex-session-test');
+  assert.equal(parsed.flow.flowId, 'codex-flow-test');
+  assert.equal(parsed.flow.phaseId, '10_test');
+  assert.equal(parsed.flow.runId, 'flow-run-test');
   assert.match(issue, /## Codex Sessions/);
   assert.match(issue, /access=danger-full-access/);
 });

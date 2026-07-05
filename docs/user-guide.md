@@ -19,6 +19,31 @@
 7. Dashboard 中段の QCDS、release readiness、open items は折りたたみ可能です。Issue / TODO の priority、status、type、phase、QCDS は色付き tag で分類される。
 8. `Work Items` の title action から Dashboard、Work Item Composer、refresh を実行できる。各項目の context menu から Start、Markdown WebView、source 表示、path copy を実行できる。
 
+## Codex Flow で工程を順番に進める
+
+Codex Flow は Work Items の上位 orchestration です。要件、設計、実装、テスト、リリース確認などの phase prompt を `.codexflow/flow.json` で管理し、前工程の `docs/handoff/latest.md` を次工程へ渡す。
+
+1. Dashboard の `Codex Flow 初期化`、または Command Palette の `Codex Starter: Codex Flow を初期化` を実行する。
+2. `.codexflow/flow.json`、`.codexflow/state.json`、`prompts/codexflow/*.md`、`docs/handoff/template.md`、`docs/handoff/latest.md` が作成される。既存ファイルは既定で上書きされない。
+3. `Codex Starter: Codex Flow Dashboard を開く` を実行する。Flow summary、progress、next phase、phase list、last run、handoff、checks を確認できる。
+4. `Copy Next Prompt` は次工程 prompt を組み立てて clipboard に入れ、VS Code Codex sidebar へ貼り付ける半自動導線として使う。
+5. `Run Next` は `codexFriendlyProjectStarter.codexFlowRunner` に従って実行する。既定の `background` は Codex CLI を background 実行し、JSONL、final message、checks、state、session record を保存する。
+6. `Run All Pending` は background runner で pending phase を順番に実行し、失敗時は `stopOnFailure` に従って停止する。
+7. phase が failed になった場合は `Repair Failed` を実行する。failed prompt、final message、checks output、Git status を含む repair prompt が生成される。
+8. `Open Latest Handoff` は `docs/handoff/latest.md` を Markdown WebView で開く。各 phase は `docs/handoff/<phase-id>.md` と latest handoff を必須成果物として扱う。
+
+Flow artifacts は workspace 内に保存される。
+
+- `.codexflow/flow.json`
+- `.codexflow/state.json`
+- `.codexflow/logs/<phase-id>/*.prompt.md`
+- `.codexflow/logs/<phase-id>/*.jsonl`
+- `.codexflow/logs/<phase-id>/*.final.md`
+- `.codexflow/logs/<phase-id>/*.checks.json`
+- `docs/handoff/*.md`
+
+`danger-full-access` と `git push` は既定にならない。auto commit も既定 false で、必要な場合は Flow 定義と設定で明示する。
+
 ## TODO / Issue から Codex に着手してもらう
 
 1. `Work Items` または `Codex Work Dashboard` で着手したい TODO、Issue を選ぶ。
@@ -180,6 +205,10 @@ VS Code の表示言語が日本語の場合、Dashboard、QCDS Status、Markdow
 - `codexFriendlyProjectStarter.useCodexForWorkItemInference`: Work Item Composer の自然言語反映で Codex CLI を使う。
 - `codexFriendlyProjectStarter.githubIssueImportLimit`: GitHub Issues 取込で一度に取得する open issue 件数。
 - `codexFriendlyProjectStarter.codexWorkItemInferenceTimeoutMs`: Codex CLI 下書き生成のタイムアウト。
+- `codexFriendlyProjectStarter.codexFlowRunner`: Codex Flow phase の runner。`background`、`terminal`、`vscode-codex`。
+- `codexFriendlyProjectStarter.codexFlowAutoCommit`: Codex Flow scaffold metadata の auto commit 方針。既定 false。push は自動実行しない。
+- `codexFriendlyProjectStarter.codexFlowMaxRepairAttempts`: failed phase の repair 最大回数。既定 1。
+- `codexFriendlyProjectStarter.codexFlowCheckTimeoutMs`: Codex Flow checks 1件あたりの timeout。既定 120000ms。
 - `codexFriendlyProjectStarter.recordCodexSessions`: VS Code Codex handoff / Codex CLI 起動履歴を project 内の `docs/codex-sessions.*` に記録するか。
 - `codexFriendlyProjectStarter.confirmBeforeCodexRun`: 実行前確認を出すか。
 - `codexFriendlyProjectStarter.markdownOpenMode`: `webview`、`source`、`sideBySide`。

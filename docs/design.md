@@ -40,7 +40,9 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - 上部 action は「プロジェクト進行中に使う操作」と「初回セットアップ / 環境確認」に分ける。
 - 進行中操作は2行に分ける。1行目は `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、2行目は `選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` とする。
 - `Issueを起票` は自然言語入力と手動入力を同じ Work Item Composer で扱う。`CodexにPrompt送信` は current prompt handoff と Codex sidebar open の選択へ進む。
+- Codex Flow actions として `Codex Flow`、`次工程を実行`、`全工程を実行` を置き、複数工程を順番に進める操作は Flow Dashboard に集約する。
 - 初回セットアップには FirstPrompt、`D:\AI` docs 生成、Issues 初期化、Codex CLI 確認を折りたたみ領域として置く。
+- 初回セットアップには `Codex Flow 初期化` も置き、既存 docs scaffold とは別 helper で `.codexflow/` と `prompts/codexflow/` を作成する。
 - 中段の QCDS Current Status、QCDS Improvements、Release Readiness、Open TODO、Open Issues は `<details>` で折りたためるようにする。
 - TODO / Issue の priority、status、type、phase、QCDS は tag として表示し、priority や blocked / bug / release などが目視で分かる色にする。
 - Dashboard は確認と操作入口にし、詳細編集は Markdown を直接開く。
@@ -63,6 +65,16 @@ VS Code の標準 UI を優先し、常設確認は Activity Bar + Tree View、�
 - GitHub Issues は QuickPick multi-select で表示し、既に local TODO / Issue に同じ URL がある issue は `imported` として分かるようにする。
 - 選択された issue は Work Item Composer と同じ Codex CLI read-only inference に渡し、local Issue の下書きへ整える。Codex CLI が使えない場合はローカル補完で継続する。
 - 作成後は `TODO.md` と local Issue に GitHub Issue 個別リンクを残し、最初に作成した local Issue を Markdown WebView で開く。
+
+### Codex Flow Dashboard
+
+- `Codex Starter: Open Codex Flow Dashboard` で開く。
+- Flow name、mode、sandbox、progress、next phase、last run、latest handoff を summary として表示する。
+- `.codexflow/flow.json` が無い場合は empty state と `Codex Flow 初期化` action を表示する。
+- phase list は status badge、phase id / name、prompt path、checks count、last run、last checks status を表示する。
+- action は `Run`、`Copy Prompt`、`Open Prompt`、`Open Handoff`、上部 action は `Run Next`、`Run All Pending`、`Copy Next Prompt`、`Repair Failed`、`Open Latest Handoff`、`Refresh` とする。
+- `background` runner は終了検知、logs、checks、state 更新を行う。`terminal` と `vscode-codex` は prompt / launcher を保存し、manual-handoff として扱う。
+- button は text と title / aria-label を持ち、WebView CSP は nonce を使う。
 
 ### QCDS Status
 

@@ -80,6 +80,16 @@
 - Codex 実行 session の project-local index と blocked follow-up Issue 作成導線を追加する。
 - tests、platform runtime gate、VSIX readiness gate、manual/user/release docs を更新する。
 
+## Phase 3.12: Codex Flow orchestration
+
+- `.codexflow/flow.json` / `state.json` と `prompts/codexflow/*.md` を生成する scaffold helper を追加する。
+- phase prompt、参照 docs、Git 状態、`docs/handoff/latest.md` を合成する `src/codex-flow.cjs` を追加する。
+- `codex exec --json` の stdout を `.codexflow/logs/<phase-id>/*.jsonl`、final message を `.final.md` に保存する background runner を追加する。
+- phase checks を `.checks.json` に保存し、success / failed / manual-handoff を `.codexflow/state.json` に反映する。
+- `docs/codex-sessions.jsonl` に flow / phase metadata を残す。
+- `Codex Flow Dashboard` と Work Dashboard の Flow actions、Command Palette commands、package localization、settings を追加する。
+- repair prompt を生成し、failed phase を同じ phase scope で再実行できるようにする。
+
 ## Phase 4: 終了処理
 
 - `npm test` を通す。

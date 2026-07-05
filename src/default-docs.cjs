@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { getDomainById } = require('./domains.cjs');
+const { joinLogicalPath } = require('./invocation-target.cjs');
 
 const DEFAULT_AI_ROOT = 'D:\\AI';
 
@@ -104,13 +105,13 @@ const DEFAULT_DOC_PATHS = [
 function collectDefaultDocSources(domainId, aiRoot = DEFAULT_AI_ROOT) {
   const domain = getDomainById(domainId);
   const sourcePaths = [
-    ...COMMON_SOURCE_FILES.map((relativePath) => path.join(aiRoot, ...relativePath.split('/'))),
-    path.join(domain.ideaPath, 'AGENTS.md'),
-    path.join(domain.ideaPath, 'SKILL.md'),
-    path.join(domain.ideaPath, 'Design.md'),
-    path.join(domain.ideaPath, 'Architecture.md'),
-    path.join(domain.domainPath, 'AGENTS.md'),
-    path.join(domain.domainPath, 'SKILL.md')
+    ...COMMON_SOURCE_FILES.map((relativePath) => joinLogicalPath(aiRoot, ...relativePath.split('/'))),
+    joinLogicalPath(domain.ideaPath, 'AGENTS.md'),
+    joinLogicalPath(domain.ideaPath, 'SKILL.md'),
+    joinLogicalPath(domain.ideaPath, 'Design.md'),
+    joinLogicalPath(domain.ideaPath, 'Architecture.md'),
+    joinLogicalPath(domain.domainPath, 'AGENTS.md'),
+    joinLogicalPath(domain.domainPath, 'SKILL.md')
   ];
   return sourcePaths.map((filePath) => ({
     filePath,

@@ -1,0 +1,53 @@
+# Codex Flow orchestrator を追加する
+
+- Status: closed
+- Priority: P1
+- Type: feature
+- Source: local
+- Phase: 03-implementation
+- Created: 2026-07-05
+- QCDS: Quality, Delivery, Satisfaction
+
+## Context
+
+現在の拡張機能は FirstPrompt 生成、Work Item Start Prompt、Codex CLI 起動、Codex session 履歴を持つ。一方で、複数工程をあらかじめ作成した prompt 群で順番に実行し、前工程の handoff を次工程へ渡す orchestrator はまだなかった。
+
+ユーザーは ChatGPT で要件定義・設計・工程別 prompt を作成し、その後 Codex に手作業で prompt を渡している。この手作業を VS Code extension 側で管理し、Codex CLI による自動または半自動の工程実行へ移行する。
+
+## Scope
+
+- `.codexflow/flow.json` / `state.json` の読み書き
+- Flow scaffold
+- phase prompt assembly
+- background Codex CLI runner
+- checks / logs / handoff / session record
+- Flow Dashboard
+- Work Dashboard integration
+- repair prompt
+- tests / docs / manual QA
+
+## Acceptance Criteria
+
+- [x] `Codex Starter: Codex Flow を初期化` で `.codexflow/flow.json`、`state.json`、phase prompts、handoff template を作成できる
+- [x] `Codex Starter: Codex Flow Dashboard を開く` で phase status と next action を確認できる
+- [x] `Run Next Phase` が phase prompt、docs、Git status、前工程 handoff を合成して Codex CLI に渡せる
+- [x] `Run All Phases` が pending phase を順番に実行し、失敗時に停止する
+- [x] `Copy Next Prompt` が VS Code Codex handoff 用に次工程 prompt を clipboard へ入れる
+- [x] Codex CLI 実行時に `.codexflow/logs/**` へ prompt / jsonl / final / checks を保存する
+- [x] `docs/handoff/latest.md` と `docs/handoff/<phase-id>.md` を必須成果物として扱う
+- [x] `docs/codex-sessions.jsonl` に flow / phase metadata が残る
+- [x] checks failure 時に phase status が failed になり repair action が使える
+- [x] `danger-full-access` と auto push が既定になっていない
+- [x] unit tests が追加され、既存 tests が regress していない
+- [x] architecture / design / implementation-plan / test-plan / manual-test / user-guide / traceability が更新されている
+
+## Validation
+
+- [x] `node --test tests/default-docs.test.cjs tests/invocation-target.test.cjs tests/codex-flow.test.cjs`
+- [x] `node --test tests/codex-cli.test.cjs tests/codex-sessions.test.cjs tests/codex-flow-runner.test.cjs tests/codex-flow-webview.test.cjs tests/i18n.test.cjs tests/work-items.test.cjs`
+
+## Notes
+
+- 自動連続実行は VS Code Codex sidebar ではなく Codex CLI background runner を主経路にする。
+- sidebar は prompt copy の半自動 handoff として維持する。
+- Flow state は VS Code globalState ではなく repo-local `.codexflow/state.json` を source of truth にする。

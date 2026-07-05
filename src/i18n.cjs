@@ -13,6 +13,10 @@ const MESSAGES = {
     'dashboard.scaffoldDocs': 'Generate D:\\AI Docs',
     'dashboard.initializeIssues': 'Initialize Issues',
     'dashboard.checkCodexCli': 'Check Codex CLI',
+    'dashboard.codexFlow': 'Codex Flow',
+    'dashboard.initializeCodexFlow': 'Initialize Codex Flow',
+    'dashboard.runNextCodexFlowPhase': 'Run Next Phase',
+    'dashboard.runAllCodexFlowPhases': 'Run All Phases',
     'dashboard.projectPhase': 'Project Phase',
     'dashboard.statePolicy': 'State policy: Not started = open / unchecked, Started = in-progress / blocked, Resolved = closed / checked. Source Markdown keeps existing metadata and checkboxes.',
     'dashboard.workItemsByPhase': 'Work Items by Phase',
@@ -28,7 +32,14 @@ const MESSAGES = {
     'webview.refresh': 'Refresh',
     'webview.workDashboard': 'Work Dashboard',
     'webview.openMetrics': 'Open Metrics JSON',
-    'webview.openEvaluation': 'Open Evaluation'
+    'webview.openEvaluation': 'Open Evaluation',
+    'flow.dashboardTitle': 'Codex Flow Dashboard',
+    'flow.initialize': 'Initialize Flow',
+    'flow.runNext': 'Run Next',
+    'flow.runAll': 'Run All Pending',
+    'flow.copyNextPrompt': 'Copy Next Prompt',
+    'flow.repairFailed': 'Repair Failed',
+    'flow.openLatestHandoff': 'Open Latest Handoff'
   },
   ja: {
     'dashboard.title': 'Codex Work Dashboard',
@@ -44,6 +55,10 @@ const MESSAGES = {
     'dashboard.scaffoldDocs': 'D:\\AI Docs 生成',
     'dashboard.initializeIssues': 'Issues 初期化',
     'dashboard.checkCodexCli': 'Codex CLI 確認',
+    'dashboard.codexFlow': 'Codex Flow',
+    'dashboard.initializeCodexFlow': 'Codex Flow 初期化',
+    'dashboard.runNextCodexFlowPhase': '次工程を実行',
+    'dashboard.runAllCodexFlowPhases': '全工程を実行',
     'dashboard.projectPhase': 'Project Phase',
     'dashboard.statePolicy': '状態方針: 未着手 = open / unchecked、着手済み = in-progress / blocked、解決済み = closed / checked。source Markdown は既存 metadata と checkbox を維持します。',
     'dashboard.workItemsByPhase': 'Work Items by Phase',
@@ -59,7 +74,14 @@ const MESSAGES = {
     'webview.refresh': 'Refresh',
     'webview.workDashboard': 'Work Dashboard',
     'webview.openMetrics': 'Open Metrics JSON',
-    'webview.openEvaluation': 'Open Evaluation'
+    'webview.openEvaluation': 'Open Evaluation',
+    'flow.dashboardTitle': 'Codex Flow Dashboard',
+    'flow.initialize': 'Codex Flow 初期化',
+    'flow.runNext': '次工程を実行',
+    'flow.runAll': '全工程を実行',
+    'flow.copyNextPrompt': '次工程 Prompt をコピー',
+    'flow.repairFailed': '失敗工程を修復',
+    'flow.openLatestHandoff': '最新 Handoff を開く'
   }
 };
 

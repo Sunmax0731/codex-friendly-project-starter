@@ -33,6 +33,11 @@ npm test
 - Default docs scaffold が `agents/phases/*/AGENTS.md`、工程別 `skills/*/SKILL.md`、作業種類別 `skills/work-types/*/SKILL.md` を生成する。
 - `src/i18n.cjs` と `package.nls*.json` が `ja` / `en` と未対応 locale fallback を検証できる。
 - VS Code Codex handoff / Codex CLI session が `docs/codex-sessions.md` / `.jsonl` に記録され、blocked work item から follow-up Issue を作成できる。
+- Codex Flow scaffold が `.codexflow/flow.json`、`state.json`、`prompts/codexflow/*.md`、`docs/handoff/*.md` を生成し、既存ファイルを既定で上書きしない。
+- Codex Flow phase prompt が phase prompt、参照 docs、Git context、previous handoff、必須成果物を含む。
+- Codex Flow runner が `--json`、final message、JSONL、checks を log path に保存し、state と session record に flow metadata を残す。
+- Codex Flow Dashboard が missing flow、phase status、Run Next / Run All / Copy Prompt / Repair action を表示する。
+- Work Dashboard から Codex Flow Dashboard、Run Next、Run All、Initialize Flow に遷移できる。
 - FirstPrompt 履歴が workspace storage に保存、復元、削除できる。
 - `D:\AI\IDEAS\<Domain>` と `D:\AI\<Domain>\created_idea_*` から project name 候補を補完し、文字化け候補を除外できる。
 - QCDS metrics の grade が定義済み値だけを使う。
@@ -54,6 +59,13 @@ npm test
 - `Codex Starter: Start Selected Work Items with Codex` が複数選択した TODO / Issue を開始プロンプトにして VS Code Codex に渡す。
 - `Codex Starter: Start All Work Items with Codex` が未完了 TODO / Issue を優先度順の一括開始プロンプトにして VS Code Codex に渡す。
 - `Codex Starter: Import GitHub Issues` が public GitHub Issues API から open issue を取得し、選択 issue を Codex CLI read-only inference 経由で local work item に変換する。
+- `Codex Starter: Initialize Codex Flow` が Flow scaffold を生成する。
+- `Codex Starter: Open Codex Flow Dashboard` が phase 状態を表示する。
+- `Codex Starter: Run Next Codex Flow Phase` が background runner または manual-handoff mode を実行する。
+- `Codex Starter: Run All Codex Flow Phases` が background runner で pending phase を順に実行する。
+- `Codex Starter: Copy Next Codex Flow Prompt` が次 phase prompt を clipboard に入れる。
+- `Codex Starter: Repair Failed Codex Flow Phase` が failed logs から repair prompt を生成する。
+- `Codex Starter: Open Latest Codex Flow Handoff` が `docs/handoff/latest.md` を開く。
 - `Codex Starter: Open Markdown WebView` が同じ文書を複数回開いても既存 panel を active にする。
 
 ## 手動テスト

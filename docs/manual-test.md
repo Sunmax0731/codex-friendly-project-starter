@@ -17,7 +17,14 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 5. `Agent Docs` と `Work Items` の title action に主要操作の icon button が表示され、item context menu から Markdown WebView、source 表示、path copy、Work Item start にアクセスできることを確認する。
 6. `Work Items` の title action または Command Palette から `Codex Starter: Open Work Dashboard` を実行し、TODO / Issue / QCDS の progress bar と、`プロジェクト進行中に使う操作`、`初回セットアップ` の2系統の GUI action が表示されることを確認する。
 7. Dashboard 上部に `Project Phase` が一般的な工程名で表示され、状態方針が未着手、着手済み、解決済みとして説明されることを確認する。中段の `QCDS Current Status`、`QCDS Improvements`、`Release Readiness`、`Work Items by Phase`、`Open TODO`、`Open Issues` が折りたたみ可能で、Issue / TODO の priority、status、type、phase、created、QCDS tags が色分けされることを確認する。`Open Legacy Tasks` は表示されないことを確認する。
-8. Command Palette から `Codex Starter: Open QCDS Status` を実行し、QCDS 専用 WebView に Quality / Cost / Delivery / Satisfaction の各 section、grade、score、checks、linked work items が表示されることを確認する。`docs/qcds-strict-metrics.json` が無い対象でも4観点の D- fallback が表示され、QCDS group が空にならないことを確認する。
+8. Dashboard 上部に `Codex Flow`、`次工程を実行`、`全工程を実行` が表示され、初回セットアップに `Codex Flow 初期化` が表示されることを確認する。
+9. Command Palette または Dashboard から `Codex Starter: Codex Flow を初期化` を実行し、`.codexflow/flow.json`、`.codexflow/state.json`、`prompts/codexflow/*.md`、`docs/handoff/template.md`、`docs/handoff/latest.md` が作成されることを確認する。既存ファイルは既定で上書きされない。
+10. `Codex Starter: Codex Flow Dashboard を開く` を実行し、Flow summary、progress、next phase、phase list、last handoff、Run Next / Run All / Copy Next Prompt / Repair / Refresh actions が表示されることを確認する。
+11. `Copy Next Prompt` を押し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が入ることを確認する。
+12. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background`、sandbox `workspace-write` で `Run Next` を実行し、`.codexflow/logs/<phase-id>/` に `.prompt.md`、`.jsonl`、`.final.md`、`.checks.json`、`.launcher.ps1` が保存され、`.codexflow/state.json` と `docs/codex-sessions.jsonl` に flow / phase metadata が残ることを確認する。
+13. checks が失敗する phase では state が `failed` になり、Dashboard で `Repair Failed` が使えることを確認する。repair prompt には failed prompt、final message、checks output、Git status が含まれることを確認する。
+14. `Codex Starter: Codex Flow の最新 Handoff を開く` で `docs/handoff/latest.md` が Markdown WebView で開くことを確認する。
+15. Command Palette から `Codex Starter: Open QCDS Status` を実行し、QCDS 専用 WebView に Quality / Cost / Delivery / Satisfaction の各 section、grade、score、checks、linked work items が表示されることを確認する。`docs/qcds-strict-metrics.json` が無い対象でも4観点の D- fallback が表示され、QCDS group が空にならないことを確認する。
 9. Work Items tree の QCDS 配下にある `Quality`、`Cost`、`Delivery`、`Satisfaction`、または Dashboard の QCDS Current Status の `Details` を開き、該当 section が開いた状態の QCDS Status WebView が表示されることを確認する。grade が `A-` 以下の場合は改善調査 / TODO 化 action が表示されることも確認する。
 10. Command Palette から `Codex Starter: Open Markdown WebView` を実行し、現在の Markdown が WebView 表示されることを確認する。
 11. Markdown WebView の右上 icon button から `Open Source`、`Copy Path`、`Refresh` が動作し、tooltip / aria-label 相当の操作名が維持されていることを確認する。`Codex Starter: Copy Markdown Path` と `Codex Starter: Refresh Markdown WebView` でも同じ操作を実行できることを確認する。`Tasks/*.md` や `Issues/*.md` のリンクをクリックして関連 Markdown に遷移できることも確認する。

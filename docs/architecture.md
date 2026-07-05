@@ -18,6 +18,9 @@
 - `src/codex-work-item-draft.cjs`: Codex CLI に渡す自然言語構造化 prompt と JSON 下書きの解析。
 - `src/github-issues.cjs`: public GitHub Issues の取得、repository 入力の正規化、GitHub Issue URL による重複検出、local TODO / Issue 作成。
 - `src/codex-cli.cjs`: Terminal mode で Codex CLI に渡す PowerShell command と terminal command 生成。
+- `src/codex-flow.cjs`: `.codexflow/flow.json` / `state.json` の schema、scaffold、phase prompt assembly、state 更新。
+- `src/codex-flow-runner.cjs`: Codex Flow phase の prompt/log path 作成、Codex CLI background runner、checks、repair prompt。
+- `src/codex-flow-webview.cjs`: Codex Flow Dashboard の表示 model と WebView HTML 生成。
 - `src/invocation-target.cjs`: FirstPrompt から対象 repo path を解決し、`codex exec -C` に渡す既存 parent directory を選ぶ。
 - `tools/`: QCDS、runtime gate、docs ZIP、closed alpha guard。
 
@@ -41,6 +44,10 @@ FirstPrompt が `D:\AI\ChromeExtension\<repo>` のように現在の VS Code wor
 
 Work Item Start Prompt は `codexFriendlyProjectStarter.codexGitWritePolicy` を読み、`preflight` または `defer` の Git 書き込み方針を VS Code Codex / Codex CLI に渡す。これにより `.git/index.lock Permission denied` が起きやすい環境では、Git 書き込みの反復ではなく未完了操作の報告へ誘導する。
 Work Item が closed にならない場合は `src/work-items.cjs` の blocked follow-up helper が原因を分類し、`Issues/*.md` に新しい follow-up Issue を作成する。Dashboard と context menu はこの helper を呼び出すだけにし、GitHub auth、Git index lock / ACL、runtime gate、tool PATH などの判定を一箇所に閉じ込める。
+
+Codex Flow は Work Items の上位 orchestration として扱う。source of truth は VS Code globalState ではなく workspace 内の `.codexflow/flow.json`、`.codexflow/state.json`、`.codexflow/logs/**`、`docs/handoff/*.md` である。各 phase は既定で新規 Codex session とし、前工程の文脈は `docs/handoff/latest.md`、Git 状態、参照 docs、phase prompt から合成する。
+
+Flow の完全自動実行は `codexFriendlyProjectStarter.codexFlowRunner=background` で行う。runner は `codex exec --json -o <final>` の stdout を `.jsonl` に保存し、checks を実行して state を更新する。`terminal` と `vscode-codex` は終了検知をしないため manual-handoff として記録する。
 
 QCDS が `A-` 以下の観点では、`src/work-items.cjs` の QCDS improvement helper が観点、grade、score、checks、linked work items を含む Issue を生成する。同じ `QCDS Improvement Axis` の Issue が存在する場合は重複作成せず、既存 Issue に再確認 notes を追記する。
 

@@ -32,13 +32,16 @@ function buildCodexExecScript(options = {}) {
   if (clean(options.outputSchemaPath)) args.push('--output-schema', clean(options.outputSchemaPath));
   if (clean(options.outputLastMessagePath)) args.push('-o', clean(options.outputLastMessagePath));
   if (clean(options.color)) args.push('--color', clean(options.color));
+  if (options.json === true) args.push('--json');
   if (options.ephemeral === true) args.push('--ephemeral');
+  const outputJsonlPath = clean(options.outputJsonlPath);
   const lines = [
     ...buildPowerShellUtf8Prelude(),
     ...buildCodexCommandResolution(normalized.cliPath),
     ...buildToolPathBootstrap(normalized.toolPaths),
     `if (-not $codexExecutable) { $codexExecutable = (Get-Command $codexCommand -ErrorAction Stop).Source }`,
     `$promptFile = ${quotePowerShell(options.promptFilePath)}`,
+    outputJsonlPath ? `$jsonlFile = ${quotePowerShell(outputJsonlPath)}` : '',
     `$codexArgs = @(`,
     ...args.map((arg) => `  ${quotePowerShell(arg)}`),
     `)`,
@@ -54,11 +57,13 @@ function buildCodexExecScript(options = {}) {
     `$codexArgs += '-'`,
     `Write-Host ''`,
     `Write-Host '--- Codex CLI output ---'`,
-    `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs`,
+    outputJsonlPath
+      ? `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs | Tee-Object -FilePath $jsonlFile`
+      : `Get-Content -LiteralPath $promptFile -Encoding UTF8 -Raw | & $codexExecutable @codexArgs`,
     `Write-Host ''`,
     `Write-Host '--- Codex CLI finished ---'`,
     `if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }`
-  ];
+  ].filter(Boolean);
   return lines.join('\n');
 }
 

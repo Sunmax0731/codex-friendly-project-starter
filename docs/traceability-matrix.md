@@ -38,6 +38,11 @@
 | Git 書き込み方針を FirstPrompt / Work Item Start に反映する | `src/workflows.cjs`, `src/prompt-builder.cjs`, `src/work-item-start.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/prompt-builder.test.cjs`, `tests/work-items.test.cjs`, `tools/platform-runtime-gate.mjs` |
 | Work Item Start の model / インテリジェンス / アクセス権限を選ぶ | `extension.js`, `src/work-item-start.cjs`, `src/codex-cli.cjs`, `package.json` | `tests/work-items.test.cjs`, `tests/codex-cli.test.cjs`, `docs/manual-test.md` |
 | Codex session を project から参照する | `src/codex-sessions.cjs`, `extension.js` | `tests/codex-sessions.test.cjs`, `docs/user-guide.md` |
+| Codex Flow を初期化し repo-local flow state を管理する | `src/codex-flow.cjs`, `extension.js`, `package.json` | `tests/codex-flow.test.cjs`, `Issues/0024-codex-flow-orchestrator.md` |
+| Codex Flow phase prompt を docs / Git / handoff から合成する | `src/codex-flow.cjs` | `tests/codex-flow.test.cjs`, `docs/user-guide.md` |
+| Codex Flow phase を background Codex CLI で実行し JSONL / final / checks を残す | `src/codex-flow-runner.cjs`, `src/codex-cli.cjs`, `extension.js` | `tests/codex-flow-runner.test.cjs`, `tests/codex-cli.test.cjs`, `docs/manual-test.md` |
+| failed phase の repair prompt を生成する | `src/codex-flow-runner.cjs`, `extension.js` | `tests/codex-flow-runner.test.cjs`, `Issues/0024-codex-flow-orchestrator.md` |
+| Codex Flow Dashboard を表示し Work Dashboard から遷移する | `src/codex-flow-webview.cjs`, `src/webview.cjs`, `src/i18n.cjs`, `extension.js` | `tests/codex-flow-webview.test.cjs`, `tests/work-items.test.cjs`, `tests/i18n.test.cjs` |
 | blocked の原因を follow-up Issue に起こす | `src/work-items.cjs`, `src/webview.cjs`, `extension.js`, `package.json` | `tests/work-items.test.cjs`, `docs/manual-test.md` |
 | Webview から生成できる | `src/webview.cjs`, `extension.js` | `tools/platform-runtime-gate.mjs`, `docs/manual-test.md` |
 | Codex CLI で AI Agent を起動する | `src/codex-cli.cjs`, `extension.js` | `tests/codex-cli.test.cjs`, `docs/vscode-verification-guide.md` |

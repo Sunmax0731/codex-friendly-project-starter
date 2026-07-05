@@ -17,6 +17,9 @@ test('t and dictionary expose localized dashboard and webview labels', () => {
   assert.equal(t('dashboard.issueTicket', 'fr'), 'Create Issue');
   assert.equal(t('webview.copyPath', 'ja-JP'), 'Copy Path');
   assert.equal(dictionary('ja')['dashboard.sendPrompt'], 'CodexにPrompt送信');
+  assert.equal(t('dashboard.codexFlow', 'en'), 'Codex Flow');
+  assert.equal(t('dashboard.initializeCodexFlow', 'ja'), 'Codex Flow 初期化');
+  assert.equal(t('flow.copyNextPrompt', 'ja'), '次工程 Prompt をコピー');
 });
 
 test('package localization files cover contributed commands and views', () => {

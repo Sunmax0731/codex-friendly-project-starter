@@ -56,6 +56,11 @@
       "detail": "Work dashboard, QCDS status, and local issue commands exist"
     },
     {
+      "id": "codex-flow-command",
+      "pass": true,
+      "detail": "Codex Flow commands and dashboard actions exist"
+    },
+    {
       "id": "work-composer-command",
       "pass": true,
       "detail": "Work Item Composer commands exist"

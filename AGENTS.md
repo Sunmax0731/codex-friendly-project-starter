@@ -34,3 +34,11 @@
 - 厳格評価では、ほかのリモートリポジトリで運用されている QCDS 証跡を比較基準にします。
 - 代表シナリオ、機械可読 metrics、回帰ベースライン、Security/Privacy、Traceability を満たさない場合は S 評価にしません。
 - QCDS は成果物の存在確認だけで合格にせず、代表シナリオの期待値一致を確認します。
+
+## Codex Flow
+
+- 複数工程の Codex 作業は `.codexflow/flow.json` と `.codexflow/state.json` で管理します。
+- 各工程は原則として新規 Codex session で実行し、前工程の文脈は `docs/handoff/latest.md`、Git 状態、設計 docs、phase prompt から引き継ぎます。
+- 実行ログは `.codexflow/logs/**` に保存し、phase 完了時は `docs/handoff/<phase-id>.md` と `docs/handoff/latest.md` を更新します。
+- `danger-full-access` と `git push` は明示指示がない限り実行しません。
+- checks が失敗した場合は logs と原因を handoff に記録し、必要なら repair phase に進みます。

@@ -218,6 +218,14 @@ test('renderWorkDashboardWebview includes graphical summary and open work sectio
   assert.match(html, /CodexにPrompt送信/);
   assert.match(html, /GitHub Issuesインポート/);
   assert.match(html, /importGitHubIssues/);
+  assert.match(html, /Codex Flow/);
+  assert.match(html, /openCodexFlowDashboard/);
+  assert.match(html, /次工程を実行/);
+  assert.match(html, /runNextCodexFlowPhase/);
+  assert.match(html, /全工程を実行/);
+  assert.match(html, /runAllCodexFlowPhases/);
+  assert.match(html, /Codex Flow 初期化/);
+  assert.match(html, /initializeCodexFlow/);
   assert.match(html, /選択WorkItemを開始/);
   assert.match(html, /startSelectedWorkItems/);
   assert.match(html, /全WorkItemを開始/);

@@ -20,7 +20,7 @@ function repositoryPathFromInput(input = {}) {
   const projectName = clean(input.projectName);
   if (!projectName) return '';
   const domain = getDomainById(input.domainId);
-  return path.join(domain.domainPath, projectName);
+  return joinLogicalPath(domain.domainPath, projectName);
 }
 
 function extractRepositoryPathFromPrompt(prompt = '') {
@@ -37,6 +37,11 @@ function extractRepositoryPathFromPrompt(prompt = '') {
 }
 
 function nearestExistingDirectory(targetPath) {
+  if (isWindowsDrivePath(targetPath) && process.platform !== 'win32') {
+    let current = path.win32.normalize(targetPath);
+    if (!path.win32.extname(current)) return path.win32.dirname(current);
+    return path.win32.dirname(current);
+  }
   let current = path.resolve(targetPath);
   if (fs.existsSync(current)) {
     const stat = fs.statSync(current);
@@ -49,6 +54,15 @@ function nearestExistingDirectory(targetPath) {
   return '';
 }
 
+function joinLogicalPath(basePath, ...segments) {
+  if (isWindowsDrivePath(basePath)) return path.win32.join(basePath, ...segments);
+  return path.join(basePath, ...segments);
+}
+
+function isWindowsDrivePath(value) {
+  return /^[A-Za-z]:\\/.test(String(value || ''));
+}
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -57,6 +71,6 @@ module.exports = {
   resolveInvocationTarget,
   repositoryPathFromInput,
   extractRepositoryPathFromPrompt,
-  nearestExistingDirectory
+  nearestExistingDirectory,
+  joinLogicalPath
 };
-

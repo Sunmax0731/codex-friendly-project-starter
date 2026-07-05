@@ -29,6 +29,7 @@
 - TODO / Issue を Codex に渡す導線は、単一、複数選択、全件の 3 種を保ち、いずれもモデル、インテリジェンス、アクセス権限の選択を起動前に通します。
 - OpenAI prompt guidance は起動時に公式 URL を確認し、本文を保存せず status と hash だけを cache します。取得失敗時は `src/openai-prompt-guidance.cjs` の fallback profile で prompt 生成を継続します。
 - VS Code Codex handoff / Codex CLI 起動時は対象プロジェクトの `docs/codex-sessions.md` と `docs/codex-sessions.jsonl` に session index を残し、Issue から起動した場合は対象 Markdown にも参照を追記します。
+- Codex Flow を使う場合は `.codexflow/flow.json` と `.codexflow/state.json` を source of truth とし、各 phase は `docs/handoff/latest.md` を読んで新規 session として開始します。background runner は JSONL / final / checks を `.codexflow/logs/**` に残します。
 - GitHub Issues 取込は public repository の読み取り専用 import とし、GitHub Issue URL を TODO / Issue に残します。実装変更時は `tests/github-issues.test.cjs` と README / manual / user guide / release gate を同時に更新します。
 - Markdown WebView は `source` を直接開く代替ではなく、work item と docs のリンク遷移を一画面で追える確認面として扱います。
 - 工程別 Skill 生成では、ルート `SKILL.md` に Phase Skills のリンクを置き、`skills/01-requirements` から `skills/06-release` までを読み込み先にします。

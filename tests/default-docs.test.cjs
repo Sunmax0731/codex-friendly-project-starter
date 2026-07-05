@@ -10,6 +10,7 @@ const {
   renderDefaultDocs,
   ensureDefaultProjectDocs
 } = require('../src/default-docs.cjs');
+const { ensureCodexFlowScaffold } = require('../src/codex-flow.cjs');
 
 test('renderDefaultDocs includes D:\\AI source docs, hierarchical agent docs, phase skills, and Issues', () => {
   const rendered = renderDefaultDocs({
@@ -52,6 +53,17 @@ test('ensureDefaultProjectDocs writes missing files and preserves existing files
   assert.ok(fs.existsSync(path.join(root, 'skills', 'work-types', 'release-operations', 'SKILL.md')));
   assert.ok(fs.existsSync(path.join(root, 'Issues', '0003-qcds-release-readiness.md')));
   assert.equal(fs.existsSync(path.join(root, 'Tasks')), false);
+  assert.equal(fs.existsSync(path.join(root, '.codexflow')), false);
+});
+
+test('Codex Flow scaffold is created by its own helper', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-default-flow-'));
+  ensureDefaultProjectDocs(root, { domainId: 'VSCodeExtension', projectName: 'flow-sample' });
+  assert.equal(fs.existsSync(path.join(root, '.codexflow')), false);
+  const result = ensureCodexFlowScaffold(root, { name: 'flow-sample' });
+  assert.ok(result.written.includes('.codexflow/flow.json'));
+  assert.ok(fs.existsSync(path.join(root, '.codexflow', 'flow.json')));
+  assert.ok(fs.existsSync(path.join(root, 'prompts', 'codexflow', '10_requirements.md')));
 });
 
 test('collectDefaultDocSources reports common and domain source paths', () => {

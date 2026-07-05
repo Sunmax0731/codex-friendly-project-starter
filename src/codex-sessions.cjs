@@ -16,6 +16,7 @@ function createCodexSessionRecord(input = {}) {
       modelReasoningEffort: input.runOptions?.modelReasoningEffort || '',
       sandboxMode: input.runOptions?.sandboxMode || ''
     },
+    flow: normalizeFlow(input.flow),
     workItems: normalizeWorkItems(input.workItems)
   };
 }
@@ -100,6 +101,23 @@ function normalizeWorkItems(items) {
     filePath: item.filePath || '',
     lineNumber: item.lineNumber || 0
   }));
+}
+
+function normalizeFlow(flow = {}) {
+  if (!flow || typeof flow !== 'object') return undefined;
+  const normalized = {
+    flowId: flow.flowId || '',
+    flowName: flow.flowName || '',
+    phaseId: flow.phaseId || '',
+    phaseName: flow.phaseName || '',
+    runId: flow.runId || '',
+    status: flow.status || '',
+    promptPath: flow.promptPath || '',
+    jsonlPath: flow.jsonlPath || '',
+    finalMessagePath: flow.finalMessagePath || '',
+    checksPath: flow.checksPath || ''
+  };
+  return Object.values(normalized).some(Boolean) ? normalized : undefined;
 }
 
 function markdownPathLink(basePath, targetPath, label) {

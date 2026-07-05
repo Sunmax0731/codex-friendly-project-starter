@@ -27,3 +27,4 @@
 
 ## Work Items
 - [x] [P2] [Phase:02-specification] 非GitフォルダでCodex CLI接続を有効化 [Issue](Issues/0023-git-codex-cli.md) [QCDS:Quality,Delivery,Satisfaction]
+- [x] [P1] [Phase:03-implementation] Codex Flow orchestrator を追加する [Issue](Issues/0024-codex-flow-orchestrator.md) [QCDS:Quality,Delivery,Satisfaction]

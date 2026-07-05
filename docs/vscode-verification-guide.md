@@ -40,8 +40,12 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 2. `Work Items` を開く。
 3. `Project Phase`、`TODO`、`Issues`、`QCDS`、`Release readiness` の group を確認し、legacy `Tasks` group が表示されないことを確認する。
 4. `Work Items` の title action または `Ctrl+Shift+P` から `Codex Starter: Open Work Dashboard` を実行する。
-5. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
-6. Dashboard の `Issues 初期化` を実行する。
+5. Dashboard の `Codex Flow 初期化` または `Ctrl+Shift+P` から `Codex Starter: Initialize Codex Flow` を実行する。
+6. `Codex Starter: Open Codex Flow Dashboard` を実行し、Flow summary、phase list、Run Next、Run All、Copy Next Prompt、Open Latest Handoff が表示されることを確認する。
+7. `Copy Next Prompt` を実行し、clipboard に phase prompt、Git context、previous handoff、referenced docs、必須成果物が含まれることを確認する。
+8. 実 Codex CLI が使える環境では `codexFriendlyProjectStarter.codexFlowRunner=background` で `Run Next` を実行し、`.codexflow/logs/**`、`.codexflow/state.json`、`docs/codex-sessions.jsonl` に flow / phase metadata が残ることを確認する。
+9. `Ctrl+Shift+P` から `Codex Starter: Open QCDS Status` を実行し、Quality / Cost / Delivery / Satisfaction の各 section を確認する。
+10. Dashboard の `Issues 初期化` を実行する。
 7. Dashboard の `Issueを起票` を押し、Work Item Composer で title、priority、type、phase、acceptance criteria を入力する。Snipping Tool などで clipboard に入れた画像を `Ctrl+V` で貼り付け、thumbnail 表示と削除ができることを確認してから Issue を作成する。
 8. Dashboard と Command Palette に `Legacy Task を作成`、`Create Legacy Local Task`、`Tasks 初期化` が表示されないことを確認する。
 9. Dashboard の `Issueを起票` を押し、自然言語メモから Codex CLI 下書きを作って Issue を作成する。
@@ -60,7 +64,8 @@ code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-st
 - legacy `Tasks/*.md` は通常 UI に表示されない。
 - Dashboard に TODO と Issue の progress bar が表示される。
 - Dashboard に `Project Phase` と `Work Items by Phase` が表示され、Issue の `Created`、TODO / Issue の工程、未着手 / 着手済み / 解決済み状態が同じ方針で表示される。
-- Dashboard 上部の日常操作に `Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` が表示され、初回セットアップに `FirstPrompt`、`Issues 初期化`、`D:\AI Docs 生成`、`Codex CLI 確認` が表示される。legacy Task 作成 / Tasks 初期化ボタンは表示されない。
+- Dashboard 上部の日常操作に `Codex Flow`、`次工程を実行`、`全工程を実行`、`Issueを起票`、`GitHub Issuesインポート`、`CodexにPrompt送信`、`選択WorkItemを開始`、`全WorkItemを開始`、`Refresh` が表示され、初回セットアップに `FirstPrompt`、`Codex Flow 初期化`、`Issues 初期化`、`D:\AI Docs 生成`、`Codex CLI 確認` が表示される。legacy Task 作成 / Tasks 初期化ボタンは表示されない。
+- Codex Flow Dashboard は missing flow の empty state と initialized flow の phase status を表示し、Run Next / Run All / Copy Prompt / Repair / Handoff 操作を提供する。
 - Dashboard 上部と Work Items title action から `GitHub Issuesインポート` を実行できる。
 - Dashboard に QCDS Current Status と QCDS Improvements が表示される。
 - QCDS Status WebView に各観点の grade、score、checks、linked work items が表示され、Work Items tree の QCDS 配下または Dashboard の `Details` から該当観点を開ける。

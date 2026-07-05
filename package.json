@@ -31,6 +31,13 @@
     "onCommand:codex-friendly-project-starter.refreshAgentDocs",
     "onCommand:codex-friendly-project-starter.refreshWorkItems",
     "onCommand:codex-friendly-project-starter.openWorkDashboard",
+    "onCommand:codex-friendly-project-starter.initializeCodexFlow",
+    "onCommand:codex-friendly-project-starter.openCodexFlowDashboard",
+    "onCommand:codex-friendly-project-starter.runNextCodexFlowPhase",
+    "onCommand:codex-friendly-project-starter.runAllCodexFlowPhases",
+    "onCommand:codex-friendly-project-starter.copyNextCodexFlowPrompt",
+    "onCommand:codex-friendly-project-starter.repairFailedCodexFlowPhase",
+    "onCommand:codex-friendly-project-starter.openLatestCodexFlowHandoff",
     "onCommand:codex-friendly-project-starter.openQcdsStatus",
     "onCommand:codex-friendly-project-starter.openMarkdownWebview",
     "onCommand:codex-friendly-project-starter.refreshMarkdownWebview",
@@ -110,6 +117,41 @@
         "command": "codex-friendly-project-starter.openWorkDashboard",
         "title": "%command.openWorkDashboard.title%",
         "icon": "$(dashboard)"
+      },
+      {
+        "command": "codex-friendly-project-starter.initializeCodexFlow",
+        "title": "%command.initializeCodexFlow.title%",
+        "icon": "$(repo-create)"
+      },
+      {
+        "command": "codex-friendly-project-starter.openCodexFlowDashboard",
+        "title": "%command.openCodexFlowDashboard.title%",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "codex-friendly-project-starter.runNextCodexFlowPhase",
+        "title": "%command.runNextCodexFlowPhase.title%",
+        "icon": "$(play)"
+      },
+      {
+        "command": "codex-friendly-project-starter.runAllCodexFlowPhases",
+        "title": "%command.runAllCodexFlowPhases.title%",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "codex-friendly-project-starter.copyNextCodexFlowPrompt",
+        "title": "%command.copyNextCodexFlowPrompt.title%",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "codex-friendly-project-starter.repairFailedCodexFlowPhase",
+        "title": "%command.repairFailedCodexFlowPhase.title%",
+        "icon": "$(wrench)"
+      },
+      {
+        "command": "codex-friendly-project-starter.openLatestCodexFlowHandoff",
+        "title": "%command.openLatestCodexFlowHandoff.title%",
+        "icon": "$(go-to-file)"
       },
       {
         "command": "codex-friendly-project-starter.openQcdsStatus",
@@ -251,6 +293,11 @@
           "group": "navigation@1"
         },
         {
+          "command": "codex-friendly-project-starter.openCodexFlowDashboard",
+          "when": "view == codexFriendlyWorkItems",
+          "group": "navigation@1.5"
+        },
+        {
           "command": "codex-friendly-project-starter.openWorkItemComposer",
           "when": "view == codexFriendlyWorkItems",
           "group": "navigation@2"
@@ -331,7 +378,7 @@
       },
       {
         "view": "codexFriendlyWorkItems",
-        "contents": "TODO.md / Issues / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
+        "contents": "TODO.md / Issues / QCDS を作業単位として可視化します。\n[Work Dashboard](command:codex-friendly-project-starter.openWorkDashboard) / [Codex Flow](command:codex-friendly-project-starter.openCodexFlowDashboard) / [GitHub Issues 取込](command:codex-friendly-project-starter.importGitHubIssues) / [Start Selected](command:codex-friendly-project-starter.startSelectedWorkItemsWithCodex) / [Start All](command:codex-friendly-project-starter.startAllWorkItemsWithCodex) / [Work Item Composer](command:codex-friendly-project-starter.openWorkItemComposer) / [Refresh](command:codex-friendly-project-starter.refreshWorkItems)"
       }
     ],
     "configuration": {
@@ -465,6 +512,34 @@
           "default": 60000,
           "minimum": 5000,
           "description": "Timeout in milliseconds for Codex CLI Work Item Composer inference before falling back to local inference."
+        },
+        "codexFriendlyProjectStarter.codexFlowRunner": {
+          "type": "string",
+          "enum": [
+            "background",
+            "terminal",
+            "vscode-codex"
+          ],
+          "default": "background",
+          "description": "Runner used for Codex Flow phases. background runs Codex CLI and updates state, terminal opens a VS Code terminal, and vscode-codex copies the prompt for manual handoff."
+        },
+        "codexFriendlyProjectStarter.codexFlowAutoCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow Codex Flow scaffold metadata to request auto commit. Git push is still never automatic."
+        },
+        "codexFriendlyProjectStarter.codexFlowMaxRepairAttempts": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Maximum repair attempts allowed for a failed Codex Flow phase."
+        },
+        "codexFriendlyProjectStarter.codexFlowCheckTimeoutMs": {
+          "type": "number",
+          "default": 120000,
+          "minimum": 5000,
+          "description": "Timeout in milliseconds for each Codex Flow phase check command."
         },
         "codexFriendlyProjectStarter.confirmBeforeCodexRun": {
           "type": "boolean",

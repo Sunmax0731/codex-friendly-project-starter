@@ -33,7 +33,9 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
     toolPaths: ['E:\\DevEnv\\GitHubCLI', 'C:\\Users\\tester\\AppData\\Local\\OpenAI\\Codex\\bin'],
     outputSchemaPath: 'D:\\tmp\\schema.json',
     outputLastMessagePath: 'D:\\tmp\\last.json',
+    outputJsonlPath: 'D:\\tmp\\flow.jsonl',
     color: 'never',
+    json: true,
     ephemeral: true
   });
   assert.match(script, /\$OutputEncoding = \$utf8NoBom/);
@@ -53,6 +55,8 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /\$env:Path = \$codexToolPath \+ ';' \+ \$codexRemainingPath/);
   assert.match(script, /Get-Content -LiteralPath \$promptFile -Encoding UTF8 -Raw/);
   assert.match(script, /& \$codexExecutable @codexArgs/);
+  assert.match(script, /\$jsonlFile = 'D:\\tmp\\flow\.jsonl'/);
+  assert.match(script, /Tee-Object -FilePath \$jsonlFile/);
   assert.match(script, /Join-Path -Path \$codexGitProbe -ChildPath '\.git'/);
   assert.match(script, /\$codexArgs \+= '--skip-git-repo-check'/);
   assert.match(script, /Non-Git workspace detected: --skip-git-repo-check enabled/);
@@ -74,8 +78,10 @@ test('buildCodexExecScript pipes a prompt file to codex exec', () => {
   assert.match(script, /'D:\\tmp\\last\.json'/);
   assert.match(script, /'--color'/);
   assert.match(script, /'never'/);
+  assert.match(script, /'--json'/);
   assert.match(script, /'--ephemeral'/);
   assert.match(script, /'-'/);
+  assert.ok(script.indexOf("'--json'") < script.indexOf("$codexArgs += '-'"));
 });
 
 test('buildGitRepoCheckBootstrap adds skip-git-repo-check only after probing parent directories', () => {

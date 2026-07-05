@@ -48,6 +48,28 @@ const {
   buildCodexCheckTerminalCommand
 } = require('./src/codex-cli.cjs');
 const {
+  ensureCodexFlowScaffold,
+  readCodexFlow,
+  readCodexFlowState,
+  writeCodexFlowState,
+  validateCodexFlow,
+  resolveNextCodexFlowPhase,
+  updateCodexFlowStateAfterRun,
+  createCodexFlowRunRecord,
+  phaseHandoffPath,
+  resolveFlowPath
+} = require('./src/codex-flow.cjs');
+const {
+  prepareCodexFlowPhaseRun,
+  runCodexFlowPhaseWithCodexCli,
+  buildCodexFlowRepairPrompt,
+  collectGitContext
+} = require('./src/codex-flow-runner.cjs');
+const {
+  buildCodexFlowDashboardModel,
+  renderCodexFlowDashboardWebview
+} = require('./src/codex-flow-webview.cjs');
+const {
   createCodexSessionRecord,
   recordCodexSession
 } = require('./src/codex-sessions.cjs');
@@ -107,6 +129,13 @@ function activate(context) {
     vscode.commands.registerCommand('codex-friendly-project-starter.openMarkdownSource', (item) => openMarkdownSourceCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.copyMarkdownPath', (item) => copyMarkdownPathCommand(item)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openWorkDashboard', () => openWorkDashboard(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.initializeCodexFlow', () => initializeCodexFlowCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openCodexFlowDashboard', () => openCodexFlowDashboard(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.runNextCodexFlowPhase', () => runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.runAllCodexFlowPhases', () => runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.copyNextCodexFlowPrompt', () => copyNextCodexFlowPromptCommand(context)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.repairFailedCodexFlowPhase', () => repairFailedCodexFlowPhaseCommand(context, treeProvider, workItemsProvider)),
+    vscode.commands.registerCommand('codex-friendly-project-starter.openLatestCodexFlowHandoff', () => openLatestCodexFlowHandoffCommand(context)),
     vscode.commands.registerCommand('codex-friendly-project-starter.openQcdsStatus', (item) => openQcdsStatus(context, treeProvider, workItemsProvider, qcdsAxisFromCommandArgument(item))),
     vscode.commands.registerCommand('codex-friendly-project-starter.scaffoldDefaultDocs', () => scaffoldDefaultDocsCommand(context, treeProvider, workItemsProvider)),
     vscode.commands.registerCommand('codex-friendly-project-starter.initializeIssuesDirectory', () => initializeIssuesDirectoryCommand(workItemsProvider)),
@@ -772,6 +801,25 @@ async function handleDashboardMessage(args) {
     await startAllWorkItemsWithCodexCommand(context, workspaceRoot);
     return;
   }
+  if (message?.type === 'openCodexFlowDashboard') {
+    await openCodexFlowDashboard(context, treeProvider, workItemsProvider, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'initializeCodexFlow') {
+    await initializeCodexFlowCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'runNextCodexFlowPhase') {
+    await runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'runAllCodexFlowPhases') {
+    await runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
   if (message?.type === 'startSelectedWorkItems') {
     await startSelectedWorkItemsWithCodexCommand(context, workspaceRoot, message.items || []);
     return;
@@ -832,6 +880,381 @@ async function handleDashboardMessage(args) {
     treeProvider?.refresh();
     workItemsProvider?.refresh();
     await renderDashboardPanel(panel, nonce, workspaceRoot);
+  }
+}
+
+async function initializeCodexFlowCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const name = path.basename(workspaceRoot);
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const result = ensureCodexFlowScaffold(workspaceRoot, {
+    name,
+    sandbox: config.get('codexSandboxMode', 'workspace-write'),
+    maxRepairAttempts: config.get('codexFlowMaxRepairAttempts', 1),
+    autoCommit: config.get('codexFlowAutoCommit', false)
+  }, { overwrite: false });
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+  vscode.window.setStatusBarMessage(`Codex Flow: ${result.written.length} files written, ${result.skipped.length} skipped`, 6000);
+  await openCodexFlowDashboard(context, treeProvider, workItemsProvider, workspaceRoot);
+}
+
+async function openCodexFlowDashboard(context, treeProvider, workItemsProvider, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const panel = vscode.window.createWebviewPanel(
+    'codexFriendlyCodexFlowDashboard',
+    'Codex Flow Dashboard',
+    vscode.ViewColumn.One,
+    { enableScripts: true, retainContextWhenHidden: false }
+  );
+  const nonce = String(Date.now()) + String(Math.random()).slice(2);
+  await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+  panel.webview.onDidReceiveMessage(async (message) => {
+    await handleCodexFlowDashboardMessage({ context, panel, nonce, workspaceRoot, treeProvider, workItemsProvider, message });
+  }, undefined, context.subscriptions);
+}
+
+async function renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot) {
+  const { flow, state, validation } = loadCodexFlowForWorkspace(workspaceRoot);
+  const model = buildCodexFlowDashboardModel(workspaceRoot, flow, state, { validationErrors: validation.errors });
+  panel.webview.html = renderCodexFlowDashboardWebview(nonce, model, { locale: uiLocale() });
+}
+
+async function handleCodexFlowDashboardMessage(args) {
+  const { context, panel, nonce, workspaceRoot, treeProvider, workItemsProvider, message } = args;
+  if (message?.type === 'initializeCodexFlow') {
+    await initializeCodexFlowCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'refreshCodexFlowDashboard') {
+    await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'runNextCodexFlowPhase' || message?.type === 'runCodexFlowPhase') {
+    await runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider, workspaceRoot, message.phaseId || '');
+    await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'runAllCodexFlowPhases') {
+    await runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'copyNextCodexFlowPrompt' || message?.type === 'copyCodexFlowPhasePrompt') {
+    await copyNextCodexFlowPromptCommand(context, workspaceRoot, message.phaseId || '');
+    return;
+  }
+  if (message?.type === 'repairFailedCodexFlowPhase') {
+    await repairFailedCodexFlowPhaseCommand(context, treeProvider, workItemsProvider, workspaceRoot);
+    await renderCodexFlowDashboardPanel(panel, nonce, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'openLatestCodexFlowHandoff') {
+    await openLatestCodexFlowHandoffCommand(context, workspaceRoot);
+    return;
+  }
+  if (message?.type === 'openCodexFlowPhasePrompt') {
+    await openCodexFlowPhasePromptCommand(context, workspaceRoot, message.phaseId || '');
+    return;
+  }
+  if (message?.type === 'openCodexFlowPhaseHandoff') {
+    await openCodexFlowPhaseHandoffCommand(context, workspaceRoot, message.phaseId || '');
+  }
+}
+
+function loadCodexFlowForWorkspace(workspaceRoot) {
+  const flow = readCodexFlow(workspaceRoot);
+  if (!flow) return { flow: undefined, state: undefined, validation: { valid: false, errors: ['.codexflow/flow.json is missing'] } };
+  const state = readCodexFlowState(workspaceRoot, flow);
+  const validation = validateCodexFlow(flow, { rootPath: workspaceRoot });
+  return { flow: validation.flow, state, validation };
+}
+
+async function runNextCodexFlowPhaseCommand(context, treeProvider, workItemsProvider, workspaceRootOverride, phaseId = '') {
+  const workspaceRoot = typeof workspaceRootOverride === 'string' ? workspaceRootOverride : pickWorkspaceRoot();
+  const { flow, state, validation } = loadCodexFlowForWorkspace(workspaceRoot);
+  if (!flow) {
+    vscode.window.showWarningMessage('Codex Flow: .codexflow/flow.json が見つかりません。Codex Flow を初期化してください。');
+    return;
+  }
+  if (!validation.valid) {
+    vscode.window.showErrorMessage('Codex Flow: flow.json が不正です。' + validation.errors.join(' / '));
+    return;
+  }
+  const phase = phaseId ? flow.phases.find((item) => item.id === phaseId) : resolveNextCodexFlowPhase(flow, state);
+  if (!phase) {
+    vscode.window.showInformationMessage('Codex Flow: pending phase はありません。');
+    return;
+  }
+  await runCodexFlowPhase(context, workspaceRoot, flow, state, phase);
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+}
+
+async function runAllCodexFlowPhasesCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const runner = vscode.workspace.getConfiguration('codexFriendlyProjectStarter').get('codexFlowRunner', 'background');
+  if (runner !== 'background') {
+    vscode.window.showWarningMessage('Codex Flow: Run All は background runner でのみ終了検知できます。次工程 prompt をコピーします。');
+    await copyNextCodexFlowPromptCommand(context, workspaceRoot);
+    return;
+  }
+  let guard = 0;
+  while (guard < 50) {
+    guard += 1;
+    const { flow, state, validation } = loadCodexFlowForWorkspace(workspaceRoot);
+    if (!flow || !validation.valid) {
+      vscode.window.showWarningMessage('Codex Flow: Run All を開始できません。Dashboard で flow validation を確認してください。');
+      return;
+    }
+    const phase = resolveNextCodexFlowPhase(flow, state);
+    if (!phase) break;
+    const result = await runCodexFlowPhase(context, workspaceRoot, flow, state, phase);
+    if (!result || result.runRecord.status !== 'succeeded') {
+      if (flow.stopOnFailure) break;
+    }
+  }
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+}
+
+async function copyNextCodexFlowPromptCommand(context, workspaceRootOverride, phaseId = '') {
+  const workspaceRoot = typeof workspaceRootOverride === 'string' ? workspaceRootOverride : pickWorkspaceRoot();
+  const { flow, state, validation } = loadCodexFlowForWorkspace(workspaceRoot);
+  if (!flow) {
+    vscode.window.showWarningMessage('Codex Flow: .codexflow/flow.json が見つかりません。Codex Flow を初期化してください。');
+    return;
+  }
+  if (!validation.valid) {
+    vscode.window.showErrorMessage('Codex Flow: flow.json が不正です。' + validation.errors.join(' / '));
+    return;
+  }
+  const phase = phaseId ? flow.phases.find((item) => item.id === phaseId) : resolveNextCodexFlowPhase(flow, state);
+  if (!phase) {
+    vscode.window.showInformationMessage('Codex Flow: copy する pending phase はありません。');
+    return;
+  }
+  const runConfig = codexFlowRunConfig(vscode.workspace.getConfiguration('codexFriendlyProjectStarter'), flow);
+  const prepared = await prepareCodexFlowPhaseRun({ rootPath: workspaceRoot, flow, state, phase, runConfig });
+  await vscode.env.clipboard.writeText(prepared.prompt);
+  await openVsCodeCodexSidebar({ silent: true });
+  vscode.window.setStatusBarMessage(`Codex Flow: ${phase.id} prompt copied`, 5000);
+}
+
+async function repairFailedCodexFlowPhaseCommand(context, treeProvider, workItemsProvider, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const { flow, state, validation } = loadCodexFlowForWorkspace(workspaceRoot);
+  if (!flow || !validation.valid) {
+    vscode.window.showWarningMessage('Codex Flow: repair できる flow がありません。');
+    return;
+  }
+  const failedRun = [...state.phaseRuns].reverse().find((run) => run.status === 'failed');
+  if (!failedRun) {
+    vscode.window.showInformationMessage('Codex Flow: failed phase はありません。');
+    return;
+  }
+  const phase = flow.phases.find((item) => item.id === failedRun.phaseId);
+  if (!phase) {
+    vscode.window.showWarningMessage('Codex Flow: failed phase definition が見つかりません。');
+    return;
+  }
+  const attempts = state.phaseRuns.filter((run) => run.phaseId === phase.id).length;
+  if (attempts - 1 >= flow.maxRepairAttempts) {
+    vscode.window.showWarningMessage('Codex Flow: repair attempt 上限に達しています。');
+    return;
+  }
+  const repairPrompt = buildCodexFlowRepairPrompt({
+    flow,
+    phase,
+    failedRun,
+    failedPrompt: await readFlowArtifact(workspaceRoot, failedRun.promptPath),
+    finalMessage: await readFlowArtifact(workspaceRoot, failedRun.finalMessagePath),
+    checks: await readJsonFlowArtifact(workspaceRoot, failedRun.checksPath),
+    gitContext: await collectGitContext(workspaceRoot)
+  });
+  await runCodexFlowPhase(context, workspaceRoot, flow, state, phase, { promptOverride: repairPrompt, sourceLabel: `Codex Flow Repair: ${phase.id}` });
+  treeProvider?.refresh();
+  workItemsProvider?.refresh();
+}
+
+async function runCodexFlowPhase(context, workspaceRoot, flow, state, phase, options = {}) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const runner = config.get('codexFlowRunner', 'background');
+  const runConfig = codexFlowRunConfig(config, flow);
+  if (runner === 'vscode-codex') {
+    return manualCodexFlowHandoff(context, workspaceRoot, flow, state, phase, runConfig, options);
+  }
+  if (runner === 'terminal') {
+    return terminalCodexFlowHandoff(context, workspaceRoot, flow, state, phase, runConfig, options);
+  }
+  if (config.get('confirmBeforeCodexRun', true)) {
+    const answer = await vscode.window.showWarningMessage(
+      `Codex Flow: ${phase.id} を background runner で実行します。\nAccess: ${runConfig.sandboxMode}\nChecks: ${(phase.checks || []).join(' / ') || 'none'}\n続行しますか?`,
+      { modal: false },
+      'Run Codex Flow',
+      'Cancel'
+    );
+    if (answer !== 'Run Codex Flow') return undefined;
+  }
+  const result = await vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: `Codex Flow: ${phase.id} を実行中...`,
+    cancellable: false
+  }, async (progress) => {
+    progress.report({ message: 'Codex CLI background runner' });
+    return runCodexFlowPhaseWithCodexCli({
+      rootPath: workspaceRoot,
+      flow,
+      state,
+      phase,
+      promptOverride: options.promptOverride,
+      runConfig,
+      cliPath: config.get('codexCliPath', 'codex'),
+      profile: config.get('codexProfile', ''),
+      toolPaths: collectCodexToolPaths(config),
+      timeoutMs: Math.max(5000, Number(config.get('codexFlowCheckTimeoutMs', 120000)) || 120000) * 10,
+      checkTimeoutMs: config.get('codexFlowCheckTimeoutMs', 120000)
+    });
+  });
+  writeCodexFlowState(workspaceRoot, updateCodexFlowStateAfterRun(state, result.runRecord));
+  recordCodexFlowSession(workspaceRoot, flow, result.runRecord, runConfig, options.sourceLabel || `Codex Flow: ${phase.id}`);
+  vscode.window.setStatusBarMessage(`Codex Flow: ${phase.id} ${result.runRecord.status}`, 7000);
+  return result;
+}
+
+async function manualCodexFlowHandoff(context, workspaceRoot, flow, state, phase, runConfig, options = {}) {
+  const prepared = await prepareCodexFlowPhaseRun({ rootPath: workspaceRoot, flow, state, phase, runConfig, promptOverride: options.promptOverride });
+  await vscode.env.clipboard.writeText(prepared.prompt);
+  await openVsCodeCodexSidebar({ silent: true });
+  const runRecord = createCodexFlowRunRecord({
+    ...prepared.runRecord,
+    phase,
+    status: 'manual-handoff',
+    finishedAt: new Date().toISOString(),
+    checksStatus: 'not-run'
+  });
+  writeCodexFlowState(workspaceRoot, updateCodexFlowStateAfterRun(state, runRecord));
+  recordCodexFlowSession(workspaceRoot, flow, runRecord, runConfig, options.sourceLabel || `Codex Flow: ${phase.id} manual handoff`);
+  vscode.window.setStatusBarMessage(`Codex Flow: ${phase.id} prompt copied for VS Code Codex`, 7000);
+  return { ...prepared, runRecord };
+}
+
+async function terminalCodexFlowHandoff(context, workspaceRoot, flow, state, phase, runConfig, options = {}) {
+  const config = vscode.workspace.getConfiguration('codexFriendlyProjectStarter');
+  const prepared = await prepareCodexFlowPhaseRun({ rootPath: workspaceRoot, flow, state, phase, runConfig, promptOverride: options.promptOverride });
+  const launcherScript = buildCodexExecScript({
+    cliPath: config.get('codexCliPath', 'codex'),
+    cwd: workspaceRoot,
+    promptFilePath: prepared.promptPath,
+    sandboxMode: runConfig.sandboxMode,
+    model: runConfig.model,
+    modelReasoningEffort: runConfig.modelReasoningEffort,
+    profile: config.get('codexProfile', ''),
+    toolPaths: collectCodexToolPaths(config),
+    outputLastMessagePath: prepared.finalMessagePath,
+    outputJsonlPath: prepared.jsonlPath,
+    color: 'never',
+    json: true
+  });
+  await fs.promises.writeFile(prepared.launcherPath, launcherScript, 'utf8');
+  runTerminalCommand('Codex Flow', buildPowerShellFileTerminalCommand(prepared.launcherPath), workspaceRoot);
+  const runRecord = createCodexFlowRunRecord({
+    ...prepared.runRecord,
+    phase,
+    status: 'manual-handoff',
+    finishedAt: new Date().toISOString(),
+    checksStatus: 'not-run'
+  });
+  writeCodexFlowState(workspaceRoot, updateCodexFlowStateAfterRun(state, runRecord));
+  recordCodexFlowSession(workspaceRoot, flow, runRecord, runConfig, options.sourceLabel || `Codex Flow: ${phase.id} terminal handoff`);
+  vscode.window.setStatusBarMessage(`Codex Flow: ${phase.id} terminal runner started`, 7000);
+  return { ...prepared, runRecord };
+}
+
+function codexFlowRunConfig(config, flow) {
+  return resolveCodexRunOptions(config, {
+    sandboxMode: flow.sandbox || 'workspace-write',
+    model: config.get('codexModel', ''),
+    modelReasoningEffort: config.get('codexReasoningEffort', '')
+  });
+}
+
+function recordCodexFlowSession(workspaceRoot, flow, runRecord, runConfig, sourceLabel) {
+  if (!vscode.workspace.getConfiguration('codexFriendlyProjectStarter').get('recordCodexSessions', true)) return;
+  try {
+    const record = createCodexSessionRecord({
+      sourceLabel,
+      workspaceRoot,
+      cwd: workspaceRoot,
+      promptFilePath: resolveFlowPath(workspaceRoot, runRecord.promptPath),
+      launcherFilePath: resolveFlowPath(workspaceRoot, runRecord.launcherPath),
+      runOptions: runConfig,
+      flow: {
+        flowId: flow.flowId,
+        flowName: flow.name,
+        phaseId: runRecord.phaseId,
+        phaseName: runRecord.phaseName,
+        runId: runRecord.runId,
+        status: runRecord.status,
+        promptPath: runRecord.promptPath,
+        jsonlPath: runRecord.jsonlPath,
+        finalMessagePath: runRecord.finalMessagePath,
+        checksPath: runRecord.checksPath
+      }
+    });
+    recordCodexSession(workspaceRoot, record);
+  } catch (error) {
+    console.warn('Codex Flow: failed to record session', error);
+  }
+}
+
+async function openLatestCodexFlowHandoffCommand(context, workspaceRootOverride) {
+  const workspaceRoot = workspaceRootOverride || pickWorkspaceRoot();
+  const flow = readCodexFlow(workspaceRoot);
+  const handoffPath = flow ? resolveFlowPath(workspaceRoot, flow.handoff.latest) : path.join(workspaceRoot, 'docs', 'handoff', 'latest.md');
+  if (!handoffPath || !fs.existsSync(handoffPath)) {
+    vscode.window.showWarningMessage('Codex Flow: latest handoff が見つかりません。');
+    return;
+  }
+  await openMarkdownWebview(context, handoffPath);
+}
+
+async function openCodexFlowPhasePromptCommand(context, workspaceRoot, phaseId) {
+  const flow = readCodexFlow(workspaceRoot);
+  const phase = flow?.phases?.find((item) => item.id === phaseId);
+  const promptPath = phase ? resolveFlowPath(workspaceRoot, phase.prompt) : '';
+  if (!promptPath || !fs.existsSync(promptPath)) {
+    vscode.window.showWarningMessage('Codex Flow: phase prompt が見つかりません。');
+    return;
+  }
+  await openMarkdownWebview(context, promptPath);
+}
+
+async function openCodexFlowPhaseHandoffCommand(context, workspaceRoot, phaseId) {
+  const flow = readCodexFlow(workspaceRoot);
+  const phase = flow?.phases?.find((item) => item.id === phaseId);
+  const handoffPath = phase ? resolveFlowPath(workspaceRoot, phaseHandoffPath(flow, phase)) : '';
+  if (!handoffPath || !fs.existsSync(handoffPath)) {
+    vscode.window.showWarningMessage('Codex Flow: phase handoff が見つかりません。');
+    return;
+  }
+  await openMarkdownWebview(context, handoffPath);
+}
+
+async function readFlowArtifact(workspaceRoot, relativePath) {
+  const filePath = relativePath ? resolveFlowPath(workspaceRoot, relativePath) : '';
+  if (!filePath) return '';
+  return fs.promises.readFile(filePath, 'utf8').catch(() => '');
+}
+
+async function readJsonFlowArtifact(workspaceRoot, relativePath) {
+  const text = await readFlowArtifact(workspaceRoot, relativePath);
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { raw: text };
   }
 }
 

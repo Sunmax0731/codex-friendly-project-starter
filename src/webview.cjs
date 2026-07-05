@@ -318,11 +318,14 @@ function renderWorkDashboardWebview(nonce, dashboard, options = {}) {
     <div class="action-heading">${escapeHtml(t('dashboard.dailyActions', locale))}</div>
     <div class="actions">
       <div class="action-row">
+        <button class="action" data-action="openCodexFlowDashboard">${escapeHtml(t('dashboard.codexFlow', locale))}</button>
         <button class="action" data-action="openComposer" data-mode="issue">${escapeHtml(t('dashboard.issueTicket', locale))}</button>
         <button class="action" data-action="importGitHubIssues">${escapeHtml(t('dashboard.githubImport', locale))}</button>
         <button class="action" data-action="sendPromptToCodex">${escapeHtml(t('dashboard.sendPrompt', locale))}</button>
       </div>
       <div class="action-row">
+        <button class="action secondary" data-action="runNextCodexFlowPhase">${escapeHtml(t('dashboard.runNextCodexFlowPhase', locale))}</button>
+        <button class="action secondary" data-action="runAllCodexFlowPhases">${escapeHtml(t('dashboard.runAllCodexFlowPhases', locale))}</button>
         <button class="action secondary" data-selected-start="true">${escapeHtml(t('dashboard.startSelected', locale))}</button>
         <button class="action secondary" data-action="startAllWorkItems">${escapeHtml(t('dashboard.startAll', locale))}</button>
         <button class="action subtle" data-action="refreshDashboard">${escapeHtml(t('dashboard.refresh', locale))}</button>
@@ -335,6 +338,7 @@ function renderWorkDashboardWebview(nonce, dashboard, options = {}) {
       <div class="action-row">
         <button class="action secondary" data-action="openStarter">${escapeHtml(t('dashboard.firstPrompt', locale))}</button>
         <button class="action secondary" data-action="scaffoldDocs">${escapeHtml(t('dashboard.scaffoldDocs', locale))}</button>
+        <button class="action secondary" data-action="initializeCodexFlow">${escapeHtml(t('dashboard.initializeCodexFlow', locale))}</button>
         <button class="action secondary" data-action="initializeIssues">${escapeHtml(t('dashboard.initializeIssues', locale))}</button>
         <button class="action secondary" data-action="checkCodexCli">${escapeHtml(t('dashboard.checkCodexCli', locale))}</button>
       </div>
