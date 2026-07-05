@@ -8,6 +8,45 @@ npm test
 code --extensionDevelopmentPath="D:\AI\VSCodeExtension\codex-friendly-project-starter"
 ```
 
+## Codex Flow リリース前 UI クリック検収チェックリスト
+
+このチェックリストは Codex Flow のリリース前受け入れ判定用です。実 VS Code UI をクリックできない環境では PASS にせず、`NOT_RUN` と理由を記録する。検収は安全なテスト用 workspace または fixture で行い、本番プロジェクトを壊さない。実行確認だけが目的の場合は `codexFriendlyProjectStarter.codexFlowRunner`、sandbox、Codex CLI 設定を確認し、必要に応じて dry-run 相当の短い smoke phase を使う。
+
+| Check | 手順 | 期待結果 | Status |
+|---|---|---|---|
+| Extension 起動確認 | VS Code でこの repository を開き、Extension Development Host を起動する。Command Palette に `Codex Starter:` 系 command が表示されることを確認し、Codex Flow Dashboard を開く。 | error notification が出ず、Dashboard に `flow.json` / `state.json` の状態と操作ボタンが表示される。 | PASS / FAIL / NOT_RUN |
+| Open Flow Dashboard | `Codex Starter: Open Codex Flow Dashboard` を実行する。 | phase の `pending` / `running` / `succeeded` / `failed` / `cancelled` が分かり、phase metadata、handoff path、log path、session mode、retry max、Run Next / Run All / Stop / Open Log / Open flow.json / Open Handoff が確認できる。 | PASS / FAIL / NOT_RUN |
+| Open flow.json | `Codex Starter: Open Codex Flow Definition (flow.json)` を実行する。 | `.codexflow/flow.json` が editor で開く。存在しない場合は分かりやすい warning が出る。 | PASS / FAIL / NOT_RUN |
+| Run Next Phase | 安全な test flow で `Codex Starter: Run Next Codex Flow Phase` を実行する。 | 次 phase が選択され、runtime prompt が生成される。`.codexflow/run-prompts/` または phase `logPath` 配下に prompt artifact が残り、state と Dashboard が `running` を示す。background runner が起動する、または dry-run で起動コマンドを確認できる。 | PASS / FAIL / NOT_RUN |
+| Stop Current Phase | background 実行中に `Codex Starter: Stop Current Codex Flow Phase` を実行する、または progress notification を cancel する。 | AbortController 相当の cancellation が効き、state と Dashboard が `cancelled` を示す。Run All が勝手に次 phase へ進まず、保存済み log artifact が可能な範囲で残る。 | PASS / FAIL / NOT_RUN |
+| Open Phase Log | `Codex Starter: Open Latest Codex Flow Phase Log` または phase 行の `Open Phase Log` を実行する。 | QuickPick などで `.jsonl`、`.final.md`、`.checks.json`、launcher、prompt の主要 artifact を選んで開ける。failed / cancelled phase と phase `logPath` 指定時の artifact も開ける。 | PASS / FAIL / NOT_RUN |
+| Run All Phases | `Codex Starter: Run All Codex Flow Phases` を実行する。 | `flow.json` の phase 順に実行され、各 phase が新しい Codex CLI 実行単位として扱われる。prompt には docs / handoff / Git context / logs が含まれ、成功時は次 phase へ進む。failed / cancelled 時は `stopOnFailure` に従って停止する。確認 dialog は開始時の1回だけで、phase ごとに追加確認しない。 | PASS / FAIL / NOT_RUN |
+| Repair / Retry Failed | 失敗する test phase を用意し、`Codex Starter: Repair Failed Codex Flow Phase` を実行する。 | failed phase を特定し、failed prompt、final message、checks output、Git status を含む repair prompt を生成する。`retryPolicy.maxAttempts` が尊重され、無制限 retry にならず、retry 後の log / state / handoff が破綻しない。 | PASS / FAIL / NOT_RUN |
+| Open Latest Handoff | `Codex Starter: Open Latest Codex Flow Handoff` を実行する。 | `docs/handoff/latest.md` が開く。存在しない場合は初期化または warning が出る。phase `handoffPath` がある場合は phase 固有 handoff も要求または生成される。 | PASS / FAIL / NOT_RUN |
+| phase optional fields | test 用 `.codexflow/flow.json` の phase に下の JSON 例の fields を指定し、Dashboard、runtime prompt、artifact 保存、validation を確認する。 | normalize 後も fields が保持される。runtime prompt に `handoffPath` と metadata が含まれる。artifact は `logPath` 配下に保存される。`sessionMode: "new-session"` は受理され、unsupported `sessionMode` は validation error になる。 | PASS / FAIL / NOT_RUN |
+
+phase optional fields の検収例:
+
+```json
+{
+  "id": "20_core_implementation",
+  "name": "Core Implementation",
+  "prompt": "prompts/codexflow/20_core_implementation.md",
+  "checks": ["npm test"],
+  "stopOnFailure": true,
+  "retryPolicy": {
+    "maxAttempts": 1
+  },
+  "handoffPath": "docs/handoff/20_core_implementation.md",
+  "logPath": ".codexflow/logs/20_core_implementation",
+  "sessionMode": "new-session",
+  "metadata": {
+    "scope": "core",
+    "owner": "codex-flow"
+  }
+}
+```
+
 ## 手順
 
 1. VS Code の Activity Bar に `Codex Starter` が表示されることを確認する。
