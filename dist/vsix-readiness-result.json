@@ -7,7 +7,7 @@
   "vsixArtifact": {
     "file": "dist/codex-friendly-project-starter-0.1.0.vsix",
     "sizeBytes": 145477,
-    "sha256": "6005C45D1F9E3E0593D5EE381E2095CA372C3F92DE596B51B6F997377F648996"
+    "sha256": "A5BF66C2E9146838F404F32900F59A714DF39F00C4410EE48F7ADF54280CF226"
   },
   "checks": [
     {
